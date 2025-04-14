@@ -1,13 +1,13 @@
-
 from binance.client import Client
 import pandas as pd
 import numpy as np
 import os
 import ta
+import streamlit as st
 
-# Carrega chave da API da Binance se necessário (usado para consulta de dados históricos)
-api_key = os.getenv("BINANCE_API_KEY")
-api_secret = os.getenv("BINANCE_API_SECRET")
+# Substituir credenciais hardcoded por variáveis seguras do Streamlit
+api_key = st.secrets["binance"]["api_key"]
+api_secret = st.secrets["binance"]["api_secret"]
 client = Client(api_key, api_secret)
 
 def validar_timeframe_superior(par, timeframe_secundario='1h'):

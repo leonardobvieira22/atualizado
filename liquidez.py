@@ -1,11 +1,11 @@
-
 from binance.client import Client
 import pandas as pd
 import numpy as np
 import os
+import streamlit as st
 
-api_key = os.getenv("BINANCE_API_KEY")
-api_secret = os.getenv("BINANCE_API_SECRET")
+api_key = st.secrets["binance"]["api_key"]
+api_secret = st.secrets["binance"]["api_secret"]
 client = Client(api_key, api_secret)
 
 def detectar_zonas_de_liquidez(par, timeframe='5m', n_faixas=20):

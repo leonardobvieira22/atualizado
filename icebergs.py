@@ -1,9 +1,8 @@
-
 from binance.client import Client
-import os
+import streamlit as st
 
-api_key = os.getenv("BINANCE_API_KEY")
-api_secret = os.getenv("BINANCE_API_SECRET")
+api_key = st.secrets["binance"]["api_key"]
+api_secret = st.secrets["binance"]["api_secret"]
 client = Client(api_key, api_secret)
 
 def detectar_iceberg(par, preco_atual, lado='compra', profundidade=5, threshold=30000):

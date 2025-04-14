@@ -22,7 +22,14 @@ STRATEGIES_FILE = "strategies.json"
 ROBOT_STATUS_FILE = "robot_status.json"
 MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
 
-client = Client(api_key="YOUR_API_KEY", api_secret="YOUR_API_SECRET")
+# Substituir credenciais hardcoded por variáveis de ambiente
+api_key = st.secrets["binance"]["api_key"]
+api_secret = st.secrets["binance"]["api_secret"]
+
+if not api_key or not api_secret:
+    raise ValueError("As credenciais da API da Binance não foram configuradas. Certifique-se de definir as chaves no arquivo secrets.toml.")
+
+client = Client(api_key=api_key, api_secret=api_secret)
 learning_engine = LearningEngine()
 
 st.markdown("""
@@ -1097,7 +1104,7 @@ with tab1:
     col1.write(f"**TP Percentual Padrão:** {config.get('tp_percent', 2.0)}%")
     col2.write(f"**SL Percentual Padrão:** {config.get('sl_percent', 1.0)}%")
     col3.write(f"**Leverage:** {config.get('leverage', 22)}x")
-    col4.write(f"**Máximo de Trades Simultâneos:** {config.get('max_trades_simultaneos', 50)}")
+    col4.write(f"**Máximo de Trades Simultaneos:** {config.get('max_trades_simultaneos', 50)}")
 
     # Aba 2: Ordens
 with tab2:
@@ -1473,7 +1480,7 @@ with tab3:
         "Leverage (x)", min_value=1, max_value=125, value=config.get("leverage", 22), step=1
     )
     config["max_trades_simultaneos"] = st.number_input(
-        "Máximo de Trades Simultâneos", min_value=1, max_value=100, value=config.get("max_trades_simultaneos", 1), step=1
+        "Máximo de Trades Simultaneos", min_value=1, max_value=100, value=config.get("max_trades_simultaneos", 1), step=1
     )
     config["score_tecnico_min"] = st.slider(
         "Score Técnico Mínimo", min_value=0.0, max_value=1.0, value=config.get("score_tecnico_min", 0.3), step=0.01
