@@ -13,6 +13,7 @@ from learning_engine import LearningEngine
 from utils import logger, gerar_resumo, calcular_confiabilidade_historica
 from strategy_manager import load_strategies, save_strategies
 import uuid
+import toml
 
 st.set_page_config(page_title="UltraBot Dashboard 9.0", layout="wide")
 
@@ -24,7 +25,12 @@ MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
 
 # Verificar se as credenciais estão presentes no st.secrets
 if "binance" not in st.secrets or "api_key" not in st.secrets["binance"] or "api_secret" not in st.secrets["binance"]:
-    raise KeyError("As credenciais da API Binance não foram encontradas. Certifique-se de que o arquivo secrets.toml está configurado corretamente.")
+    try:
+        # Tentar carregar o arquivo secrets.toml manualmente
+        secrets = toml.load("secrets.toml")
+        st.secrets["binance"] = secrets.get("binance", {})
+    except Exception as e:
+        raise KeyError("As credenciais da API Binance não foram encontradas. Certifique-se de que o arquivo secrets.toml está configurado corretamente.") from e
 
 api_key = st.secrets["binance"]["api_key"]
 api_secret = st.secrets["binance"]["api_secret"]
@@ -1317,7 +1323,7 @@ with tab2:
 <p>🎯 <strong>TP:</strong> <span style="color: green;">+{row['TP Percent']}%</span> | <strong>SL:</strong> <span style="color: red;">-{row['SL Percent']}%</span></p>
 <p>🧠 <strong>Estratégia:</strong> {row['Strategy']}</p>
 <p>📌 <strong>Motivos do Sinal:</strong> {row['Resumo']}</p>
-<p>📊 <strong>Indicadores Utilizados:</strong></p>
+<p>📊 <strong>Indicadores Utilizados:</p>
 <p>- {row['Indicadores']}</p>
 <p>📈 <strong>Confiabilidade Histórica:</strong> {row['Historical Win Rate (%)']}% ({row['Total Signals']} sinais)</p>
 <p>💵 <strong>PnL Médio por Sinal:</strong> {row['Avg PNL (%)']}%</p>
