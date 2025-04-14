@@ -10,6 +10,4 @@ requests
 psutil
 tenacity
 python-dotenv
-flask
-fastapi
-uvicorn
+scikit-learn
