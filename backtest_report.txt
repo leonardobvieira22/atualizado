@@ -1,0 +1,16 @@
+Backtest Report (2025-03-25 to 2025-04-01)
+Total Trades: 0
+Win Rate: 0.00%
+Total Profit: 0.00%
+┌────────────────── Relatório de Confiabilidade dos Indicadores ──────────────────┐
+│ Indicador: SMA        │ Sinais: 0     │ Vitórias: 0     │ Confiança: 0.00% │ Lucro Médio: 0.00% │
+│ Indicador: EMA        │ Sinais: 0     │ Vitórias: 0     │ Confiança: 0.00% │ Lucro Médio: 0.00% │
+│ Indicador: RSI        │ Sinais: 0     │ Vitórias: 0     │ Confiança: 0.00% │ Lucro Médio: 0.00% │
+│ Indicador: MACD       │ Sinais: 0     │ Vitórias: 0     │ Confiança: 0.00% │ Lucro Médio: 0.00% │
+│ Indicador: ADX        │ Sinais: 0     │ Vitórias: 0     │ Confiança: 0.00% │ Lucro Médio: 0.00% │
+│ Indicador: Volume     │ Sinais: 0     │ Vitórias: 0     │ Confiança: 0.00% │ Lucro Médio: 0.00% │
+│ Indicador: Bollinger  │ Sinais: 0     │ Vitórias: 0     │ Confiança: 0.00% │ Lucro Médio: 0.00% │
+│ Indicador: Estocastico │ Sinais: 0     │ Vitórias: 0     │ Confiança: 0.00% │ Lucro Médio: 0.00% │
+│ Indicador: VWAP       │ Sinais: 0     │ Vitórias: 0     │ Confiança: 0.00% │ Lucro Médio: 0.00% │
+│ Indicador: OBV        │ Sinais: 0     │ Vitórias: 0     │ Confiança: 0.00% │ Lucro Médio: 0.00% │
+└────────────────────────────────────────────────────────────────────────────────┘

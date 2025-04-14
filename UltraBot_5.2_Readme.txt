@@ -1,0 +1,114 @@
+
+UltraBot 5.2 - Sistema de Trading e Backtesting Automatizado
+
+Visão Geral
+-------------
+O UltraBot 5.2 é um sistema automatizado de trading e backtesting focado em operar no mercado de criptomoedas usando a API da Binance Futures. Ele combina análise técnica com inteligência artificial para gerar sinais de compra e venda, além de executar ordens de trading no modo real ou simulado (dry run). O sistema inclui funcionalidades de backtest para testar estratégias com dados históricos e dashboard para visualização em tempo real do desempenho do bot.
+
+Este sistema permite simular negociações com uma carteira em USDT e realizar operações de compra e venda, com a capacidade de avaliar o P&L (lucro e perda), taxa de acerto e outros indicadores de desempenho.
+
+Funcionalidades
+---------------
+Principais Funcionalidades
+- Análise Técnica: Utiliza indicadores técnicos como RSI, ADX, EMA, MACD, Bandas de Bollinger e Estocástico.
+- Execução de Ordens: Capacidade de executar ordens de compra e venda na Binance Futures.
+- Modo Dry Run: Simula ordens com uma carteira fictícia para testar a performance sem risco financeiro.
+- Backtest: Realiza testes históricos para validar estratégias de trading.
+- Carteira Simulada: Simula a dedução de saldo durante a execução de ordens e atualiza o saldo conforme o P&L.
+- Taxa de Acerto e P&L: Monitora e exibe a taxa de acerto, saldo da carteira e o P&L durante e após as negociações.
+- Dashboard em Tempo Real: Interface visual interativa utilizando Streamlit, mostrando indicadores, histórico de trades e status da carteira.
+
+Requisitos
+-----------
+1. Dependências
+- Python 3.x (preferencialmente Python 3.8+)
+- Bibliotecas Python:
+  - binance
+  - openai
+  - pandas
+  - streamlit
+  - python-dotenv
+  - filelock
+  - requests
+
+Instale as dependências com o seguinte comando:
+pip install -r requirements.txt
+
+Configuração
+------------
+1. Arquivo .env
+Crie um arquivo .env na raiz do projeto e insira suas credenciais da Binance. As chaves são necessárias para autenticação com a API da Binance:
+
+API_KEY=your_api_key
+API_SECRET=your_api_secret
+
+2. Arquivo de Configuração (config.json)
+Você pode configurar parâmetros como valores de stop loss, take profit, alavancagem e outros ajustes no arquivo de configuração dashboard_config.json.
+
+Exemplo de configuração:
+{
+  "dry_run": true,
+  "entry_value": 100.0,
+  "take_profit": 6.0,
+  "stop_loss": 3.0,
+  "leverage": 10.0,
+  "slippage": 0.2,
+  "close_order": false,
+  "position_id": 0,
+  "close_all_orders": false
+}
+
+3. Ativação do Dashboard
+O sistema utiliza Streamlit para criar o dashboard. Ao iniciar o sistema, o código automaticamente verifica se uma porta disponível está livre entre 8579 e 8599 e abre o dashboard na primeira porta disponível.
+
+Execução
+---------
+1. Rodando o UltraBot
+Para iniciar o bot e o dashboard, basta rodar o script main.py. Ele irá iniciar o bot e também configurar o dashboard na porta disponível:
+
+python main.py
+
+2. Interação com o Dashboard
+Após iniciar o sistema, o dashboard será aberto automaticamente no navegador, fornecendo uma interface interativa para monitorar as operações de trading e exibir os resultados de backtest.
+
+Backtest
+---------
+O UltraBot 5.2 inclui uma funcionalidade de backtest, que permite testar a estratégia utilizando dados históricos. O backtest é realizado em segundo plano e os resultados são salvos no arquivo backtest_results.json.
+
+Como Funciona o Backtest
+- O sistema registra os preços dos pares de criptomoedas e simula ordens de compra e venda com base em sinais de análise técnica.
+- Quando uma ordem atinge o Take Profit (TP) ou o Stop Loss (SL), a operação é fechada e o P&L é calculado.
+- O taxa de acerto e o lucro total são calculados e exibidos no painel.
+
+Visualizando os Resultados do Backtest
+Os resultados do backtest são exibidos no arquivo backtest_results.json. Além disso, a taxa de acerto e os lucros totais também são visíveis no dashboard.
+
+Módulos e Estrutura
+-------------------
+1. Módulos Principais
+- sentimento_mercado: Responsável por analisar o sentimento do mercado (fundamentado em Open Interest e Funding Rates).
+- icebergs: Detecta grandes ordens (icebergs) que podem afetar o preço de mercado.
+- delta_volume: Calcula a variação de volume para identificar possíveis mudanças de tendência.
+- liquidez: Detecta zonas de liquidez no gráfico.
+- multi_timeframe: Valida sinais em múltiplos timeframes.
+- modelo_ml: Classifica sinais usando aprendizado de máquina.
+- logger_sinais: Registra detalhes dos sinais emitidos e aceitos.
+- indicadores: Calcula indicadores técnicos como RSI, EMA, ADX, MACD, Bandas de Bollinger e Estocástico.
+- executores: Executa ordens de trading.
+- swing_detector: Detecta topos e fundos (swing highs/lows).
+- validador_sinais: Valida sinais com base nos indicadores.
+
+Notas Importantes
+-----------------
+- Dry Run: O modo dry run (simulação) é utilizado para testar a estratégia sem risco financeiro, utilizando uma carteira fictícia.
+- Carteira Simulada: A carteira do dry run é simulada em USDT, permitindo que o bot execute ordens e calcule o P&L e a taxa de acerto sem impacto real.
+- Execução Real: Quando o modo dry run estiver desativado, o bot realiza negociações reais na Binance Futures com alavancagem configurável.
+- Portas do Dashboard: O sistema verifica automaticamente as portas disponíveis entre 8579 e 8599 para iniciar o dashboard, garantindo que não haja conflitos.
+
+Considerações Finais
+--------------------
+O UltraBot 5.2 é uma poderosa ferramenta para traders que desejam automatizar suas operações no mercado de criptomoedas e realizar backtests para testar suas estratégias de forma eficaz. Com a integração de IA e indicadores técnicos, o bot oferece uma maneira robusta de operar na Binance Futures, seja para fins de simulação (dry run) ou operação real.
+
+Se você precisar de mais funcionalidades ou ajustes, basta modificar o código conforme necessário ou integrar outras inteligências artificiais para aprimorar o sistema!
+
+Contribuições são bem-vindas! 🚀

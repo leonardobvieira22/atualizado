@@ -1,0 +1,102 @@
+{
+    "total_orders": 18165,
+    "wins": 7957,
+    "win_rate": 43.80401871731351,
+    "total_pnl": 6386.0174788987515,
+    "indicators": {
+        "SMA": {
+            "signals": 9165,
+            "wins": 4375,
+            "confidence": 47.73595199127114
+        },
+        "EMA": {
+            "signals": 10745,
+            "wins": 4300,
+            "confidence": 40.01861330851559
+        },
+        "RSI": {
+            "signals": 6,
+            "wins": 3,
+            "confidence": 50.0
+        },
+        "MACD": {
+            "signals": 211,
+            "wins": 72,
+            "confidence": 34.12322274881517
+        },
+        "ADX": {
+            "signals": 3733,
+            "wins": 1624,
+            "confidence": 43.50388427538173
+        },
+        "Volume": {
+            "signals": 2974,
+            "wins": 1413,
+            "confidence": 47.51176866173504
+        }
+    },
+    "timeframes": {
+        "5m": {
+            "signals": 2,
+            "wins": 0,
+            "confidence": 0.0
+        },
+        "15m": {
+            "signals": 18161,
+            "wins": 7957,
+            "confidence": 43.813666648312314
+        },
+        "1h": {
+            "signals": 2,
+            "wins": 0,
+            "confidence": 0.0
+        }
+    },
+    "strategies": {
+        "NaN": {
+            "signals": 1,
+            "wins": 0,
+            "confidence": 0.0
+        },
+        "sma_only": {
+            "signals": 2356,
+            "wins": 959,
+            "confidence": 40.70458404074703
+        },
+        "ema_only": {
+            "signals": 2350,
+            "wins": 938,
+            "confidence": 39.91489361702128
+        },
+        "sma_rsi": {
+            "signals": 2191,
+            "wins": 891,
+            "confidence": 40.66636239160201
+        },
+        "ema_macd": {
+            "signals": 2228,
+            "wins": 886,
+            "confidence": 39.76660682226212
+        },
+        "ema_adx": {
+            "signals": 2349,
+            "wins": 938,
+            "confidence": 39.9318859088974
+        },
+        "all": {
+            "signals": 1747,
+            "wins": 720,
+            "confidence": 41.213508872352605
+        },
+        "extended_target": {
+            "signals": 2071,
+            "wins": 818,
+            "confidence": 39.49782713664896
+        },
+        "rsi_macd": {
+            "signals": 2,
+            "wins": 2,
+            "confidence": 100.0
+        }
+    }
+}

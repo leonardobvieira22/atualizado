@@ -1,0 +1,101 @@
+{
+    "15m": {
+        "sma_only": {
+            "signals": 808,
+            "wins": 298,
+            "total_pnl": 10.697522876525436,
+            "confidence": 0.18506791601958697
+        },
+        "rsi_only": {
+            "signals": 0,
+            "wins": 0,
+            "total_pnl": 0.0,
+            "confidence": 0.0
+        },
+        "volume_only": {
+            "signals": 0,
+            "wins": 0,
+            "total_pnl": 0.0,
+            "confidence": 0.0
+        },
+        "sma_rsi": {
+            "signals": 778,
+            "wins": 294,
+            "total_pnl": 13.165074638156412,
+            "confidence": 0.18979209991247792
+        },
+        "sma_volume": {
+            "signals": 644,
+            "wins": 248,
+            "total_pnl": 13.876090729519841,
+            "confidence": 0.19362392008769563
+        },
+        "rsi_volume": {
+            "signals": 0,
+            "wins": 0,
+            "total_pnl": 0.0,
+            "confidence": 0.0
+        },
+        "all": {
+            "signals": 616,
+            "wins": 244,
+            "total_pnl": 16.111146727949052,
+            "confidence": 0.19935967100064522
+        }
+    },
+    "1h": {
+        "sma_only": {
+            "signals": 810,
+            "wins": 298,
+            "total_pnl": 1.3432475012545932,
+            "confidence": 0.18506791601958697,
+            "win_rate": 0.36790123456790125,
+            "avg_pnl": 0.0016583302484624609
+        },
+        "rsi_only": {
+            "signals": 0,
+            "wins": 0,
+            "total_pnl": 0.0,
+            "confidence": 0.0
+        },
+        "volume_only": {
+            "signals": 0,
+            "wins": 0,
+            "total_pnl": 0.0,
+            "confidence": 0.0
+        },
+        "sma_rsi": {
+            "signals": 778,
+            "wins": 294,
+            "total_pnl": 13.165074638156412,
+            "confidence": 0.18979209991247792
+        },
+        "sma_volume": {
+            "signals": 644,
+            "wins": 248,
+            "total_pnl": 13.876090729519841,
+            "confidence": 0.19362392008769563
+        },
+        "rsi_volume": {
+            "signals": 0,
+            "wins": 0,
+            "total_pnl": 0.0,
+            "confidence": 0.0
+        },
+        "all": {
+            "signals": 616,
+            "wins": 244,
+            "total_pnl": 16.111146727949052,
+            "confidence": 0.19935967100064522
+        }
+    },
+    "5m": {
+        "sma_only": {
+            "signals": 1,
+            "wins": 0,
+            "total_pnl": -0.12918837516882364,
+            "win_rate": 0.0,
+            "avg_pnl": -0.12918837516882364
+        }
+    }
+}

@@ -1,0 +1,146 @@
+{
+    "tp_percent": 2.0,
+    "sl_percent": 1.0,
+    "leverage": 10,
+    "quantities": {
+        "XRPUSDT": 1.0,
+        "DOGEUSDT": 1.0,
+        "TRXUSDT": 1.0
+    },
+    "quantities_usdt": {
+        "XRPUSDT": 1.9949,
+        "DOGEUSDT": 0.15753,
+        "TRXUSDT": 0.2371
+    },
+    "quantity_in_usdt": false,
+    "modes": {
+        "real": false,
+        "dry_run": true,
+        "backtest": false
+    },
+    "price_cache_duration": 5,
+    "learning_enabled": true,
+    "learning_update_interval": 3600,
+    "indicators": {
+        "sma": {
+            "score": 3,
+            "enabled": true
+        },
+        "ema": {
+            "score": 3,
+            "enabled": true
+        },
+        "rsi": {
+            "score": 60,
+            "sobrevendido": 20,
+            "sobrecomprado": 80,
+            "enabled": true
+        },
+        "macd": {
+            "score": 55,
+            "enabled": true
+        },
+        "adx": {
+            "score": 10,
+            "threshold": 25,
+            "enabled": true
+        },
+        "volume": {
+            "score": 10,
+            "enabled": true
+        },
+        "bollinger": {
+            "score": 20,
+            "enabled": true
+        },
+        "estocastico": {
+            "score": 15,
+            "enabled": true
+        },
+        "vwap": {
+            "score": 15,
+            "enabled": true
+        },
+        "obv": {
+            "score": 10,
+            "enabled": true
+        },
+        "fibonacci": {
+            "score": 15,
+            "enabled": true
+        },
+        "sentimento": {
+            "score": 10,
+            "enabled": true
+        }
+    },
+    "backtest_config": {
+        "timeframes": [
+            "1m",
+            "5m",
+            "15m",
+            "1h",
+            "4h",
+            "1d"
+        ],
+        "signal_strategies": [
+            {
+                "name": "all",
+                "indicators": [
+                    "sma",
+                    "ema",
+                    "rsi",
+                    "macd"
+                ],
+                "enabled": true
+            },
+            {
+                "name": "sma_rsi",
+                "indicators": [
+                    "sma",
+                    "rsi"
+                ],
+                "enabled": true
+            },
+            {
+                "name": "ema_macd",
+                "indicators": [
+                    "ema",
+                    "macd"
+                ],
+                "enabled": true
+            },
+            {
+                "name": "swing_trade_composite",
+                "indicators": [
+                    "rsi",
+                    "macd",
+                    "ema"
+                ],
+                "enabled": true
+            },
+            {
+                "name": "sma_only",
+                "indicators": [
+                    "sma"
+                ],
+                "enabled": false
+            }
+        ]
+    },
+    "score_tecnico_min": 0.8,
+    "ml_confidence_min": 0.5,
+    "indicadores_ativos": {
+        "EMA": true,
+        "MACD": true,
+        "RSI": true,
+        "Swing Trade Composite": true
+    },
+    "confianca_minima": {
+        "EMA": 0.5,
+        "MACD": 0.5,
+        "RSI": 0.5,
+        "Swing Trade Composite": 0.5
+    },
+    "realtime_signals_enabled": true
+}

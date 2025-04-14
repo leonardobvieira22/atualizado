@@ -1,0 +1,15 @@
+pandas
+numpy
+binance-connector
+python-binance
+ta
+streamlit
+streamlit-autorefresh
+plotly
+requests
+psutil
+tenacity
+python-dotenv
+flask
+fastapi
+uvicorn

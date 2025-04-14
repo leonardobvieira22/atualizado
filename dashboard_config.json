@@ -1,0 +1,19 @@
+{
+    "dry_run": true,
+    "entry_value": 10.0,
+    "take_profit": 0.9999999999999999,
+    "stop_loss": 1.0,
+    "leverage": 11,
+    "slippage": 0.2,
+    "intervalo_tempo": "1m",
+    "usar_rsi": true,
+    "usar_adx": false,
+    "usar_ema": true,
+    "usar_macd": false,
+    "usar_bollinger": true,
+    "usar_estocastico": true,
+    "capital_por_trade": 100.0,
+    "close_order": false,
+    "position_id": 0,
+    "close_all_orders": false
+}
