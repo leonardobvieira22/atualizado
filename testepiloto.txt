@@ -1,0 +1,2 @@
+# Este é um arquivo de teste chamado testepiloto.txt
+# Criado para fins de teste no projeto UltraBot.
