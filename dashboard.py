@@ -43,12 +43,14 @@ if not api_key or not api_secret:
 # Adicionar teste de conectividade com a API Binance e logs detalhados
 logging.basicConfig(level=logging.DEBUG)
 
+# Adicionar log para capturar o código de retorno da API Binance
 try:
+    logging.info("Testando conectividade com a API Binance...")
     client = Client(api_key=st.secrets["binance"]["api_key"], api_secret=st.secrets["binance"]["api_secret"])
     client.ping()  # Testa a conectividade com a API
     logging.info("Conexão com a API Binance bem-sucedida!")
 except BinanceAPIException as e:
-    logging.error(f"Erro na API Binance: {e}")
+    logging.error(f"Erro na API Binance: Código de retorno {e.status_code}, Mensagem: {e.message}")
     raise
 except Exception as e:
     logging.error(f"Erro inesperado: {e}")
