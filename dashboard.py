@@ -22,7 +22,10 @@ STRATEGIES_FILE = "strategies.json"
 ROBOT_STATUS_FILE = "robot_status.json"
 MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
 
-# Substituir credenciais hardcoded por variáveis de ambiente
+# Verificar se as credenciais estão presentes no st.secrets
+if "binance" not in st.secrets or "api_key" not in st.secrets["binance"] or "api_secret" not in st.secrets["binance"]:
+    raise KeyError("As credenciais da API Binance não foram encontradas. Certifique-se de que o arquivo secrets.toml está configurado corretamente.")
+
 api_key = st.secrets["binance"]["api_key"]
 api_secret = st.secrets["binance"]["api_secret"]
 
