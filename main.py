@@ -37,7 +37,7 @@ csv_writer = CsvWriter(
 logger.info("CsvWriter inicializado com sucesso.")
 
 logger.info("Carregando variáveis de ambiente com load_dotenv()...")
-load_dotenv()
+# load_dotenv()  # Removido para evitar dependência local
 logger.info("Variáveis de ambiente carregadas com sucesso.")
 
 PAIRS = SYMBOLS
