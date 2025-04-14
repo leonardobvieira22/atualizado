@@ -301,7 +301,7 @@ try:
         except Exception as e:
             logger.error(f"Erro ao atualizar resumo do bot: {e}")
 
-    def process_signals_for_timeframe(pair, tf, current_time, active_strategies, config, active_trades_dry_run):
+    def process_signals_for_timeframe(pair, tf, current_time, active_strategies, config, active_trades_dry_run, client, learning_engine, binance_utils, candle_schedule):
         """Processa sinais para um par/timeframe específico"""
         signals = {}
         
@@ -319,6 +319,9 @@ try:
             if tf not in strategy_config.get("timeframes", TIMEFRAMES):
                 continue
 
+            # Importar check_timeframe_direction_limit do módulo trade_manager
+            from trade_manager import check_timeframe_direction_limit
+            
             # Verifica se já atingiu limite de ordens para LONG
             can_open_long = check_timeframe_direction_limit(
                 pair, tf, "LONG", strategy_name, active_trades_dry_run, config

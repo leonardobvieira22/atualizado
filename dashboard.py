@@ -481,6 +481,85 @@ st.markdown("""
         background-color: #dee2e6;
         transition: background-color 0.2s ease;
     }
+
+    .notification {
+        border-left: 4px solid #007bff;
+        padding: 12px 15px;
+        background-color: #f8f9fa;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: background-color 0.3s;
+    }
+    
+    .notification:hover {
+        background-color: #e9ecef;
+    }
+    
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    
+    .notification-source {
+        font-weight: 500;
+        font-size: 15px;
+    }
+    
+    .notification-timestamp {
+        color: #6c757d;
+        font-size: 12px;
+    }
+    
+    .notification-message {
+        font-size: 14px;
+        margin-bottom: 3px;
+    }
+    
+    .notification-details {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    
+    .notification-count {
+        background-color: #6c757d;
+        color: white;
+        border-radius: 10px;
+        padding: 1px 6px;
+        font-size: 11px;
+        margin-left: 5px;
+    }
+    
+    .notification-error {
+        border-left-color: #dc3545;
+    }
+    
+    .notification-warning {
+        border-left-color: #ffc107;
+    }
+    
+    .notification-info {
+        border-left-color: #0dcaf0;
+    }
+    
+    .notification-success {
+        border-left-color: #28a745;
+    }
+    
+    .mark-read-button {
+        font-size: 12px;
+        padding: 2px 5px;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+        border-radius: 3px;
+    }
+    
+    .mark-read-button:hover {
+        background-color: #e9ecef;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -771,6 +850,53 @@ def check_alerts(df_open):
 
     return alerts
 
+def reset_bot_data(reset_password):
+    """Função para resetar os dados do bot (ordens, estatísticas, etc.)"""
+    correct_password = "ultra2025"  # Senha definida para reset do bot
+    
+    if reset_password != correct_password:
+        return False, "Senha incorreta. O reset não foi realizado."
+    
+    try:
+        # Resetar arquivo de sinais
+        if os.path.exists(SINALS_FILE):
+            df = pd.DataFrame(columns=[
+                'signal_id', 'par', 'direcao', 'preco_entrada', 'preco_saida', 'quantity',
+                'lucro_percentual', 'pnl_realizado', 'resultado', 'timestamp', 'timestamp_saida',
+                'estado', 'strategy_name', 'contributing_indicators', 'localizadores',
+                'motivos', 'timeframe', 'aceito', 'parametros', 'quality_score'
+            ])
+            df.to_csv(SINALS_FILE, index=False)
+        
+        # Resetar arquivo de oportunidades perdidas
+        if os.path.exists(MISSED_OPPORTUNITIES_FILE):
+            df_missed = pd.DataFrame(columns=[
+                'timestamp', 'robot_name', 'par', 'timeframe', 'direcao', 'score_tecnico',
+                'contributing_indicators', 'reason'
+            ])
+            df_missed.to_csv(MISSED_OPPORTUNITIES_FILE, index=False)
+        
+        # Resetar status dos robôs
+        robot_status = load_robot_status()
+        for strategy_name in robot_status.keys():
+            robot_status[strategy_name] = False
+        save_robot_status(robot_status)
+        
+        # Limpar notificações
+        from notification_manager import clear_all_notifications
+        clear_all_notifications()
+        
+        # Treinar modelo novamente
+        try:
+            learning_engine.train()
+        except Exception as e:
+            logger.error(f"Erro ao treinar modelo após reset: {e}")
+        
+        return True, "Bot resetado com sucesso! Todos os dados foram limpos."
+    except Exception as e:
+        logger.error(f"Erro ao resetar bot: {e}")
+        return False, f"Erro ao resetar bot: {e}"
+
 def get_tp_sl(row, key, default=0.0):
     try:
         params = json.loads(row['parametros'])
@@ -781,29 +907,39 @@ def get_tp_sl(row, key, default=0.0):
 # Adicionar validação para sincronizar o status dos robôs e as estatísticas gerais
 
 def validate_robot_status_and_stats():
+    """
+    Valida a consistência entre o status dos robôs e as operações abertas
+    """
     # Carregar status dos robôs e dados do banco de dados
     robot_status = load_robot_status()
     df = pd.read_csv(SINALS_FILE)
 
-    # Verificar inconsistências no status dos robôs
-    for strategy_name, is_active in robot_status.items():
-        active_orders = df[(df['strategy_name'] == strategy_name) & (df['estado'] == 'aberto')]
-        if is_active and active_orders.empty:
-            st.warning(f"Inconsistência detectada: Robô '{strategy_name}' está ativo, mas não possui ordens abertas.")
-        elif not is_active and not active_orders.empty:
-            st.warning(f"Inconsistência detectada: Robô '{strategy_name}' está inativo, mas possui ordens abertas.")
-
-    # Desativar robôs não listados no status
+    # Lista de itens que são conjuntos de indicadores e não robôs
+    indicadores_compostos = ["swing_trade_composite"]
+    
+    # Usar o novo sistema de notificações
+    from notification_manager import check_system_health
+    
+    # Verificar saúde do sistema e contar inconsistências
+    inconsistency_count = check_system_health(df, robot_status, indicadores_compostos)
+    
+    # Atualizar status para estratégias não listadas
     all_strategies = set(robot_status.keys())
     active_strategies_in_data = set(df['strategy_name'].unique())
     unlisted_strategies = active_strategies_in_data - all_strategies
 
     for strategy_name in unlisted_strategies:
-        st.warning(f"Robô '{strategy_name}' não está listado no status dos robôs. Desativando automaticamente.")
+        # Não desativar automaticamente conjuntos de indicadores
+        if strategy_name.lower() in [ind.lower() for ind in indicadores_compostos]:
+            continue
+            
+        # Apenas adicionar ao status como desativado
         robot_status[strategy_name] = False
 
     # Salvar o status atualizado
     save_robot_status(robot_status)
+    
+    return inconsistency_count
 
 # Chamar a validação no início do dashboard
 validate_robot_status_and_stats()
@@ -821,14 +957,14 @@ else:
     df.to_csv(SINALS_FILE, index=False)
 
 if os.path.exists(MISSED_OPPORTUNITIES_FILE):
-    df_missed = pd.read_csv(MISSED_OPORTUNITIES_FILE)
+    df_missed = pd.read_csv(MISSED_OPPORTUNITIES_FILE)
     df_missed['timestamp'] = pd.to_datetime(df_missed['timestamp'])
 else:
     df_missed = pd.DataFrame(columns=[
         'timestamp', 'robot_name', 'par', 'timeframe', 'direcao', 'score_tecnico',
         'contributing_indicators', 'reason'
     ])
-    df_missed.to_csv(MISSED_OPORTUNITIES_FILE, index=False)
+    df_missed.to_csv(MISSED_OPPORTUNITIES_FILE, index=False)
 
 df_open = df[df['estado'] == 'aberto']
 df_closed = df[df['estado'] == 'fechado']
@@ -844,8 +980,8 @@ st.session_state['known_open_orders'] = current_open_orders
 strategies = load_strategies()
 robot_status = load_robot_status()
 
-# Cabeçalho com o robô decorativo
-col_title, col_robot = st.columns([3, 1])
+# Cabeçalho com o robô decorativo e notificações
+col_title, col_robot, col_notifications = st.columns([3, 1, 3])
 with col_title:
     st.title("UltraBot Dashboard")
 with col_robot:
@@ -870,6 +1006,8 @@ with col_robot:
         </div>
     </div>
     """, unsafe_allow_html=True)
+with col_notifications:
+    render_notifications_panel()
 
 # Criar abas
 tab1, tab2, tab3, tab4 = st.tabs(["Visão Geral", "Ordens", "Configurações de Estratégia", "Oportunidades Perdidas"])
@@ -1694,3 +1832,75 @@ st.markdown('</div>', unsafe_allow_html=True)
 # Botão de Atualização
 if st.button("Atualizar"):
     st.rerun()
+
+def render_notifications_panel():
+    """
+    Renderiza o painel de notificações no dashboard
+    """
+    try:
+        from notification_manager import get_recent_notifications, mark_notification_as_read
+        
+        # Obter notificações recentes (máximo 10)
+        notifications = get_recent_notifications(limit=10)
+        
+        if not notifications:
+            st.info("Não há notificações para exibir")
+            return
+        
+        # Exibir as 2 notificações mais recentes
+        st.subheader(f"Notificações Recentes ({len(notifications)})")
+        
+        for i, notification in enumerate(notifications[:2]):
+            notification_type = notification.get('type', 'info')
+            css_class = f"notification notification-{notification_type}"
+            
+            # Formatar a timestamp
+            timestamp = datetime.strptime(notification['timestamp'], "%Y-%m-%d %H:%M:%S")
+            formatted_time = timestamp.strftime("%d/%m/%Y %H:%M")
+            
+            # Renderizar a notificação
+            st.markdown(f"""
+            <div class="{css_class}" id="notification-{notification['id']}">
+                <div class="notification-header">
+                    <span class="notification-source">{notification['source']}</span>
+                    <span class="notification-timestamp">{formatted_time}</span>
+                </div>
+                <div class="notification-message">{notification['message']}</div>
+                {f'<div class="notification-details">{notification["details"]}</div>' if 'details' in notification else ''}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button(f"Marcar como lida", key=f"mark_read_{notification['id']}"):
+                mark_notification_as_read(notification['id'])
+                st.rerun()
+        
+        # Botão para ver mais notificações
+        if len(notifications) > 2:
+            if st.button("Ver Todas as Notificações"):
+                with st.expander("Todas as Notificações", expanded=True):
+                    for notification in notifications:
+                        notification_type = notification.get('type', 'info')
+                        css_class = f"notification notification-{notification_type}"
+                        
+                        # Formatar a timestamp
+                        timestamp = datetime.strptime(notification['timestamp'], "%Y-%m-%d %H:%M:%S")
+                        formatted_time = timestamp.strftime("%d/%m/%Y %H:%M")
+                        
+                        # Renderizar a notificação
+                        st.markdown(f"""
+                        <div class="{css_class}" id="notification-{notification['id']}">
+                            <div class="notification-header">
+                                <span class="notification-source">{notification['source']}</span>
+                                <span class="notification-timestamp">{formatted_time}</span>
+                            </div>
+                            <div class="notification-message">{notification['message']}</div>
+                            {f'<div class="notification-details">{notification["details"]}</div>' if 'details' in notification else ''}
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        if st.button(f"Marcar como lida", key=f"mark_read_all_{notification['id']}"):
+                            mark_notification_as_read(notification['id'])
+                            st.rerun()
+    except Exception as e:
+        st.error(f"Erro ao carregar notificações: {e}")
+        logger.error(f"Erro ao renderizar notificações: {e}")
