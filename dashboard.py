@@ -9,11 +9,13 @@ import ta
 import plotly.express as px
 from datetime import datetime, timedelta
 from binance.client import Client
+from binance.exceptions import BinanceAPIException
 from learning_engine import LearningEngine
 from utils import logger, gerar_resumo, calcular_confiabilidade_historica
 from strategy_manager import load_strategies, save_strategies
 import uuid
 import toml
+import logging
 
 st.set_page_config(page_title="UltraBot Dashboard 9.0", layout="wide")
 
@@ -38,7 +40,20 @@ api_secret = st.secrets["binance"]["api_secret"]
 if not api_key or not api_secret:
     raise ValueError("As credenciais da API da Binance não foram configuradas. Certifique-se de definir as chaves no arquivo secrets.toml.")
 
-client = Client(api_key=api_key, api_secret=api_secret)
+# Adicionar teste de conectividade com a API Binance e logs detalhados
+logging.basicConfig(level=logging.DEBUG)
+
+try:
+    client = Client(api_key=st.secrets["binance"]["api_key"], api_secret=st.secrets["binance"]["api_secret"])
+    client.ping()  # Testa a conectividade com a API
+    logging.info("Conexão com a API Binance bem-sucedida!")
+except BinanceAPIException as e:
+    logging.error(f"Erro na API Binance: {e}")
+    raise
+except Exception as e:
+    logging.error(f"Erro inesperado: {e}")
+    raise
+
 learning_engine = LearningEngine()
 
 st.markdown("""
