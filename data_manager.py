@@ -1,7 +1,14 @@
 import pandas as pd  # Importação adicionada para pd
 import os  # Importação adicionada para os
 from datetime import datetime, timedelta  # Importação adicionada para datetime e timedelta
+import pytz
 from utils import logger, api_call_with_retry
+
+def convert_timestamp_to_local(timestamp):
+    """Converte timestamp da Binance (UTC) para horário local"""
+    utc_time = datetime.fromtimestamp(timestamp/1000.0, tz=pytz.UTC)
+    local_timezone = datetime.now().astimezone().tzinfo
+    return utc_time.astimezone(local_timezone)
 
 def get_historical_data(client, symbol, timeframe, limit=100):
     """
@@ -28,7 +35,11 @@ def get_historical_data(client, symbol, timeframe, limit=100):
             'close_time', 'quote_asset_volume', 'number_of_trades',
             'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
         ])
-        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        
+        # Converter timestamps para horário local
+        df['timestamp'] = df['timestamp'].apply(convert_timestamp_to_local)
+        df['close_time'] = df['close_time'].apply(convert_timestamp_to_local)
+        
         df = df[['timestamp', 'open', 'high', 'low', 'close', 'volume']]
         df['close'] = df['close'].astype(float)
         df['open'] = df['open'].astype(float)

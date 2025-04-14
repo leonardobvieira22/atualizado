@@ -4,6 +4,11 @@ from utils import logger, CsvWriter
 import uuid
 from datetime import datetime
 import json
+import pytz
+
+def get_local_timestamp():
+    """Retorna timestamp atual no timezone local"""
+    return datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S")
 
 # Inicializar o CsvWriter com filename e columns
 csv_writer = CsvWriter(
@@ -31,6 +36,39 @@ def check_active_trades():
         logger.error(f"Erro ao verificar trades ativos: {e}")
         return []
 
+def check_timeframe_direction_limit(pair, timeframe, direction, strategy_name, active_trades, config):
+    """
+    Verifica se já atingiu o limite de ordens para um timeframe/direção específico
+    """
+    # Verifica se o timeframe está ativo para esta estratégia
+    strategy_timeframes = config.get('backtest_config', {}).get('signal_strategies', [])
+    strategy_config = next((s for s in strategy_timeframes if s['name'] == strategy_name), None)
+    
+    if strategy_config and 'timeframes' in strategy_config:
+        if timeframe not in strategy_config['timeframes']:
+            logger.info(f"Timeframe {timeframe} não está ativo para estratégia {strategy_name}")
+            return False
+    
+    tf_limits = config.get('limits_by_timeframe', {}).get(timeframe, {'LONG': 1, 'SHORT': 1})
+    max_orders = tf_limits.get(direction, 1)
+    
+    # Filtrar ordens ativas para o mesmo par/timeframe/direção/estratégia
+    matching_orders = [
+        trade for trade in active_trades 
+        if trade['par'] == pair 
+        and trade['timeframe'] == timeframe 
+        and trade['direcao'] == direction 
+        and trade['strategy_name'] == strategy_name 
+        and trade['estado'] == 'aberto'
+    ]
+    
+    can_open = len(matching_orders) < max_orders
+    
+    if not can_open:
+        logger.info(f"Limite atingido para {strategy_name} em {pair}/{timeframe}/{direction}: {len(matching_orders)}/{max_orders}")
+    
+    return can_open
+
 def generate_combination_key(pair, direction, strategy_name, contributing_indicators, tf):
     """
     Gera uma chave única para uma combinação de par, direção, estratégia, indicadores e timeframe.
@@ -46,7 +84,7 @@ def save_signal(signal_data, accepted, mode):
     """
     try:
         signal_data['signal_id'] = str(uuid.uuid4())
-        signal_data['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        signal_data['timestamp'] = get_local_timestamp()
         signal_data['estado'] = signal_data.get('estado', 'aberto')
         signal_data['aceito'] = accepted
         signal_data['mode'] = mode
@@ -68,7 +106,7 @@ def save_signal_log(signal_data, accepted, mode):
             # Registrar sinal rejeitado
             MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
             log_entry = {
-                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'timestamp': get_local_timestamp(),
                 'robot_name': signal_data['strategy_name'],
                 'par': signal_data['par'],
                 'timeframe': signal_data['timeframe'],
@@ -123,3 +161,35 @@ def save_report(report_data):
         logger.info(f"Relatório salvo com sucesso em '{report_filename}'.")
     except Exception as e:
         logger.error(f"Erro ao salvar relatório: {e}")
+
+def close_order(signal_id, exit_price, result="Manual"):
+    """
+    Fecha uma ordem no arquivo sinais_detalhados.csv
+    """
+    try:
+        df = pd.read_csv("sinais_detalhados.csv")
+        order_idx = df.index[df['signal_id'] == signal_id].tolist()[0]
+        
+        df.at[order_idx, 'preco_saida'] = exit_price
+        df.at[order_idx, 'timestamp_saida'] = get_local_timestamp()
+        df.at[order_idx, 'estado'] = 'fechado'
+        df.at[order_idx, 'resultado'] = result
+        
+        # Calcular lucro
+        entry_price = float(df.at[order_idx, 'preco_entrada'])
+        direction = df.at[order_idx, 'direcao']
+        
+        if direction == "LONG":
+            profit_percent = ((exit_price - entry_price) / entry_price) * 100
+        else:
+            profit_percent = ((entry_price - exit_price) / entry_price) * 100
+            
+        df.at[order_idx, 'lucro_percentual'] = profit_percent
+        df.at[order_idx, 'pnl_realizado'] = profit_percent
+        
+        df.to_csv("sinais_detalhados.csv", index=False)
+        logger.info(f"Ordem {signal_id} fechada com sucesso. Resultado: {result}, PNL: {profit_percent:.2f}%")
+        return True
+    except Exception as e:
+        logger.error(f"Erro ao fechar ordem {signal_id}: {e}")
+        return False

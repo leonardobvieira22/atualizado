@@ -369,3 +369,61 @@ def check_alerts(client, threshold_percent=0.1):
     except Exception as e:
         logger.error(f"Erro ao verificar alertas: {e}")
         return []
+
+def reset_bot_data(password_input):
+    """
+    Reseta todas as ordens e estatísticas do bot após validação da senha
+    """
+    from config import CONFIG
+    import os
+    import pandas as pd
+    from datetime import datetime
+    from utils import logger
+    
+    if password_input != CONFIG.get('reset_password'):
+        return False, "Senha incorreta!"
+    
+    try:
+        # Backup dos arquivos antes de resetar
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        files_to_reset = [
+            "sinais_detalhados.csv",
+            "oportunidades_perdidas.csv",
+            "trades_dry_run.json",
+            "wallet_dry_run.json",
+            "strategy_confidence.json"
+        ]
+        
+        # Criar backups
+        for file in files_to_reset:
+            if os.path.exists(file):
+                backup_name = f"{file}.backup_{timestamp}"
+                os.rename(file, backup_name)
+        
+        # Recriar arquivos vazios com estrutura correta
+        df_sinais = pd.DataFrame(columns=[
+            'signal_id', 'par', 'direcao', 'preco_entrada', 'preco_saida', 'quantity',
+            'lucro_percentual', 'pnl_realizado', 'resultado', 'timestamp', 'timestamp_saida',
+            'estado', 'strategy_name', 'contributing_indicators', 'localizadores',
+            'motivos', 'timeframe', 'aceito', 'parametros', 'quality_score'
+        ])
+        df_sinais.to_csv("sinais_detalhados.csv", index=False)
+        
+        df_missed = pd.DataFrame(columns=[
+            'timestamp', 'robot_name', 'par', 'timeframe', 'direcao',
+            'score_tecnico', 'contributing_indicators', 'reason'
+        ])
+        df_missed.to_csv("oportunidades_perdidas.csv", index=False)
+        
+        # Recriar arquivos JSON vazios
+        for json_file in ["trades_dry_run.json", "wallet_dry_run.json", "strategy_confidence.json"]:
+            with open(json_file, "w") as f:
+                f.write("{}")
+        
+        logger.info("Reset do bot realizado com sucesso")
+        return True, "Reset realizado com sucesso! Os dados anteriores foram backupeados com timestamp."
+        
+    except Exception as e:
+        logger.error(f"Erro ao realizar reset do bot: {e}")
+        return False, f"Erro ao realizar reset: {str(e)}"

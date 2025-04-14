@@ -170,17 +170,28 @@ def generate_multi_timeframe_signal(signals_by_tf, learning_engine, contributing
         reasons = []
         timeframes_analisados = list(signals_by_tf.keys())
 
+        # Pesos ajustados para dar mais equilíbrio entre timeframes
+        tf_weights = {
+            "1m": 1.0,
+            "5m": 1.0,
+            "15m": 1.0,
+            "1h": 1.2,
+            "4h": 1.2,
+            "1d": 1.3
+        }
+
         for tf, signal_data in signals_by_tf.items():
             direction = signal_data['direction']
             score = signal_data['score']
-            tf_weight = 1.0 / (timeframes_analisados.index(tf) + 1)
-            direction_counts[direction] += tf_weight
-            total_score += score * tf_weight
+            weight = tf_weights.get(tf, 1.0)
+            direction_counts[direction] += weight
+            total_score += score * weight
             reasons.extend(signal_data['details'].get('reasons', []))
 
         long_score = direction_counts["LONG"]
         short_score = direction_counts["SHORT"]
         final_direction = None
+
         if long_score > short_score and long_score > 0:
             final_direction = "LONG"
         elif short_score > long_score and short_score > 0:

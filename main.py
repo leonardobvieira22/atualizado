@@ -94,20 +94,25 @@ try:
         return next_close
 
     def generate_realtime_signal(client, pair, tf, strategy_config, config, learning_engine, binance_utils):
-        """Gera sinais em tempo real para timeframes menores."""
-        if tf not in ["1m", "5m"] or not config.get("realtime_signals_enabled", False):
+        """Gera sinais em tempo real para timeframes."""
+        # Remove restrição de timeframe e deixa apenas verificação de sinais em tempo real
+        if not config.get("realtime_signals_enabled", True):
             return None, None, None, None, None
 
         current_price = get_current_price(client, pair, config)
         if current_price is None:
             return None, None, None, None, None
 
-        historical_data = get_historical_data(client, pair, tf, limit=50)
+        # Ajusta o número de candles baseado no timeframe
+        limit = 200 if tf in ["1h", "4h", "1d"] else 100
+        historical_data = get_historical_data(client, pair, tf, limit=limit)
         if historical_data.empty:
             return None, None, None, None, None
 
-        historical_data.loc[historical_data.index[-1] + 1] = historical_data.iloc[-1]
-        historical_data.iloc[-1, historical_data.columns.get_loc('close')] = current_price
+        # Atualiza o último preço apenas para timeframes menores
+        if tf in ["1m", "5m", "15m"]:
+            historical_data.loc[historical_data.index[-1] + 1] = historical_data.iloc[-1]
+            historical_data.iloc[-1, historical_data.columns.get_loc('close')] = current_price
 
         historical_data = calculate_indicators(historical_data, binance_utils)
         direction, score, details, contributing_indicators, strategy_name = generate_signal(
@@ -295,6 +300,58 @@ try:
             logger.info(f"Resumo atualizado: {total_signals} sinais gerados, {open_orders} ordens abertas, {closed_orders} ordens fechadas.")
         except Exception as e:
             logger.error(f"Erro ao atualizar resumo do bot: {e}")
+
+    def process_signals_for_timeframe(pair, tf, current_time, active_strategies, config, active_trades_dry_run):
+        """Processa sinais para um par/timeframe específico"""
+        signals = {}
+        
+        if current_time < candle_schedule[pair][tf]:
+            logger.debug(f"Aguardando próximo fechamento para {pair}/{tf}: {candle_schedule[pair][tf]}")
+            return signals
+
+        limit = 200 if tf in ["1h", "4h", "1d"] else 100
+        historical_data = get_historical_data(client, pair, tf, limit=limit)
+        if historical_data.empty:
+            logger.warning(f"Sem dados históricos para {pair}/{tf}")
+            return signals
+
+        for strategy_name, strategy_config in active_strategies.items():
+            if tf not in strategy_config.get("timeframes", TIMEFRAMES):
+                continue
+
+            # Verifica se já atingiu limite de ordens para LONG
+            can_open_long = check_timeframe_direction_limit(
+                pair, tf, "LONG", strategy_name, active_trades_dry_run, config
+            )
+            
+            # Verifica se já atingiu limite de ordens para SHORT
+            can_open_short = check_timeframe_direction_limit(
+                pair, tf, "SHORT", strategy_name, active_trades_dry_run, config
+            )
+
+            if not can_open_long and not can_open_short:
+                logger.info(f"Limites atingidos para {strategy_name} em {pair}/{tf} (LONG e SHORT)")
+                continue
+
+            direction, score, details, contributing_indicators, _ = generate_signal(
+                historical_data, tf, strategy_config, config, learning_engine, binance_utils
+            )
+
+            if direction and score >= MIN_SCORE_THRESHOLD:
+                if (direction == "LONG" and can_open_long) or (direction == "SHORT" and can_open_short):
+                    signals[strategy_name] = {
+                        "direction": direction,
+                        "score": score,
+                        "details": details,
+                        "contributing_indicators": contributing_indicators,
+                        "strategy_name": strategy_name,
+                        "timeframe": tf
+                    }
+                    logger.info(f"Sinal válido gerado para {pair}/{tf}/{direction} com estratégia {strategy_name}")
+                else:
+                    logger.info(f"Limite de ordens atingido para {direction} em {pair}/{tf} com estratégia {strategy_name}")
+
+        return signals
 
     def main():
         logger.info("Inicializando arquivos CSV...")

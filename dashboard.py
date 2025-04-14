@@ -821,14 +821,14 @@ else:
     df.to_csv(SINALS_FILE, index=False)
 
 if os.path.exists(MISSED_OPPORTUNITIES_FILE):
-    df_missed = pd.read_csv(MISSED_OPPORTUNITIES_FILE)
+    df_missed = pd.read_csv(MISSED_OPORTUNITIES_FILE)
     df_missed['timestamp'] = pd.to_datetime(df_missed['timestamp'])
 else:
     df_missed = pd.DataFrame(columns=[
         'timestamp', 'robot_name', 'par', 'timeframe', 'direcao', 'score_tecnico',
         'contributing_indicators', 'reason'
     ])
-    df_missed.to_csv(MISSED_OPPORTUNITIES_FILE, index=False)
+    df_missed.to_csv(MISSED_OPORTUNITIES_FILE, index=False)
 
 df_open = df[df['estado'] == 'aberto']
 df_closed = df[df['estado'] == 'fechado']
@@ -1430,6 +1430,28 @@ with tab2:
 # Aba 3: Configurações de Estratégia
 with tab3:
     st.header("Configurações de Estratégia")
+
+    # Seção de Reset do Bot
+    st.header("Reset do Bot")
+    st.warning("⚠️ Atenção: Esta ação irá resetar todas as ordens e estatísticas do bot!")
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        reset_password = st.text_input("Senha de Reset", type="password")
+    with col2:
+        if st.button("Reset Bot", type="primary"):
+            if reset_password:
+                success, message = reset_bot_data(reset_password)
+                if success:
+                    st.success(message)
+                    # Recarregar a página após 3 segundos
+                    st.rerun()
+                else:
+                    st.error(message)
+            else:
+                st.error("Por favor, digite a senha de reset!")
+
+    st.divider()  # Adiciona uma linha divisória
 
     # Lista de indicadores
     indicadores_simples = [

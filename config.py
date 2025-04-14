@@ -36,7 +36,15 @@ CONFIG = {
     'sentiment_enabled': False,
     'sentiment_api_key': os.getenv('SENTIMENT_API_KEY', ""),
     'sentiment_source': 'lunarcrush',
-    'realtime_signals_enabled': True,
+    'realtime_signals_enabled': True,  # Habilitado para todos os timeframes
+    'timeframe_settings': {  # Novas configurações por timeframe
+        '1m': {'realtime_enabled': True, 'weight': 1.0},
+        '5m': {'realtime_enabled': True, 'weight': 1.0},
+        '15m': {'realtime_enabled': True, 'weight': 1.0},
+        '1h': {'realtime_enabled': True, 'weight': 1.2},
+        '4h': {'realtime_enabled': True, 'weight': 1.2},
+        '1d': {'realtime_enabled': True, 'weight': 1.3}
+    },
     'quantity_in_usdt': 10.0,  # Adicionado para corrigir o erro de quantidade
     'indicators': {
         'rsi': {'ativo': True, 'periodo': 14, 'sobrecomprado': 60, 'sobrevendido': 30, 'score': 20, 'tp_percent': 1.8, 'sl_percent': 0.9},  # Ajustado sobrecomprado para 60
@@ -89,6 +97,15 @@ CONFIG = {
             {"name": "swing_trade_composite", "indicators": ["rsi", "macd", "ema"], "type": "movimento_longo", "timeframes": ["1h", "4h", "1d"], "min_target_percent": 3.0, "stop_loss_percent": 1.0, "leverage": 5, "enabled": True}
         ]
     },
+    'limits_by_timeframe': {
+        '1m': {'LONG': 1, 'SHORT': 1},
+        '5m': {'LONG': 1, 'SHORT': 1},
+        '15m': {'LONG': 1, 'SHORT': 1},
+        '1h': {'LONG': 1, 'SHORT': 1},
+        '4h': {'LONG': 1, 'SHORT': 1},
+        '1d': {'LONG': 1, 'SHORT': 1}
+    },
+    'reset_password': '123456',  # Senha para resetar ordens e estatísticas
     'modes': {
         'dry_run': True,
         'real': False,
