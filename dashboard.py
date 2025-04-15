@@ -28,7 +28,7 @@ CONFIG_FILE = "config.json"
 STRATEGIES_FILE = "strategies.json"
 ROBOT_STATUS_FILE = "robot_status.json"
 MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
-#verificar se atualizou 
+#verificar se atualizou git
 #verificar dnv
 # Verificar se as credenciais estão presentes no st.secrets
 if "binance" not in st.secrets or "api_key" not in st.secrets["binance"] or "api_secret" not in st.secrets["binance"]:
