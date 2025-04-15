@@ -1,0 +1,14 @@
+[Unit]
+Description=UltraBot Dashboard Streamlit
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/root/ultrabotv1.1
+ExecStart=/usr/bin/env streamlit run dashboard.py --server.port 8580
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

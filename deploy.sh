@@ -41,14 +41,14 @@ fi
 
 # Iniciar o Streamlit em segundo plano
 echo "Iniciando o serviço Streamlit..."
-nohup streamlit run dashboard.py --server.port 8501 > streamlit.log 2>&1 &
+nohup streamlit run dashboard.py --server.port 8580 > streamlit.log 2>&1 &
 
 sleep 5
 
 echo "Verificando status do serviço..."
 if pgrep -f "streamlit run dashboard.py" > /dev/null; then
     echo "Serviço Streamlit iniciado com sucesso!"
-    echo "O dashboard está disponível em: http://209.38.100.245:8501"
+    echo "O dashboard está disponível em: http://209.38.100.245:8580"
 else
     echo "ERRO: Falha ao iniciar o serviço Streamlit. Verifique o arquivo streamlit.log para mais detalhes."
     exit 1

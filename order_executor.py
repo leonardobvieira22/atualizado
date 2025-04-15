@@ -4,6 +4,7 @@ from binance.exceptions import BinanceAPIException
 import pandas as pd
 import json
 from datetime import datetime
+from trade_manager import check_timeframe_direction_limit, check_active_trades
 
 SINALS_FILE = "sinais_detalhados.csv"
 
@@ -53,6 +54,22 @@ class OrderExecutor:
         Returns:
             dict: Detalhes da ordem executada ou simulada.
         """
+        # Checagem centralizada de limite de ordens por direção/par/timeframe/robô
+        active_trades = check_active_trades()
+        can_open = check_timeframe_direction_limit(
+            par,
+            self.config['timeframe'],
+            direcao,
+            self.config['strategy_name'],
+            active_trades,
+            self.config
+        )
+        if not can_open:
+            logger.warning(f"Limite de trades simultâneos atingido para {self.config['strategy_name']} em {par}/{self.config['timeframe']}/{direcao}. Ordem não será criada.")
+            with open("oportunidades_perdidas.csv", "a") as f:
+                f.write(f"{pd.Timestamp.now()},{self.config['strategy_name']},{par},{self.config['timeframe']},{direcao},N/A,N/A,Limite de trades simultâneos atingido\n")
+            return {"status": "ignored", "reason": "limite de trades simultâneos atingido"}
+
         # Verificar se já existe uma ordem aberta para o robô na mesma direção e timeframe
         df = pd.read_csv("sinais_detalhados.csv")
         ordens_abertas = df[(df['estado'] == 'aberto') &

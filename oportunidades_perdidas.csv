@@ -1,250 +1,335 @@
 timestamp,robot_name,par,timeframe,direcao,score_tecnico,contributing_indicators,reason
-2025-04-15 04:53:42,ROBOT PADRAO 1,TRXUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,ROBOT PADRAO 1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,ROBOT PADRAO 1,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,ROBOT PADRAO 1,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,ROBOT PADRAO 1,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,ROBOT PADRAO 1,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,hard,TRXUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,hard,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,hard,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,hard,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,hard,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,hard,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,only1,DOGEUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,only1,DOGEUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,only1,DOGEUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,only1,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,only1,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,only1,DOGEUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,frouxo,XRPUSDT,1d,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,frouxo,XRPUSDT,1h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,frouxo,XRPUSDT,4h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,frouxo,XRPUSDT,1m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,frouxo,XRPUSDT,5m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:42,frouxo,XRPUSDT,15m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,bolinguer + vol max,XRPUSDT,1d,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,bolinguer + vol max,XRPUSDT,1h,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,bolinguer + vol max,XRPUSDT,4h,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,bolinguer + vol max,XRPUSDT,1m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,bolinguer + vol max,XRPUSDT,5m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,bolinguer + vol max,XRPUSDT,15m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,GPT 00,XRPUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,GPT 00,XRPUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,GPT 00,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,GPT 00,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,GPT 00,XRPUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,GPT 00,XRPUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,Momentum Fast,TRXUSDT,1m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,Momentum Fast,TRXUSDT,5m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,Composite Trend,TRXUSDT,1h,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,Composite Trend,TRXUSDT,5m,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:53:44,Composite Trend,TRXUSDT,15m,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:27,Robo 00,XRPUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:27,Robo 00,XRPUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:27,Robo 00,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:27,Robo 00,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:27,Robo 00,XRPUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:27,Robo 00,XRPUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:28,ROBOT 1 LEO,XRPUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,ROBOT PADRAO 1,TRXUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,ROBOT PADRAO 1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,ROBOT PADRAO 1,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,ROBOT PADRAO 1,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,ROBOT PADRAO 1,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,ROBOT PADRAO 1,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,hard,DOGEUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,hard,DOGEUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,hard,DOGEUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,hard,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,hard,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,hard,DOGEUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,only1,XRPUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,only1,XRPUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,only1,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,only1,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,only1,XRPUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,only1,XRPUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,frouxo,XRPUSDT,1d,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,frouxo,XRPUSDT,1h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,frouxo,XRPUSDT,4h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,frouxo,XRPUSDT,1m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,frouxo,XRPUSDT,5m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:29,frouxo,XRPUSDT,15m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:31,ultima 10,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,sma max,XRPUSDT,1d,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,sma max,XRPUSDT,1h,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,sma max,XRPUSDT,4h,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,sma max,XRPUSDT,1m,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,sma max,XRPUSDT,5m,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,sma max,XRPUSDT,15m,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,ema max,DOGEUSDT,1d,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,ema max,DOGEUSDT,1h,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,ema max,DOGEUSDT,4h,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,ema max,DOGEUSDT,1m,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,ema max,DOGEUSDT,5m,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,ema max,DOGEUSDT,15m,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,bolinguer + vol max,TRXUSDT,1d,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,bolinguer + vol max,TRXUSDT,1h,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,bolinguer + vol max,TRXUSDT,4h,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,bolinguer + vol max,TRXUSDT,1m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,bolinguer + vol max,TRXUSDT,5m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,bolinguer + vol max,TRXUSDT,15m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,GPT 00,TRXUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,GPT 00,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,GPT 00,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,GPT 00,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,Momentum Fast,DOGEUSDT,1m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,Momentum Fast,DOGEUSDT,5m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,Swing Alpha,TRXUSDT,1d,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,Swing Alpha,TRXUSDT,1h,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,Swing Alpha,TRXUSDT,4h,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,Sentiment Guard,XRPUSDT,1h,LONG,0.0,Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,Sentiment Guard,XRPUSDT,15m,LONG,0.0,Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,Composite Trend,DOGEUSDT,1h,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,Composite Trend,DOGEUSDT,5m,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:32,Composite Trend,DOGEUSDT,15m,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:43,Robo 00,TRXUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:43,Robo 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:43,Robo 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:43,Robo 00,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:43,Robo 00,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:43,Robo 00,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,ROBOT PADRAO 1,XRPUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,ROBOT PADRAO 1,XRPUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,ROBOT PADRAO 1,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,ROBOT PADRAO 1,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,ROBOT PADRAO 1,XRPUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,ROBOT PADRAO 1,XRPUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,hard,XRPUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,hard,XRPUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,hard,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,hard,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,hard,XRPUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,hard,XRPUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,only1,DOGEUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,only1,DOGEUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,only1,DOGEUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,only1,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,only1,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,only1,DOGEUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,frouxo,XRPUSDT,1d,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,frouxo,XRPUSDT,1h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,frouxo,XRPUSDT,4h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,frouxo,XRPUSDT,1m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,frouxo,XRPUSDT,5m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:44,frouxo,XRPUSDT,15m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:46,robo do um porcento ,XRPUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,sma max,DOGEUSDT,1d,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,sma max,DOGEUSDT,1h,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,sma max,DOGEUSDT,4h,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,sma max,DOGEUSDT,1m,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,sma max,DOGEUSDT,5m,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,sma max,DOGEUSDT,15m,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,ema max,DOGEUSDT,1d,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,ema max,DOGEUSDT,1h,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,ema max,DOGEUSDT,4h,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,ema max,DOGEUSDT,1m,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,ema max,DOGEUSDT,5m,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,ema max,DOGEUSDT,15m,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,bolinguer + vol max,TRXUSDT,1d,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,bolinguer + vol max,TRXUSDT,1h,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,bolinguer + vol max,TRXUSDT,4h,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,bolinguer + vol max,TRXUSDT,1m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,bolinguer + vol max,TRXUSDT,5m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,bolinguer + vol max,TRXUSDT,15m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,GPT 00,TRXUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,GPT 00,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,GPT 00,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,GPT 00,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,Momentum Fast,DOGEUSDT,1m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,Momentum Fast,DOGEUSDT,5m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,Swing Alpha,DOGEUSDT,1d,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,Swing Alpha,DOGEUSDT,1h,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,Swing Alpha,DOGEUSDT,4h,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,Sentiment Guard,XRPUSDT,1h,LONG,0.0,Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,Sentiment Guard,XRPUSDT,15m,LONG,0.0,Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,Composite Trend,TRXUSDT,1h,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,Composite Trend,TRXUSDT,5m,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:55:48,Composite Trend,TRXUSDT,15m,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:19,Robo 00,TRXUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:19,Robo 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:19,Robo 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:19,Robo 00,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:19,Robo 00,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:19,Robo 00,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ROBOT 1 LEO,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ROBOT PADRAO 1,XRPUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ROBOT PADRAO 1,XRPUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ROBOT PADRAO 1,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ROBOT PADRAO 1,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ROBOT PADRAO 1,XRPUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ROBOT PADRAO 1,XRPUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,hard,XRPUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,hard,XRPUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,hard,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,hard,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,hard,XRPUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,hard,XRPUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,only1,XRPUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,only1,XRPUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,only1,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,only1,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,only1,XRPUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,only1,XRPUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,frouxo,DOGEUSDT,1d,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,frouxo,DOGEUSDT,1h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,frouxo,DOGEUSDT,4h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,frouxo,DOGEUSDT,1m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,frouxo,DOGEUSDT,5m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,frouxo,DOGEUSDT,15m,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,robo do um porcento ,DOGEUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,robo do um porcento ,DOGEUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,robo do um porcento ,DOGEUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,robo do um porcento ,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,robo do um porcento ,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,robo do um porcento ,DOGEUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ultima 10,TRXUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ultima 10,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ultima 10,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ultima 10,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ultima 10,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ultima 10,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,sma max,XRPUSDT,1d,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,sma max,XRPUSDT,1h,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,sma max,XRPUSDT,4h,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,sma max,XRPUSDT,1m,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,sma max,XRPUSDT,5m,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,sma max,XRPUSDT,15m,LONG,0.0,SMA,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ema max,DOGEUSDT,1d,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ema max,DOGEUSDT,1h,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ema max,DOGEUSDT,4h,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ema max,DOGEUSDT,1m,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ema max,DOGEUSDT,5m,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,ema max,DOGEUSDT,15m,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,bolinguer + vol max,DOGEUSDT,1d,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,bolinguer + vol max,DOGEUSDT,1h,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,bolinguer + vol max,DOGEUSDT,4h,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,bolinguer + vol max,DOGEUSDT,1m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,bolinguer + vol max,DOGEUSDT,5m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,bolinguer + vol max,DOGEUSDT,15m,LONG,0.0,Volume;Bollinger,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,GPT 00,DOGEUSDT,1d,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,GPT 00,DOGEUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,GPT 00,DOGEUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,GPT 00,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,GPT 00,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,GPT 00,DOGEUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,Momentum Fast,TRXUSDT,1m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,Momentum Fast,TRXUSDT,5m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,Swing Alpha,DOGEUSDT,1d,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,Swing Alpha,DOGEUSDT,1h,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,Swing Alpha,DOGEUSDT,4h,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,Sentiment Guard,DOGEUSDT,1h,LONG,0.0,Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,Sentiment Guard,DOGEUSDT,15m,LONG,0.0,Sentimento,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,Composite Trend,DOGEUSDT,1h,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,Composite Trend,DOGEUSDT,5m,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
-2025-04-15 04:59:21,Composite Trend,DOGEUSDT,15m,LONG,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:43:21,robo do um porcento ,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:43:27,Robo 00,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:43:28,ROBOT 1 LEO,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:43:29,ROBOT 1 LEO,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:43:51,Robo 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:43:54,ROBOT 1 LEO,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:43:59,hard,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:43:59,hard,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:44:07,Robo 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:44:08,Robo 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:44:09,Robo 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:44:10,Robo 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:44:30,frouxo,DOGEUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:44:37,ROBOT 1 LEO,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:44:37,ROBOT 1 LEO,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:44:39,ROBOT 1 LEO,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:44:39,ROBOT 1 LEO,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:03,ultima 10,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:06,ROBOT PADRAO 1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:09,only1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:09,ROBOT PADRAO 1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:11,frouxo,XRPUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:11,hard,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:12,hard,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:13,robo do um porcento ,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:45:40,ema max,XRPUSDT,1h,SHORT,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:41,only1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:42,only1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:42,ultima 10,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:45:43,ultima 10,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:46:10,frouxo,DOGEUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:46:13,ultima 10,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:46:18,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:46:23,Swing Alpha,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:46:43,ultima 10,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:46:43,ultima 10,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:46:55,ema max,XRPUSDT,1h,SHORT,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:47:11,ultima 10,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:47:35,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:48:06,Swing Alpha,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:48:40,Robo 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:48:41,Robo 00,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:08,Momentum Fast,DOGEUSDT,1m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 18:49:08,Robo 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:09,Robo 00,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:11,ROBOT 1 LEO,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:12,ROBOT 1 LEO,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:15,Swing Alpha,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:15,Swing Alpha,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:36,Robo 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:37,Robo 00,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:39,ROBOT 1 LEO,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:40,ROBOT 1 LEO,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:40,ROBOT 1 LEO,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:47,ROBOT PADRAO 1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:49:47,ROBOT PADRAO 1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:07,ROBOT 1 LEO,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:07,ROBOT 1 LEO,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:09,ROBOT PADRAO 1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:09,ROBOT PADRAO 1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:17,hard,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:18,hard,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:37,ROBOT PADRAO 1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:37,ROBOT PADRAO 1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:41,only1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:42,frouxo,TRXUSDT,1h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:45,robo do um porcento ,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:50:46,hard,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:52,only1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:50:53,only1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:08,only1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:09,only1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:17,Robo 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:17,Robo 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:19,ultima 10,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:21,only1,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:27,frouxo,DOGEUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:28,frouxo,DOGEUSDT,4h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:37,only1,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:43,only1,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:45,Robo 00,TRXUSDT,1m,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:45,frouxo,XRPUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:47,robo do um porcento ,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:51:51,ROBOT 1 LEO,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:51:51,ROBOT 1 LEO,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:52:20,ROBOT 1 LEO,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:52:26,ROBOT PADRAO 1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:52:26,robo do um porcento ,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:52:26,ROBOT PADRAO 1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:52:32,ultima 10,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:52:41,Robo 00,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:52:41,Robo 00,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:52:42,GPT 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:52:54,ROBOT PADRAO 1,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:01,hard,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:02,only1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:03,only1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:10,ROBOT 1 LEO,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:11,ROBOT 1 LEO,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:13,Momentum Fast,DOGEUSDT,1m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 18:53:18,Momentum Fast,DOGEUSDT,5m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 18:53:31,only1,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:38,frouxo,DOGEUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:38,frouxo,DOGEUSDT,4h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:39,ROBOT 1 LEO,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:46,ROBOT PADRAO 1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:46,ROBOT PADRAO 1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:53:50,Momentum Fast,XRPUSDT,4h,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 18:54:03,Momentum Fast,DOGEUSDT,1m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 18:54:07,Robo 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:08,Robo 00,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:09,Swing Alpha,TRXUSDT,1h,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:14,ROBOT PADRAO 1,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:19,ROBOT PADRAO 1,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:22,hard,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:22,hard,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:36,Robo 00,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:36,robo do um porcento ,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:54:42,robo do um porcento ,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:54:43,ROBOT 1 LEO,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:43,ROBOT 1 LEO,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:45,ultima 10,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:45,ultima 10,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:48,Composite Trend,XRPUSDT,1h,SHORT,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:51,hard,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:57,only1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:54:59,frouxo,XRPUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:02,robo do um porcento ,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:55:12,ROBOT 1 LEO,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:13,ultima 10,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:17,ROBOT 1 LEO,XRPUSDT,5m,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:18,ultima 10,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:19,ROBOT PADRAO 1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:20,ROBOT PADRAO 1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:36,ultima 10,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:37,ultima 10,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:48,ROBOT PADRAO 1,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:56,only1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:55:58,frouxo,XRPUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:56:00,robo do um porcento ,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:56:33,robo do um porcento ,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:56:35,GPT 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:56:42,ema max,XRPUSDT,1h,SHORT,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:01,Robo 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:02,Robo 00,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:05,Momentum Fast,DOGEUSDT,1m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 18:57:13,ema max,XRPUSDT,1h,SHORT,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:21,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:21,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:23,Robo 00,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:24,Robo 00,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:27,Robo 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:27,Robo 00,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:33,Robo 00,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:39,ROBOT 1 LEO,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:40,ROBOT 1 LEO,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:51,Robo 00,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:52,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:52,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:55,Robo 00,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:57,ROBOT 1 LEO,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:57:58,ROBOT 1 LEO,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:01,ROBOT 1 LEO,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:02,ROBOT 1 LEO,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:09,ROBOT PADRAO 1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:09,ROBOT PADRAO 1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:20,Momentum Fast,DOGEUSDT,1m,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 18:58:23,Swing Alpha,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:24,Swing Alpha,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:28,ROBOT PADRAO 1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:30,hard,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:31,ROBOT 1 LEO,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:33,frouxo,XRPUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:34,frouxo,XRPUSDT,4h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:37,ROBOT PADRAO 1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:37,ROBOT PADRAO 1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:38,ROBOT PADRAO 1,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:44,hard,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:58:45,hard,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:03,robo do um porcento ,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:59:05,ROBOT PADRAO 1,DOGEUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:11,hard,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:13,only1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:14,hard,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:14,only1,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:19,hard,XRPUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:22,only1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:22,only1,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:33,ultima 10,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:33,ultima 10,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:44,frouxo,TRXUSDT,1h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:46,robo do um porcento ,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 18:59:52,frouxo,DOGEUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 18:59:52,frouxo,DOGEUSDT,4h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:00:02,ultima 10,XRPUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:00:23,robo do um porcento ,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:00:56,robo do um porcento ,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:00:59,ema max,XRPUSDT,1h,SHORT,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:01:00,ema max,XRPUSDT,4h,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:01:21,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:01:22,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:01:51,Momentum Fast,XRPUSDT,4h,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 19:02:06,Momentum Fast,XRPUSDT,4h,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 19:02:15,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:02:16,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:02:42,Swing Alpha,TRXUSDT,1h,LONG,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:02:44,GPT 00,TRXUSDT,1m,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:02:52,Swing Alpha,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:02:53,Swing Alpha,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:00,Robo 00,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:01,Robo 00,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:09,Robo 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:09,Robo 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:16,Robo 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:17,Robo 00,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:31,ROBOT 1 LEO,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:31,ROBOT 1 LEO,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:38,Robo 00,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:44,Robo 00,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:44,Robo 00,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:45,ROBOT 1 LEO,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:45,ROBOT 1 LEO,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:46,ROBOT 1 LEO,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:08:47,ROBOT 1 LEO,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:00,ROBOT PADRAO 1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:02,hard,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:05,frouxo,XRPUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:06,frouxo,XRPUSDT,4h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:14,ROBOT 1 LEO,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:14,ROBOT 1 LEO,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:14,ROBOT PADRAO 1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:16,ROBOT PADRAO 1,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:16,ROBOT PADRAO 1,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:16,hard,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:20,frouxo,TRXUSDT,1h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:35,robo do um porcento ,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:09:43,ROBOT PADRAO 1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:46,hard,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:47,only1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:47,only1,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:47,only1,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:48,only1,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:56,robo do um porcento ,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:09:58,ultima 10,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:09:59,ultima 10,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:11,ultima 10,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:12,ultima 10,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:16,frouxo,XRPUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:17,frouxo,XRPUSDT,4h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:18,frouxo,TRXUSDT,1h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:20,robo do um porcento ,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:10:27,Robo 00,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:28,Robo 00,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:37,Robo 00,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:38,Robo 00,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:47,Robo 00,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:47,robo do um porcento ,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:10:47,Robo 00,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:53,robo do um porcento ,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:10:54,robo do um porcento ,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:10:56,ultima 10,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:56,ultima 10,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:58,ROBOT 1 LEO,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:10:58,ROBOT 1 LEO,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:08,ROBOT 1 LEO,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:09,ROBOT 1 LEO,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:17,ROBOT 1 LEO,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:18,ROBOT 1 LEO,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:21,robo do um porcento ,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:11:22,robo do um porcento ,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:11:23,ultima 10,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:23,ultima 10,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:27,ROBOT 1 LEO,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:33,ROBOT PADRAO 1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:35,hard,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:36,hard,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:41,ROBOT PADRAO 1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:43,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:43,hard,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:43,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:43,hard,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:48,ROBOT PADRAO 1,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:49,ROBOT PADRAO 1,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:51,ultima 10,DOGEUSDT,1m,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:56,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:57,ultima 10,DOGEUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:11:57,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:02,ema max,XRPUSDT,1h,SHORT,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:03,ema max,XRPUSDT,4h,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:07,frouxo,DOGEUSDT,1h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:07,frouxo,DOGEUSDT,4h,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:13,Momentum Fast,TRXUSDT,4h,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 19:12:14,only1,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:15,only1,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:18,hard,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:18,hard,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:26,Momentum Fast,TRXUSDT,4h,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 19:12:35,frouxo,DOGEUSDT,1m,SHORT,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:35,ema max,TRXUSDT,1h,LONG,0.0,EMA;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:42,robo do um porcento ,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:12:44,only1,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:50,frouxo,TRXUSDT,1h,LONG,0.0,MACD;Volume;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:12:53,robo do um porcento ,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento,Limite de trades simultâneos atingido
+2025-04-15 19:13:04,Swing Alpha,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:05,Swing Alpha,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:08,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:09,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:13,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:14,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:18,ultima 10,XRPUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:18,ultima 10,XRPUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:30,ultima 10,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:38,GPT 00,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:42,GPT 00,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:44,GPT 00,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:13:48,GPT 00,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:14:20,Composite Trend,DOGEUSDT,1h,SHORT,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:14:27,Swing Alpha,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:14:28,Swing Alpha,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:14:33,Composite Trend,DOGEUSDT,1h,SHORT,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:14:50,GPT 00,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:14:53,Momentum Fast,TRXUSDT,4h,LONG,0.0,EMA;RSI;MACD;Volume,Limite de trades simultâneos atingido
+2025-04-15 19:15:02,GPT 00,TRXUSDT,1h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:15:03,GPT 00,TRXUSDT,4h,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:15:33,GPT 00,TRXUSDT,1m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:15:38,GPT 00,TRXUSDT,5m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:15:40,GPT 00,TRXUSDT,15m,LONG,0.0,SMA;EMA;RSI;MACD;ADX;Volume;Bollinger;Estocastico;VWAP;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:15:43,Swing Alpha,DOGEUSDT,1h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:15:43,Swing Alpha,DOGEUSDT,4h,SHORT,0.0,SMA;EMA;ADX;Volume;Bollinger;Estocastico;OBV;Fibonacci;Sentimento;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:16:00,Composite Trend,DOGEUSDT,1h,SHORT,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:16:01,Composite Trend,DOGEUSDT,4h,SHORT,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:16:49,Composite Trend,DOGEUSDT,1h,SHORT,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:16:49,Composite Trend,DOGEUSDT,4h,SHORT,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido
+2025-04-15 19:17:17,Composite Trend,DOGEUSDT,1m,SHORT,0.0,EMA;RSI;MACD;ADX;VWAP;Swing Trade Composite,Limite de trades simultâneos atingido

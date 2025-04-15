@@ -682,9 +682,8 @@ try:
                     signals_in_iteration += 1
                     bot_status["signals_generated"] += 1
 
-                # Processar a fila de sinais
-                global_max_trades = config.get("max_trades_simultaneos", 50)  # Limite global
-                while not signal_queue.empty() and len(active_trades_dry_run) < global_max_trades:
+                # Remover limitação global: processar todos os sinais da fila
+                while not signal_queue.empty():
                     _, signal_data = signal_queue.get()
                     strategy_name = signal_data['strategy_name']
                     strategy_config = active_strategies[strategy_name]
@@ -727,8 +726,8 @@ try:
                         ).start()
                         logger.info(f"Thread de simulação iniciada para sinal {signal_id}.")
 
-                # Reavaliar sinais rejeitados
-                while len(active_trades_dry_run) < global_max_trades and not rejected_signals.empty():
+                # Reavaliar sinais rejeitados, também sem limitação global
+                while not rejected_signals.empty():
                     _, signal_data = rejected_signals.get()
                     strategy_name = signal_data['strategy_name']
                     strategy_config = active_strategies[strategy_name]

@@ -28,7 +28,7 @@ CONFIG_FILE = "config.json"
 STRATEGIES_FILE = "strategies.json"
 ROBOT_STATUS_FILE = "robot_status.json"
 MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
-
+#verificar se atualizou 
 # Verificar se as credenciais estão presentes no st.secrets
 if "binance" not in st.secrets or "api_key" not in st.secrets["binance"] or "api_secret" not in st.secrets["binance"]:
     try:
@@ -1419,7 +1419,8 @@ with tab1:
         if advanced_metrics:
             metrics_df = pd.DataFrame.from_dict(advanced_metrics, orient='index')
             metrics_df = metrics_df.rename_axis('Robô').reset_index()
-            st.dataframe(metrics_df.style.format({
+            # Formatação segura para evitar erro de colunas ausentes ou tipos incompatíveis
+            format_dict = {
                 'total_pnl': '{:.2f}',
                 'win_rate': '{:.2f}',
                 'avg_win': '{:.2f}',
@@ -1428,7 +1429,16 @@ with tab1:
                 'expectancia': '{:.2f}',
                 'sharpe': '{:.2f}',
                 'max_drawdown': '{:.2f}'
-            }), use_container_width=True)
+            }
+            format_dict = {k: v for k, v in format_dict.items() if k in metrics_df.columns}
+            # Garante que só formata colunas numéricas
+            for k in list(format_dict.keys()):
+                if not pd.api.types.is_numeric_dtype(metrics_df[k]):
+                    del format_dict[k]
+            if format_dict:
+                st.dataframe(metrics_df.style.format(format_dict), use_container_width=True)
+            else:
+                st.dataframe(metrics_df, use_container_width=True)
         else:
             st.info("Ainda não há dados suficientes para calcular as métricas avançadas.")
     else:

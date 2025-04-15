@@ -69,6 +69,22 @@ def check_timeframe_direction_limit(pair, timeframe, direction, strategy_name, a
     
     return can_open
 
+def check_global_and_robot_limit(strategy_name, active_trades, max_global=540, max_per_robot=36):
+    """
+    Verifica se o limite global e o limite por robô foram atingidos.
+    Retorna True se pode abrir nova ordem, False caso contrário.
+    """
+    # Limite global
+    if len(active_trades) >= max_global:
+        logger.info(f"Limite global de trades simultâneos atingido: {len(active_trades)}/{max_global}")
+        return False
+    # Limite por robô
+    robot_trades = [t for t in active_trades if t['strategy_name'] == strategy_name and t['estado'] == 'aberto']
+    if len(robot_trades) >= max_per_robot:
+        logger.info(f"Limite de trades simultâneos por robô atingido para {strategy_name}: {len(robot_trades)}/{max_per_robot}")
+        return False
+    return True
+
 def generate_combination_key(pair, direction, strategy_name, contributing_indicators, tf):
     """
     Gera uma chave única para uma combinação de par, direção, estratégia, indicadores e timeframe.

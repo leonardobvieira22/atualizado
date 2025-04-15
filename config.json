@@ -142,5 +142,6 @@
         "RSI": 0.5,
         "Swing Trade Composite": 0.5
     },
-    "realtime_signals_enabled": true
+    "realtime_signals_enabled": true,
+    "max_trades_simultaneos_global": 540
 }

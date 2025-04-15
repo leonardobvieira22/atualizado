@@ -1,4 +1,6 @@
+import pandas as pd
 from binance.enums import SIDE_BUY, SIDE_SELL, ORDER_TYPE_MARKET, ORDER_TYPE_LIMIT
+from trade_manager import check_timeframe_direction_limit, check_active_trades
 
 def configurar_alavancagem(client, par, leverage):
     try:
@@ -8,6 +10,26 @@ def configurar_alavancagem(client, par, leverage):
         print(f"[EXECUTOR] Erro ao configurar alavancagem: {e}")
 
 def executar_ordem(client, par, direcao, capital, stop_loss, take_profit, mercado='futures', dry_run=False):
+    # Checagem centralizada de limite de ordens por direção/par/timeframe/robô
+    # ATENÇÃO: É necessário passar o config correto para os parâmetros abaixo
+    from config import CONFIG
+    strategy_name = CONFIG.get('strategy_name', 'default')
+    timeframe = CONFIG.get('timeframe', '1h')
+    active_trades = check_active_trades()
+    can_open = check_timeframe_direction_limit(
+        par.replace('/', ''),
+        timeframe,
+        direcao.upper() if direcao in ['LONG', 'SHORT'] else ('LONG' if direcao == 'buy' else 'SHORT'),
+        strategy_name,
+        active_trades,
+        CONFIG
+    )
+    if not can_open:
+        print(f"[EXECUTOR] Limite de trades simultâneos atingido para {strategy_name} em {par}/{timeframe}/{direcao}. Ordem não será criada.")
+        with open("oportunidades_perdidas.csv", "a") as f:
+            f.write(f"{{}} ,{{}},{{}},{{}},{{}},N/A,N/A,Limite de trades simultâneos atingido\n".format(pd.Timestamp.now(), strategy_name, par, timeframe, direcao))
+        return
+
     if dry_run:
         print(f"[EXECUTOR] Simulando ordem {direcao} em {par} ({mercado}) com capital {capital}")
         return
