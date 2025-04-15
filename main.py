@@ -22,17 +22,7 @@ from signal_generator import generate_signal, generate_multi_timeframe_signal, c
 from trade_manager import check_active_trades, generate_combination_key, save_signal, save_signal_log
 from trade_simulator import simulate_trade, simulate_trade_backtest
 from backtest import run_backtest
-
-LOCK_FILE = "dashboard.lock"
-
-# Verificar se o arquivo de lock já existe
-if os.path.exists(LOCK_FILE):
-    print("O bot já está em execução. Saindo...")
-    sys.exit(1)
-
-# Criar o arquivo de lock
-with open(LOCK_FILE, "w") as lock:
-    lock.write("lock")
+from strategy_manager import sync_strategies_and_status
 
 try:
     # Inicializar o CsvWriter com filename e columns
@@ -208,7 +198,6 @@ try:
 
                 print("┌── Resumo do Bot (a cada 30s) ──┐")
                 print(f"│ Modos Ativos: {active_modes}")
-                print(f"│ Sinais Gerados: {bot_status['signals_generated']}")
                 print(f"│ Ordens Abertas: {active_trades}/{max_trades}")
                 print(f"│ Ordens Fechadas: {bot_status['orders_closed']}")
                 print(f"│ Última Atualização do Modelo: {datetime.fromtimestamp(bot_status['last_learning_update']).strftime('%Y-%m-%d %H:%M:%S')}")
@@ -833,13 +822,17 @@ try:
                 system_errors.append(error_entry)
                 logger.error(f"Erro no loop principal: {e}")
                 time.sleep(5)
-
-    if __name__ == "__main__":
-        logger.info("Iniciando execução do script main.py...")
-        main()
-        logger.info("Execução do script main.py finalizada.")
+    try:
+        if __name__ == "__main__":
+            logger.info("Iniciando execução do script main.py...")
+            main()
+            logger.info("Execução do script main.py finalizada.")
+    except Exception as e:
+        logger.error(f"Erro durante a execução do script: {e}")
+    finally:
+        logger.info("Finalizando execução do script main.py...")
+except Exception as e:
+    logger.error(f"Erro durante a execução do bot: {e}")
+    raise
 finally:
-    # Remover o arquivo de lock ao finalizar
-    if os.path.exists(LOCK_FILE):
-        os.remove(LOCK_FILE)
-    print("Bot finalizado e lock removido.")
+    logger.info("Finalizando execução do bot...")

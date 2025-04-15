@@ -16,6 +16,10 @@ from strategy_manager import load_strategies, save_strategies
 import uuid
 import toml
 import logging
+import shutil
+from dashboard_utils import calculate_advanced_metrics
+from strategy_manager import sync_strategies_and_status
+from trade_manager import check_timeframe_direction_limit, check_active_trades, save_signal_log
 
 st.set_page_config(page_title="UltraBot Dashboard 9.0", layout="wide")
 
@@ -28,29 +32,26 @@ MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
 # Verificar se as credenciais estão presentes no st.secrets
 if "binance" not in st.secrets or "api_key" not in st.secrets["binance"] or "api_secret" not in st.secrets["binance"]:
     try:
-        # Tentar carregar o arquivo secrets.toml manualmente
         secrets = toml.load("secrets.toml")
         st.secrets["binance"] = secrets.get("binance", {})
     except Exception as e:
-        raise KeyError("As credenciais da API Binance não foram encontradas. Certifique-se de que o arquivo secrets.toml está configurado corretamente.") from e
+        raise KeyError("As credenciais da API Binance não foram encontradas.") from e
 
 api_key = st.secrets["binance"]["api_key"]
 api_secret = st.secrets["binance"]["api_secret"]
 
 if not api_key or not api_secret:
-    raise ValueError("As credenciais da API da Binance não foram configuradas. Certifique-se de definir as chaves no arquivo secrets.toml.")
+    raise ValueError("As credenciais da API da Binance não foram configuradas.")
 
-# Adicionar teste de conectividade com a API Binance e logs detalhados
 logging.basicConfig(level=logging.DEBUG)
 
-# Adicionar log para capturar o código de retorno da API Binance
 try:
     logging.info("Testando conectividade com a API Binance...")
-    client = Client(api_key=st.secrets["binance"]["api_key"], api_secret=st.secrets["binance"]["api_secret"])
-    client.ping()  # Testa a conectividade com a API
+    client = Client(api_key=api_key, api_secret=api_secret)
+    client.ping()
     logging.info("Conexão com a API Binance bem-sucedida!")
 except BinanceAPIException as e:
-    logging.error(f"Erro na API Binance: Código de retorno {e.status_code}, Mensagem: {e.message}")
+    logging.error(f"Erro na API Binance: Código {e.status_code}, Mensagem: {e.message}")
     raise
 except Exception as e:
     logging.error(f"Erro inesperado: {e}")
@@ -62,7 +63,109 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+.loader {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #007bff;
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.robot-tag.updating {
+    opacity: 0.7;
+    position: relative;
+    border: 2px solid #00d4ff;
+    animation: pulse 1s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 8px rgba(0, 212, 255, 0.3); }
+    50% { box-shadow: 0 0 12px rgba(0, 212, 255, 0.6); }
+    100% { box-shadow: 0 0 8px rgba(0, 212, 255, 0.3); }
+}
+
+.toggle-button {
+    background-color: #28a745; /* Verde para "Ligar" */
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 3px 6px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.toggle-button.toggle-button-off {
+    background-color: #dc3545; /* Vermelho para "Desligar" */
+}
+
+.toggle-button:hover {
+    background-color: #218838; /* Verde escuro para "Ligar" */
+}
+
+.toggle-button.toggle-button-off:hover {
+    background-color: #c82333; /* Vermelho escuro para "Desligar" */
+}
+
+.toggle-button:active {
+    transform: scale(0.95);
+}
+
+.edit-button {
+    background-color: #e0f7fa;
+    color: #1e3c72;
+    border: 1px solid #1e3c72;
+    border-radius: 3px;
+    padding: 3px 6px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    transition: background-color 0.3s ease;
+    margin-left: 5px;
+}
+
+.edit-button:hover {
+    background-color: #b3e5fc;
+}
+
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    animation: fade-in 0.5s ease-in-out;
+    font-family: 'Roboto', sans-serif;
+}
+
+@keyframes fade-in {
+    0% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-out {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+.fade-out {
+    animation: fade-out 0.5s ease-in-out forwards;
+}
     body {
         background-color: #f0f2f6;
         color: #333333;
@@ -85,16 +188,16 @@ st.markdown("""
         background-color: #007bff;
         color: white;
         border-radius: 8px;
-        padding: 12px 24px;
-        font-size: 16px;
+        padding: 8px 16px;
+        font-size: 14px;
         border: none;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
     .stButton>button:hover {
         background-color: #0056b3;
-        transform: translateY(-2px);
+        transform: translateY(-1px);
     }
 
     .stButton>button:active {
@@ -109,36 +212,70 @@ st.markdown("""
         padding: 8px;
     }
 
-    .stTable {
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+        max-height: 500px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+        position: relative;
+        border-radius: 8px;
+    }
+
+    .status-table {
         border-collapse: collapse;
         width: 100%;
         background-color: #f5f5f5;
         border-radius: 8px;
-        overflow: hidden;
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        table-layout: auto;
     }
 
-    .stTable th {
+    .status-table th {
         background-color: #007bff;
         color: white;
         padding: 12px;
         text-align: left;
         font-weight: 500;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        white-space: nowrap;
     }
 
-    .stTable td {
+    .status-table td {
         padding: 12px;
         color: #333333;
         border-bottom: 1px solid #dddddd;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
     }
 
-    .stTable tr:nth-child(even) {
+    .status-table tr:nth-child(even) {
         background-color: #e9ecef;
     }
 
-    .stTable tr:hover {
+    .status-table tr:hover {
         background-color: #dee2e6;
         transition: background-color 0.2s ease;
+    }
+
+    .status-table td[title]:hover::after {
+        content: attr(title);
+        position: absolute;
+        left: 0;
+        top: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 1000;
+        white-space: normal;
+        max-width: 300px;
+        display: block;
     }
 
     .metric {
@@ -243,35 +380,44 @@ st.markdown("""
     }
 
     .robot-tag .button-container {
-        display: flex;
-        justify-content: flex-start;
-        margin-top: 5px;
-    }
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 5px;
+}
 
-    .robot-tag .toggle-button {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 3px;
-        padding: 3px 6px;
-        cursor: pointer;
-        font-family: 'Orbitron', sans-serif;
-        font-size: 10px;
-        transition: background-color 0.3s ease;
-    }
+.robot-tag .toggle-container {
+    position: relative;
+    width: 40px;
+    height: 20px;
+    background-color: #ccc; /* Cor de fundo quando desligado */
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-    .robot-tag .toggle-button:hover {
-        background-color: #0056b3;
-    }
+.robot-tag .toggle-container.active {
+    background-color: #28a745; /* Verde quando ligado */
+}
 
-    .robot-tag .toggle-button-off {
-        background-color: #ff5555;
-        color: white;
-    }
+.robot-tag .toggle-circle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
 
-    .robot-tag .toggle-button-off:hover {
-        background-color: #cc4444;
-    }
+.robot-tag .toggle-container.active .toggle-circle {
+    transform: translateX(20px); /* Move o círculo para a direita quando ligado */
+}
+
+.robot-tag .toggle-container:hover {
+    opacity: 0.9;
+}
 
     .robot-tag .edit-button {
         background-color: #ffffff;
@@ -409,9 +555,6 @@ st.markdown("""
         margin-right: 15px;
     }
 
-    .right_leg {
-    }
-
     .eyes:hover .left_eye {
         transform: translateX(10px) translateY(-7px) scale(1.1);
     }
@@ -449,39 +592,6 @@ st.markdown("""
         gap: 10px;
     }
 
-    .status-table {
-        border-collapse: collapse;
-        width: 100%;
-        background-color: #f5f5f5;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-    }
-
-    .status-table th {
-        background-color: #007bff;
-        color: white;
-        padding: 12px;
-        text-align: left;
-        font-weight: 500;
-    }
-
-    .status-table td {
-        padding: 12px;
-        color: #333333;
-        border-bottom: 1px solid #dddddd;
-    }
-
-    .status-table tr:nth-child(even) {
-        background-color: #e9ecef;
-    }
-
-    .status-table tr:hover {
-        background-color: #dee2e6;
-        transition: background-color 0.2s ease;
-    }
-
     .notification {
         border-left: 4px solid #007bff;
         padding: 12px 15px;
@@ -491,38 +601,38 @@ st.markdown("""
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         transition: background-color 0.3s;
     }
-    
+
     .notification:hover {
         background-color: #e9ecef;
     }
-    
+
     .notification-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 5px;
     }
-    
+
     .notification-source {
         font-weight: 500;
         font-size: 15px;
     }
-    
+
     .notification-timestamp {
         color: #6c757d;
         font-size: 12px;
     }
-    
+
     .notification-message {
         font-size: 14px;
         margin-bottom: 3px;
     }
-    
+
     .notification-details {
         font-size: 12px;
         color: #6c757d;
     }
-    
+
     .notification-count {
         background-color: #6c757d;
         color: white;
@@ -531,23 +641,23 @@ st.markdown("""
         font-size: 11px;
         margin-left: 5px;
     }
-    
+
     .notification-error {
         border-left-color: #dc3545;
     }
-    
+
     .notification-warning {
         border-left-color: #ffc107;
     }
-    
+
     .notification-info {
         border-left-color: #0dcaf0;
     }
-    
+
     .notification-success {
         border-left-color: #28a745;
     }
-    
+
     .mark-read-button {
         font-size: 12px;
         padding: 2px 5px;
@@ -556,12 +666,15 @@ st.markdown("""
         border: 1px solid #dee2e6;
         border-radius: 3px;
     }
-    
+
     .mark-read-button:hover {
         background-color: #e9ecef;
     }
     </style>
 """, unsafe_allow_html=True)
+
+# Sincronizar estratégias e status dos robôs antes de carregar
+sync_strategies_and_status()
 
 def load_config():
     if os.path.exists(CONFIG_FILE):
@@ -720,6 +833,10 @@ def calculate_indicators(df, active_indicators):
     return indicators
 
 def generate_orders(robot_name, strategy_config):
+    if not isinstance(robot_name, str) or not robot_name:
+        logger.error(f"Nome de robô inválido: {robot_name}")
+        return None
+
     if os.path.exists(SINALS_FILE):
         df = pd.read_csv(SINALS_FILE)
     else:
@@ -741,65 +858,115 @@ def generate_orders(robot_name, strategy_config):
     available_pairs = ["XRPUSDT", "DOGEUSDT", "TRXUSDT"]
     selected_pair = random.choice(available_pairs)
 
-    timeframe = strategy_config.get('timeframes', ["1d"])[0]
-
-    historical_data = download_historical_data(selected_pair, interval=timeframe, lookback='30 days')
-    if historical_data is None or len(historical_data) < 50:
-        logger.warning(f"Dados insuficientes para {selected_pair} no timeframe {timeframe}.")
-        return
-
-    indicators = calculate_indicators(historical_data, active_indicators)
-
-    localizadores = {
-        "EMA12>EMA50": str(indicators.get("EMA12>EMA50", False)).lower(),
-        "RSI Sobrevendido": str(indicators.get("RSI Sobrevendido", False)).lower(),
-        "MACD Cruzamento Alta": str(indicators.get("MACD Cruzamento Alta", False)).lower(),
-        "Swing_Trade_Composite_LONG": str(indicators.get("Swing_Trade_Composite_LONG", False)).lower(),
-        "Swing_Trade_Composite_SHORT": str(indicators.get("Swing_Trade_Composite_SHORT", False)).lower(),
-        "ML_Confidence": strategy_config['ml_confidence_min']
+    timeframes = strategy_config.get('timeframes', ["1d"])
+    tf_weights = {
+        "1m": 1.0,
+        "5m": 1.0,
+        "15m": 1.0,
+        "1h": 1.2,
+        "4h": 1.2,
+        "1d": 1.3
     }
+    timeframes = sorted(timeframes, key=lambda tf: tf_weights.get(tf, 1.0), reverse=True)
 
-    should_generate_order = any([
-        indicators.get("EMA12>EMA50", False),
-        indicators.get("RSI Sobrevendido", False),
-        indicators.get("MACD Cruzamento Alta", False),
-        indicators.get("Swing_Trade_Composite_LONG", False),
-        indicators.get("Swing_Trade_Composite_SHORT", False)
-    ])
+    for timeframe in timeframes:
+        # Verificar limite de ordens antes de gerar nova ordem
+        active_trades = check_active_trades()
+        # Limite global de trades simultâneos
+        max_global = strategy_config.get('max_trades_simultaneos')
+        if max_global is None:
+            # Tenta buscar do config global
+            from strategy_manager import load_config
+            config_global = load_config() if callable(load_config) else {}
+            max_global = config_global.get('max_trades_simultaneos', 50)
+        if len(active_trades) >= max_global:
+            logger.warning(f"Limite global de trades simultâneos ({max_global}) atingido. Ordem não será criada.")
+            save_signal_log({
+                'strategy_name': robot_name,
+                'par': selected_pair,
+                'timeframe': timeframe,
+                'direcao': direction if 'direction' in locals() else 'LONG',
+                'contributing_indicators': contributing_indicators
+            }, accepted=False, mode='DASHBOARD')
+            continue
+        direction = None  # será definido após indicadores
+        historical_data = download_historical_data(selected_pair, interval=timeframe, lookback='30 days')
+        if historical_data is None or len(historical_data) < 50:
+            logger.warning(f"Dados insuficientes para {selected_pair} no timeframe {timeframe}.")
+            continue
 
-    if not should_generate_order:
-        logger.info(f"Nenhuma condição de indicador atendida para {robot_name} no par {selected_pair}.")
-        return
+        indicators = calculate_indicators(historical_data, active_indicators)
 
-    direction = "LONG" if indicators.get("EMA12>EMA50", False) or indicators.get("MACD Cruzamento Alta", False) or indicators.get("Swing_Trade_Composite_LONG", False) else "SHORT"
+        localizadores = {
+            "EMA12>EMA50": str(indicators.get("EMA12>EMA50", False)).lower(),
+            "RSI Sobrevendido": str(indicators.get("RSI Sobrevendido", False)).lower(),
+            "MACD Cruzamento Alta": str(indicators.get("MACD Cruzamento Alta", False)).lower(),
+            "Swing_Trade_Composite_LONG": str(indicators.get("Swing_Trade_Composite_LONG", False)).lower(),
+            "Swing_Trade_Composite_SHORT": str(indicators.get("Swing_Trade_Composite_SHORT", False)).lower(),
+            "ML_Confidence": strategy_config['ml_confidence_min']
+        }
 
-    new_order = {
-        'signal_id': str(uuid.uuid4()),
-        'par': selected_pair,
-        'direcao': direction,
-        'preco_entrada': historical_data['close'].iloc[-1],
-        'preco_saida': np.nan,
-        'quantity': random.uniform(50.0, 200.0),
-        'lucro_percentual': np.nan,
-        'pnl_realizado': np.nan,
-        'resultado': np.nan,
-        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        'timestamp_saida': np.nan,
-        'estado': "aberto",
-        'strategy_name': robot_name,
-        'contributing_indicators': contributing_indicators,
-        'localizadores': json.dumps(localizadores),
-        'motivos': "Ordem gerada com base em indicadores reais",
-        'timeframe': timeframe,
-        'aceito': True,
-        'parametros': json.dumps(params),
-        'quality_score': 0.5  # Valor fictício para simulação
-    }
+        should_generate_order = any([
+            indicators.get("EMA12>EMA50", False),
+            indicators.get("RSI Sobrevendido", False),
+            indicators.get("MACD Cruzamento Alta", False),
+            indicators.get("Swing_Trade_Composite_LONG", False),
+            indicators.get("Swing_Trade_Composite_SHORT", False)
+        ])
 
-    df = pd.concat([df, pd.DataFrame([new_order])], ignore_index=True)
-    df.to_csv(SINALS_FILE, index=False)
-    logger.info(f"Ordem simulada gerada para o robô {robot_name} no par {selected_pair}.")
-    return new_order
+        if not should_generate_order:
+            logger.info(f"Nenhuma condição atendida para {robot_name} no par {selected_pair}.")
+            continue
+
+        direction = "LONG" if indicators.get("EMA12>EMA50", False) or indicators.get("MACD Cruzamento Alta", False) or indicators.get("Swing_Trade_Composite_LONG", False) else "SHORT"
+
+        # VERIFICAÇÃO DE LIMITE DE ORDENS
+        if not check_timeframe_direction_limit(selected_pair, timeframe, direction, robot_name, active_trades, strategy_config):
+            logger.warning(f"Limite de ordens atingido para {robot_name} em {selected_pair}/{timeframe}/{direction}. Ordem não será criada.")
+            # Registrar oportunidade perdida
+            save_signal_log({
+                'strategy_name': robot_name,
+                'par': selected_pair,
+                'timeframe': timeframe,
+                'direcao': direction,
+                'contributing_indicators': contributing_indicators
+            }, accepted=False, mode='DASHBOARD')
+            continue
+
+        entry_price = historical_data['close'].iloc[-1]
+        # Calcular quantity baseado em USDT (padrão 10 USDT)
+        quantity_in_usdt = strategy_config.get('quantity_in_usdt', 10.0)
+        quantity = quantity_in_usdt / entry_price if entry_price > 0 else 1.0
+        new_order = {
+            'signal_id': str(uuid.uuid4()),
+            'par': selected_pair,
+            'direcao': direction,
+            'preco_entrada': entry_price,
+            'preco_saida': np.nan,
+            'quantity': quantity,
+            'lucro_percentual': np.nan,
+            'pnl_realizado': np.nan,
+            'resultado': np.nan,
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'timestamp_saida': np.nan,
+            'estado': "aberto",
+            'strategy_name': robot_name,
+            'contributing_indicators': contributing_indicators,
+            'localizadores': json.dumps(localizadores),
+            'motivos': "Ordem gerada com base em indicadores reais",
+            'timeframe': timeframe,
+            'aceito': True,
+            'parametros': json.dumps(params),
+            'quality_score': 0.5
+        }
+
+        df = pd.concat([df, pd.DataFrame([new_order])], ignore_index=True)
+        df.to_csv(SINALS_FILE, index=False)
+        logger.info(f"Ordem simulada gerada para {robot_name} no par {selected_pair}.")
+        return new_order
+
+    logger.warning(f"Nenhum timeframe gerou ordens para {robot_name} no par {selected_pair}.")
+    return None
 
 def check_alerts(df_open):
     alerts = []
@@ -824,15 +991,15 @@ def check_alerts(df_open):
 
         if distance_to_tp <= 0:
             close_order(row['signal_id'], mark_price, "TP")
-            alerts.append(f"✅ Robô {robot_name}: Ordem {row['signal_id']} ({symbol}) fechada: atingiu o TP! ({row['timeframe']}) ({direction})")
+            alerts.append(f"✅ Robô {robot_name}: Ordem {row['signal_id']} ({symbol}) fechada: TP! ({row['timeframe']})")
         elif distance_to_sl <= 0:
             close_order(row['signal_id'], mark_price, "SL")
-            alerts.append(f"❌ Robô {robot_name}: Ordem {row['signal_id']} ({symbol}) fechada: atingiu o SL! ({row['timeframe']}) ({direction})")
+            alerts.append(f"❌ Robô {robot_name}: Ordem {row['signal_id']} ({symbol}) fechada: SL! ({row['timeframe']})")
         else:
             if distance_to_tp > 0 and distance_to_tp <= 0.5:
-                alerts.append(f"🚨 Robô {robot_name}: Ordem {row['signal_id']} ({symbol}) está a {distance_to_tp:.2f}% do TP! ({row['timeframe']}) ({direction})")
+                alerts.append(f"🚨 Robô {robot_name}: Ordem {row['signal_id']} ({symbol}) a {distance_to_tp:.2f}% do TP! ({row['timeframe']})")
             if distance_to_sl > 0 and distance_to_sl <= 0.5:
-                alerts.append(f"⚠️ Robô {robot_name}: Ordem {row['signal_id']} ({symbol}) está a {distance_to_sl:.2f}% do SL! ({row['timeframe']}) ({direction})")
+                alerts.append(f"⚠️ Robô {robot_name}: Ordem {row['signal_id']} ({symbol}) a {distance_to_sl:.2f}% do SL! ({row['timeframe']})")
 
     log_file = "bot.log"
     if os.path.exists(log_file):
@@ -846,53 +1013,43 @@ def check_alerts(df_open):
     df = pd.read_csv(SINALS_FILE)
     df_closed = df[df['estado'] == 'fechado']
     if len(df_closed[df_closed['resultado'].isin(['TP', 'SL'])]) < 5:
-        alerts.append("⚠️ Sistema: Modelo de machine learning não treinado: menos de 5 ordens com TP/SL.")
+        alerts.append("⚠️ Sistema: Modelo ML não treinado: menos de 5 ordens com TP/SL.")
 
     return alerts
 
 def reset_bot_data(reset_password):
-    """Função para resetar os dados do bot (ordens, estatísticas, etc.)"""
-    correct_password = "ultra2025"  # Senha definida para reset do bot
-    
+    correct_password = "ultra2025"
+    reset_password = reset_password.strip()
+
     if reset_password != correct_password:
-        return False, "Senha incorreta. O reset não foi realizado."
-    
+        return False, "Senha incorreta."
+
     try:
-        # Resetar arquivo de sinais
+        backup_dir = "backup"
+        os.makedirs(backup_dir, existindo=True)
+
         if os.path.exists(SINALS_FILE):
-            df = pd.DataFrame(columns=[
-                'signal_id', 'par', 'direcao', 'preco_entrada', 'preco_saida', 'quantity',
-                'lucro_percentual', 'pnl_realizado', 'resultado', 'timestamp', 'timestamp_saida',
-                'estado', 'strategy_name', 'contributing_indicators', 'localizadores',
-                'motivos', 'timeframe', 'aceito', 'parametros', 'quality_score'
-            ])
-            df.to_csv(SINALS_FILE, index=False)
-        
-        # Resetar arquivo de oportunidades perdidas
+            shutil.copy(SINALS_FILE, os.path.join(backup_dir, os.path.basename(SINALS_FILE)))
+            os.remove(SINALS_FILE)
+
         if os.path.exists(MISSED_OPPORTUNITIES_FILE):
-            df_missed = pd.DataFrame(columns=[
-                'timestamp', 'robot_name', 'par', 'timeframe', 'direcao', 'score_tecnico',
-                'contributing_indicators', 'reason'
-            ])
-            df_missed.to_csv(MISSED_OPPORTUNITIES_FILE, index=False)
-        
-        # Resetar status dos robôs
+            shutil.copy(MISSED_OPPORTUNITIES_FILE, os.path.join(backup_dir, os.path.basename(MISSED_OPPORTUNITIES_FILE)))
+            os.remove(MISSED_OPPORTUNITIES_FILE)
+
         robot_status = load_robot_status()
         for strategy_name in robot_status.keys():
             robot_status[strategy_name] = False
         save_robot_status(robot_status)
-        
-        # Limpar notificações
+
         from notification_manager import clear_all_notifications
         clear_all_notifications()
-        
-        # Treinar modelo novamente
+
         try:
             learning_engine.train()
         except Exception as e:
             logger.error(f"Erro ao treinar modelo após reset: {e}")
-        
-        return True, "Bot resetado com sucesso! Todos os dados foram limpos."
+
+        return True, "Bot resetado com sucesso!"
     except Exception as e:
         logger.error(f"Erro ao resetar bot: {e}")
         return False, f"Erro ao resetar bot: {e}"
@@ -904,44 +1061,44 @@ def get_tp_sl(row, key, default=0.0):
     except (json.JSONDecodeError, KeyError, TypeError):
         return default
 
-# Adicionar validação para sincronizar o status dos robôs e as estatísticas gerais
-
 def validate_robot_status_and_stats():
-    """
-    Valida a consistência entre o status dos robôs e as operações abertas
-    """
-    # Carregar status dos robôs e dados do banco de dados
     robot_status = load_robot_status()
-    df = pd.read_csv(SINALS_FILE)
-
-    # Lista de itens que são conjuntos de indicadores e não robôs
+    if os.path.exists(SINALS_FILE):
+        df = pd.read_csv(SINALS_FILE)
+        # Verificação de existência da coluna antes de acessar
+        if 'strategy_name' not in df.columns or df.empty:
+            logger.warning("Arquivo sinais_detalhados.csv está vazio ou sem a coluna 'strategy_name'.")
+            return
+        # Tratar valores inválidos na coluna strategy_name
+        df = df.dropna(subset=['strategy_name'])  # Remover linhas com NaN
+        df = df[df['strategy_name'].apply(lambda x: isinstance(x, str))]  # Manter apenas strings
+        logger.info(f"Valores únicos em strategy_name após limpeza: {df['strategy_name'].unique()}")
+    else:
+        df = pd.DataFrame(columns=[
+            'signal_id', 'par', 'direcao', 'preco_entrada', 'preco_saida', 'quantity',
+            'lucro_percentual', 'pnl_realizado', 'resultado', 'timestamp', 'timestamp_saida',
+            'estado', 'strategy_name', 'contributing_indicators', 'localizadores',
+            'motivos', 'timeframe', 'aceito', 'parametros', 'quality_score'
+        ])
+    
     indicadores_compostos = ["swing_trade_composite"]
     
-    # Usar o novo sistema de notificações
     from notification_manager import check_system_health
-    
-    # Verificar saúde do sistema e contar inconsistências
     inconsistency_count = check_system_health(df, robot_status, indicadores_compostos)
     
-    # Atualizar status para estratégias não listadas
     all_strategies = set(robot_status.keys())
-    active_strategies_in_data = set(df['strategy_name'].unique())
+    active_strategies_in_data = set(df['strategy_name'].unique()) if 'strategy_name' in df.columns else set()
     unlisted_strategies = active_strategies_in_data - all_strategies
 
     for strategy_name in unlisted_strategies:
-        # Não desativar automaticamente conjuntos de indicadores
-        if strategy_name.lower() in [ind.lower() for ind in indicadores_compostos]:
+        if isinstance(strategy_name, str) and strategy_name.lower() in [ind.lower() for ind in indicadores_compostos]:
             continue
-            
-        # Apenas adicionar ao status como desativado
         robot_status[strategy_name] = False
 
-    # Salvar o status atualizado
     save_robot_status(robot_status)
-    
     return inconsistency_count
 
-# Chamar a validação no início do dashboard
+# Chamar validação inicial
 validate_robot_status_and_stats()
 
 if os.path.exists(SINALS_FILE):
@@ -976,11 +1133,9 @@ current_open_orders = set(df_open['signal_id'].tolist())
 new_orders = current_open_orders - st.session_state['known_open_orders']
 st.session_state['known_open_orders'] = current_open_orders
 
-# Carregar as estratégias e combinar com as fixas
 strategies = load_strategies()
 robot_status = load_robot_status()
 
-# Cabeçalho com o robô decorativo e notificações
 col_title, col_robot, col_notifications = st.columns([3, 1, 3])
 with col_title:
     st.title("UltraBot Dashboard")
@@ -1007,12 +1162,12 @@ with col_robot:
     </div>
     """, unsafe_allow_html=True)
 with col_notifications:
+    def render_notifications_panel():
+        st.info("Notifications panel is not implemented yet.")
     render_notifications_panel()
 
-# Criar abas
 tab1, tab2, tab3, tab4 = st.tabs(["Visão Geral", "Ordens", "Configurações de Estratégia", "Oportunidades Perdidas"])
 
-# Aba 1: Visão Geral
 with tab1:
     st.header("Status dos Robôs")
     active_strategies = st.session_state.get('active_strategies', load_robot_status())
@@ -1047,13 +1202,11 @@ with tab1:
         win_rate = (wins / total_orders * 100) if total_orders > 0 else 0
         total_pnl = robot_closed['pnl_realizado'].sum() if total_orders > 0 else 0
 
-        # Métricas adicionais
         robot_signals = df[df['strategy_name'] == strategy_name]
         signals_generated = len(robot_signals)
         signals_accepted = len(robot_signals[robot_signals['aceito'] == True])
         signals_rejected = len(robot_signals[robot_signals['aceito'] == False])
         avg_quality_score = robot_signals['quality_score'].mean() if 'quality_score' in robot_signals.columns and not robot_signals['quality_score'].isna().all() else 0.0
-        # Contar ordens abertas
         open_orders = len(df_open[df_open['strategy_name'] == strategy_name])
 
         alert = ""
@@ -1070,13 +1223,12 @@ with tab1:
             "Sinais Gerados": signals_generated,
             "Sinais Aceitos": signals_accepted,
             "Sinais Rejeitados": signals_rejected,
-            "Ordens Abertas": open_orders,  # Nova coluna adicionada
+            "Ordens Abertas": open_orders,
             "Score Médio de Qualidade": f"{avg_quality_score:.2f}",
             "PNL Total": f"{total_pnl:.2f}% {alert}",
             "Taxa de Vitória": f"{win_rate:.2f}%"
         })
 
-    # Exibir tabela com opção de ordenação
     status_df = pd.DataFrame(status_data)
     sort_by = st.selectbox("Ordenar por", ["Robô", "Tempo Online", "Sinais Gerados", "Sinais Aceitos", "Sinais Rejeitados", "Ordens Abertas", "Score Médio de Qualidade", "PNL Total", "Taxa de Vitória"], key="sort_robots")
     if sort_by == "Robô":
@@ -1104,7 +1256,6 @@ with tab1:
 
     st.markdown(status_df.to_html(index=False, classes="status-table"), unsafe_allow_html=True)
 
-    # Gráfico de evolução do PNL por robô
     st.subheader("Evolução do PNL por Robô")
     if not df_closed.empty:
         chart_data = pd.DataFrame()
@@ -1121,7 +1272,6 @@ with tab1:
     else:
         st.info("Nenhuma ordem fechada para exibir o gráfico.")
 
-    # Gráfico de distribuição de ordens por resultado
     st.subheader("Distribuição de Ordens por Resultado")
     if not df_closed.empty:
         result_counts = df_closed.groupby(['strategy_name', 'resultado']).size().unstack(fill_value=0)
@@ -1201,7 +1351,6 @@ with tab1:
     else:
         st.info("Nenhuma ordem fechada para exibir a performance por estratégia.")
 
-    # Gráfico de distribuição de ordens por resultado (geral)
     st.subheader("Distribuição de Ordens por Resultado (Geral)")
     if not df_closed.empty:
         result_counts = df_closed['resultado'].value_counts().reset_index()
@@ -1211,7 +1360,6 @@ with tab1:
     else:
         st.info("Nenhuma ordem fechada para exibir o gráfico.")
 
-    # Seção: Desempenho por Combinação (Robô, Timeframe, Direção)
     st.header("Desempenho por Combinação")
     if not df.empty:
         df['pnl_current'] = df.apply(
@@ -1239,12 +1387,10 @@ with tab1:
             height=600
         )
         st.plotly_chart(fig)
-
         st.table(grouped)
     else:
         st.info("Nenhum dado disponível para exibir o desempenho por combinação.")
 
-    # Seção: Treinamento do Modelo
     st.header("Treinamento do Modelo")
     if st.button("Forçar Treinamento do Modelo"):
         try:
@@ -1253,15 +1399,12 @@ with tab1:
         except Exception as e:
             st.error(f"Erro ao treinar o modelo: {e}")
 
-    # Exibir Acurácia do Modelo
     st.subheader("Acurácia do Modelo de Aprendizado")
     st.metric(label="Acurácia Atual", value=f"{learning_engine.accuracy * 100:.2f}%")
 
-    # Exibir Indicadores Utilizados
     st.subheader("Indicadores Utilizados pelo Modelo")
     st.write(", ".join(learning_engine.features))
 
-    # Seção: Configurações Atuais
     st.header("Configurações Atuais")
     config = load_config()
     col1, col2, col3, col4 = st.columns(4)
@@ -1270,7 +1413,27 @@ with tab1:
     col3.write(f"**Leverage:** {config.get('leverage', 22)}x")
     col4.write(f"**Máximo de Trades Simultaneos:** {config.get('max_trades_simultaneos', 50)}")
 
-    # Aba 2: Ordens
+    st.header("Métricas Quantitativas Avançadas por Robô")
+    if not df_closed.empty:
+        advanced_metrics = calculate_advanced_metrics(df_closed)
+        if advanced_metrics:
+            metrics_df = pd.DataFrame.from_dict(advanced_metrics, orient='index')
+            metrics_df = metrics_df.rename_axis('Robô').reset_index()
+            st.dataframe(metrics_df.style.format({
+                'total_pnl': '{:.2f}',
+                'win_rate': '{:.2f}',
+                'avg_win': '{:.2f}',
+                'avg_loss': '{:.2f}',
+                'payoff_ratio': '{:.2f}',
+                'expectancia': '{:.2f}',
+                'sharpe': '{:.2f}',
+                'max_drawdown': '{:.2f}'
+            }), use_container_width=True)
+        else:
+            st.info("Ainda não há dados suficientes para calcular as métricas avançadas.")
+    else:
+        st.info("Nenhuma ordem fechada para exibir métricas avançadas.")
+
 with tab2:
     st.header("Ordens")
     st.info("Visualize e filtre ordens simuladas (dry run), ordens fechadas e sinais gerados.")
@@ -1318,10 +1481,11 @@ with tab2:
         (filtered_df.apply(lambda row: get_tp_sl(row, 'sl_percent'), axis=1).isin(sl_filter))
     ]
 
-    # Seção: Posições Simuladas (Dry Run) - Últimas 5
-    st.subheader("Posições Simuladas (Dry Run) - Últimas 5")
+    # Seção: Posições Simuladas (Dry Run)
+    st.subheader("Posições Simuladas (Dry Run)")
     filtered_open = filtered_df[filtered_df['estado'] == 'aberto'].sort_values(by='timestamp', ascending=False)
     logger.info(f"Ordens abertas após filtros: {len(filtered_open)}")
+
     if not filtered_open.empty:
         display_data = []
         for _, row in filtered_open.iterrows():
@@ -1343,13 +1507,13 @@ with tab2:
                 pnl = (entry_price - mark_price) / entry_price * 100
             open_time = row['timestamp'].to_pydatetime()
             time_elapsed = (datetime.now() - open_time).total_seconds() / 60
-
-            status_emoji = "🟢" if pnl >= 0 else "🔴"
-            valores_indicadores = json.loads(row['localizadores'])
-            resumo = gerar_resumo([row['contributing_indicators']], valores_indicadores)
             win_rate, avg_pnl, total_signals = calcular_confiabilidade_historica(
                 row['strategy_name'], row['direcao'], df_closed
             )
+            # Correção: definir status_emoji e resumo
+            status_emoji = "🟠🟢" if pnl >= 0 else "🟠🔴"
+            valores_indicadores = json.loads(row['localizadores'])
+            resumo = gerar_resumo([row['contributing_indicators']], valores_indicadores)
 
             display_data.append({
                 "Status": status_emoji,
@@ -1362,64 +1526,112 @@ with tab2:
                 "Distance to SL (%)": f"{distance_to_sl:.2f}%",
                 "PNL (%)": f"{pnl:.2f}%",
                 "Time (min)": f"{time_elapsed:.2f}",
-                "Indicadores": row['contributing_indicators'],
                 "Strategy": row['strategy_name'],
                 "Signal ID": row['signal_id'],
                 "Motivos": row['motivos'],
                 "Resumo": resumo,
                 "Timeframe": row['timeframe'],
                 "Quantity": row['quantity'],
-                "Historical Win Rate (%)": win_rate,
-                "Avg PNL (%)": avg_pnl,
+                "Historical Win Rate (%)": f"{win_rate:.1f}",
+                "Avg PNL (%)": f"{avg_pnl:.2f}",
                 "Total Signals": total_signals,
                 "Aceito": "Sim" if row['aceito'] else "Não",
                 "TP Percent": params['tp_percent'],
                 "SL Percent": params['sl_percent'],
-                "Quality Score": f"{row['quality_score']:.2f}" if 'quality_score' in row else "N/A"
+                "Quality Score": f"{row['quality_score']:.2f}" if 'quality_score' in row else "N/A",
+                "Contributing Indicators": row['contributing_indicators']
             })
 
         if display_data:
             display_df = pd.DataFrame(display_data)
-            display_df = display_df[["Status", "Par", "Direction", "Entry Price", "Mark Price", "Liq. Price", "Distance to TP (%)", "Distance to SL (%)", "PNL (%)", "Time (min)", "Indicadores", "Strategy", "Signal ID", "Motivos", "Resumo", "Timeframe", "Quantity", "Historical Win Rate (%)", "Avg PNL (%)", "Total Signals", "Aceito", "TP Percent", "SL Percent", "Quality Score"]]
-            # Exibir as últimas 5 ordens abertas
-            st.table(display_df.head(5).drop(['Signal ID', 'Motivos', 'Resumo', 'Timeframe', 'Quantity', 'Historical Win Rate (%)', 'Avg PNL (%)', 'Total Signals', 'Aceito', 'TP Percent', 'SL Percent', 'Quality Score'], axis=1))
-            
-            # Botão "Ver Mais"
-            if len(display_df) > 5:
-                if st.button("Ver Todas as Ordens Abertas"):
-                    for idx, row in display_df.iterrows():
-                        col1, col2 = st.columns([9, 1])
-                        with col1:
-                            st.table(row.drop(['Signal ID', 'Motivos', 'Resumo', 'Timeframe', 'Quantity', 'Historical Win Rate (%)', 'Avg PNL (%)', 'Total Signals', 'Aceito', 'TP Percent', 'SL Percent', 'Quality Score']).to_frame().T)
-                            with st.expander(f"Detalhes da Estratégia: {row['Strategy']}"):
-                                st.markdown(f"""
+            display_df = display_df[["Status", "Par", "Direction", "Entry Price", "Mark Price", "Liq. Price", "Distance to TP (%)", "Distance to SL (%)", "PNL (%)", "Time (min)", "Strategy", "Signal ID", "Motivos", "Resumo", "Timeframe", "Quantity", "Historical Win Rate (%)", "Avg PNL (%)", "Total Signals", "Aceito", "TP Percent", "SL Percent", "Quality Score", "Contributing Indicators"]]
+
+            # Inicializar estados para paginação e expansão
+            if 'open_orders_page' not in st.session_state:
+                st.session_state['open_orders_page'] = 1
+            if 'expanded_open_orders' not in st.session_state:
+                st.session_state['expanded_open_orders'] = {}
+
+            page_size = 10  # Exibir 10 ordens por página
+            start_idx = (st.session_state['open_orders_page'] - 1) * page_size
+            end_idx = min(start_idx + page_size, len(display_df))
+            total_pages = (len(display_df) + page_size - 1) // page_size
+
+            # Exibir ordens da página atual
+            st.markdown('<div class="table-container">', unsafe_allow_html=True)
+            for idx, row in display_df.iloc[start_idx:end_idx].iterrows():
+                order_id = row['Signal ID']
+                order_key = f"toggle_open_{order_id}"
+
+                # Verificar se a ordem está expandida
+                is_expanded = st.session_state['expanded_open_orders'].get(order_id, False)
+
+                # Layout com botão de expandir/recolher ao lado
+                col1, col2, col3 = st.columns([7, 1, 1])
+                with col1:
+                    st.table(row[["Status", "Par", "Direction", "Entry Price", "Mark Price", "Liq. Price", "Distance to TP (%)", "Distance to SL (%)", "PNL (%)", "Time (min)", "Strategy"]].to_frame().T)
+                with col2:
+                    if st.button(
+                        "Recolher" if is_expanded else "Expandir",
+                        key=order_key,
+                        help="Expandir/recolher os detalhes da estratégia"
+                    ):
+                        st.session_state['expanded_open_orders'][order_id] = not is_expanded
+                        # Fechar outras ordens expandidas
+                        for other_id in list(st.session_state['expanded_open_orders'].keys()):
+                            if other_id != order_id:
+                                st.session_state['expanded_open_orders'][other_id] = False
+                        st.rerun()
+                with col3:
+                    if st.button("Fechar Ordem", key=f"close_{order_id}"):
+                        close_order_manually(order_id, float(row['Mark Price']))
+                        st.rerun()
+
+                # Exibir detalhes se expandido
+                if is_expanded:
+                    st.markdown(f"""
 <div class="strategy-header">
 🟦 [ULTRABOT] SINAL GERADO - {row['Par']} ({row['Timeframe']}) - {row['Direction']} 🟦
 </div>
 <div class="strategy-section">
+<p><strong>Id da ordem:</strong> {row['Signal ID']}</p>
 <p>💰 <strong>Preço de Entrada:</strong> {row['Entry Price']} | <strong>Quantidade:</strong> {row['Quantity']}</p>
 <p>🎯 <strong>TP:</strong> <span style="color: green;">+{row['TP Percent']}%</span> | <strong>SL:</strong> <span style="color: red;">-{row['SL Percent']}%</span></p>
 <p>🧠 <strong>Estratégia:</strong> {row['Strategy']}</p>
 <p>📌 <strong>Motivos do Sinal:</strong> {row['Resumo']}</p>
 <p>📊 <strong>Indicadores Utilizados:</strong></p>
-<p>- {row['Indicadores']}</p>
+<p>- {row['Contributing Indicators']}</p>
 <p>📈 <strong>Confiabilidade Histórica:</strong> {row['Historical Win Rate (%)']}% ({row['Total Signals']} sinais)</p>
 <p>💵 <strong>PnL Médio por Sinal:</strong> {row['Avg PNL (%)']}%</p>
 <p>✅ <strong>Status:</strong> Sinal {row['Aceito']} (Dry-Run Interno)</p>
 <p>🌟 <strong>Score de Qualidade:</strong> {row['Quality Score']}</p>
 </div>
-                                """, unsafe_allow_html=True)
-                        with col2:
-                            if st.button("Fechar Ordem", key=f"close_{row['Signal ID']}"):
-                                close_order_manually(row['Signal ID'], float(row['Mark Price']))
-                                st.rerun()
+                    """, unsafe_allow_html=True)
+
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            # Controles de navegação para paginação
+            if total_pages > 1:
+                col_prev, col_next = st.columns(2)
+                with col_prev:
+                    if st.session_state['open_orders_page'] > 1:
+                        if st.button("Carregar Anteriores", key="prev_open"):
+                            st.session_state['open_orders_page'] -= 1
+                            st.session_state['expanded_open_orders'] = {}
+                            st.rerun()
+                with col_next:
+                    if st.session_state['open_orders_page'] < total_pages:
+                        if st.button("Carregar Mais", key="next_open"):
+                            st.session_state['open_orders_page'] += 1
+                            st.session_state['expanded_open_orders'] = {}
+                            st.rerun()
         else:
             st.info("Nenhuma posição simulada corresponde aos filtros selecionados.")
     else:
         st.info("Nenhuma posição simulada no modo Dry Run.")
 
-    # Seção: Histórico de Ordens Fechadas - Últimas 5
-    st.subheader("Histórico de Ordens Fechadas - Últimas 5")
+    # Seção: Histórico de Ordens Fechadas
+    st.subheader("Histórico de Ordens Fechadas")
     filtered_closed = filtered_df[filtered_df['estado'] == 'fechado'].sort_values(by='timestamp_saida', ascending=False)
     if not filtered_closed.empty:
         closed_display = []
@@ -1440,7 +1652,6 @@ with tab2:
                 "Exit Price": f"{float(row['preco_saida']):.4f}",
                 "PNL (%)": f"{float(row['pnl_realizado']):.2f}%",
                 "Resultado": row['resultado'],
-                "Indicadores": row['contributing_indicators'],
                 "Strategy": row['strategy_name'],
                 "Open Time": row['timestamp'],
                 "Close Time": row['timestamp_saida'],
@@ -1448,51 +1659,103 @@ with tab2:
                 "Resumo": resumo,
                 "Timeframe": row['timeframe'],
                 "Quantity": row['quantity'],
-                "Historical Win Rate (%)": win_rate,
-                "Avg PNL (%)": avg_pnl,
+                "Historical Win Rate (%)": f"{win_rate:.1f}",
+                "Avg PNL (%)": f"{avg_pnl:.2f}",
                 "Total Signals": total_signals,
                 "Aceito": "Sim" if row['aceito'] else "Não",
                 "TP Percent": params['tp_percent'],
                 "SL Percent": params['sl_percent'],
-                "Quality Score": f"{row['quality_score']:.2f}" if 'quality_score' in row else "N/A"
+                "Quality Score": f"{row['quality_score']:.2f}" if 'quality_score' in row else "N/A",
+                "Contributing Indicators": row['contributing_indicators'],
+                "Signal ID": row['signal_id']
             })
 
         if closed_display:
             closed_df = pd.DataFrame(closed_display)
-            closed_df = closed_df[["Status", "Par", "Direction", "Entry Price", "Exit Price", "PNL (%)", "Resultado", "Indicadores", "Strategy", "Open Time", "Close Time", "Motivos", "Resumo", "Timeframe", "Quantity", "Historical Win Rate (%)", "Avg PNL (%)", "Total Signals", "Aceito", "TP Percent", "SL Percent", "Quality Score"]]
-            # Exibir as últimas 5 ordens fechadas
-            st.table(closed_df.head(5).drop(['Motivos', 'Resumo', 'Timeframe', 'Quantity', 'Historical Win Rate (%)', 'Avg PNL (%)', 'Total Signals', 'Aceito', 'TP Percent', 'SL Percent', 'Quality Score'], axis=1))
+            closed_df = closed_df[["Status", "Par", "Direction", "Entry Price", "Exit Price", "PNL (%)", "Resultado", "Strategy", "Open Time", "Close Time", "Motivos", "Resumo", "Timeframe", "Quantity", "Historical Win Rate (%)", "Avg PNL (%)", "Total Signals", "Aceito", "TP Percent", "SL Percent", "Quality Score", "Contributing Indicators", "Signal ID"]]
 
-            # Botão "Ver Mais"
-            if len(closed_df) > 5:
-                if st.button("Ver Todas as Ordens Fechadas"):
-                    for idx, row in closed_df.iterrows():
-                        st.table(row.drop(['Motivos', 'Resumo', 'Timeframe', 'Quantity', 'Historical Win Rate (%)', 'Avg PNL (%)', 'Total Signals', 'Aceito', 'TP Percent', 'SL Percent', 'Quality Score']).to_frame().T)
-                        with st.expander(f"Detalhes da Estratégia: {row['Strategy']}"):
-                            st.markdown(f"""
+            # Inicializar estados para paginação e expansão
+            if 'closed_orders_page' not in st.session_state:
+                st.session_state['closed_orders_page'] = 1
+            if 'expanded_closed_orders' not in st.session_state:
+                st.session_state['expanded_closed_orders'] = {}
+
+            page_size = 10  # Exibir 10 ordens por página
+            start_idx = (st.session_state['closed_orders_page'] - 1) * page_size
+            end_idx = min(start_idx + page_size, len(closed_df))
+            total_pages = (len(closed_df) + page_size - 1) // page_size
+
+            # Exibir ordens da página atual
+            st.markdown('<div class="table-container">', unsafe_allow_html=True)
+            for idx, row in closed_df.iloc[start_idx:end_idx].iterrows():
+                order_id = row['Signal ID']
+                order_key = f"toggle_closed_{order_id}_{idx}"
+
+                # Verificar se a ordem está expandida
+                is_expanded = st.session_state['expanded_closed_orders'].get(order_id, False)
+
+                # Layout com botão de expandir/recolher ao lado
+                col1, col2 = st.columns([8, 1])
+                with col1:
+                    st.table(row[["Status", "Par", "Direction", "Entry Price", "Exit Price", "PNL (%)", "Resultado", "Strategy", "Open Time", "Close Time"]].to_frame().T)
+                with col2:
+                    if st.button(
+                        "Recolher" if is_expanded else "Expandir",
+                        key=order_key,
+                        help="Expandir/recolher os detalhes da estratégia"
+                    ):
+                        st.session_state['expanded_closed_orders'][order_id] = not is_expanded
+                        # Fechar outras ordens expandidas
+                        for other_id in list(st.session_state['expanded_closed_orders'].keys()):
+                            if other_id != order_id:
+                                st.session_state['expanded_closed_orders'][other_id] = False
+                        st.rerun()
+
+                # Exibir detalhes se expandido
+                if is_expanded:
+                    st.markdown(f"""
 <div class="strategy-header">
 🟦 [ULTRABOT] SINAL GERADO - {row['Par']} ({row['Timeframe']}) - {row['Direction']} 🟦
 </div>
 <div class="strategy-section">
+<p><strong>Id da ordem:</strong> {row['Signal ID']}</p>
 <p>💰 <strong>Preço de Entrada:</strong> {row['Entry Price']} | <strong>Quantidade:</strong> {row['Quantity']}</p>
 <p>🎯 <strong>TP:</strong> <span style="color: green;">+{row['TP Percent']}%</span> | <strong>SL:</strong> <span style="color: red;">-{row['SL Percent']}%</span></p>
 <p>🧠 <strong>Estratégia:</strong> {row['Strategy']}</p>
 <p>📌 <strong>Motivos do Sinal:</strong> {row['Resumo']}</p>
-<p>📊 <strong>Indicadores Utilizados:</p>
-<p>- {row['Indicadores']}</p>
+<p>📊 <strong>Indicadores Utilizados:</strong></p>
+<p>- {row['Contributing Indicators']}</p>
 <p>📈 <strong>Confiabilidade Histórica:</strong> {row['Historical Win Rate (%)']}% ({row['Total Signals']} sinais)</p>
 <p>💵 <strong>PnL Médio por Sinal:</strong> {row['Avg PNL (%)']}%</p>
 <p>✅ <strong>Status:</strong> Sinal {row['Aceito']} (Dry-Run Interno)</p>
 <p>🌟 <strong>Score de Qualidade:</strong> {row['Quality Score']}</p>
 </div>
-                            """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
+
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            # Controles de navegação para paginação
+            if total_pages > 1:
+                col_prev, col_next = st.columns(2)
+                with col_prev:
+                    if st.session_state['closed_orders_page'] > 1:
+                        if st.button("Carregar Anteriores", key="prev_closed"):
+                            st.session_state['closed_orders_page'] -= 1
+                            st.session_state['expanded_closed_orders'] = {}
+                            st.rerun()
+                with col_next:
+                    if st.session_state['closed_orders_page'] < total_pages:
+                        if st.button("Carregar Mais", key="next_closed"):
+                            st.session_state['closed_orders_page'] += 1
+                            st.session_state['expanded_closed_orders'] = {}
+                            st.rerun()
         else:
             st.info("Nenhuma ordem fechada corresponde aos filtros selecionados.")
     else:
         st.info("Nenhuma ordem fechada no modo Dry Run.")
 
-    # Seção: Sinais Gerados - Últimos 5
-    st.subheader("Sinais Gerados - Últimos 5")
+    # Seção: Sinais Gerados
+    st.subheader("Sinais Gerados")
     if not filtered_df.empty:
         signals_display = []
         for _, row in filtered_df.iterrows():
@@ -1502,20 +1765,39 @@ with tab2:
                 "Direção": row['direcao'],
                 "Estratégia": row['strategy_name'],
                 "Timeframe": row['timeframe'],
-                "Indicadores": row['contributing_indicators'],
                 "Aceito": "Sim" if row['aceito'] else "Não",
                 "Quality Score": f"{row['quality_score']:.2f}" if 'quality_score' in row else "N/A"
             })
-        
-        signals_df = pd.DataFrame(signals_display)
-        signals_df = signals_df[["Timestamp", "Par", "Direção", "Estratégia", "Timeframe", "Indicadores", "Aceito", "Quality Score"]]
-        # Exibir os últimos 5 sinais
-        st.table(signals_df.head(5))
 
-        # Botão "Ver Mais"
-        if len(signals_df) > 5:
-            if st.button("Ver Todos os Sinais"):
-                st.table(signals_df)
+        signals_df = pd.DataFrame(signals_display)
+        signals_df = signals_df[["Timestamp", "Par", "Direção", "Estratégia", "Timeframe", "Aceito", "Quality Score"]]
+
+        # Inicializar estado para paginação
+        if 'signals_page' not in st.session_state:
+            st.session_state['signals_page'] = 1
+
+        page_size = 10  # Exibir 10 sinais por página
+        start_idx = (st.session_state['signals_page'] - 1) * page_size
+        end_idx = min(start_idx + page_size, len(signals_df))
+        total_pages = (len(signals_df) + page_size - 1) // page_size
+
+        st.markdown('<div class="table-container">', unsafe_allow_html=True)
+        st.table(signals_df.iloc[start_idx:end_idx])
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Controles de navegação para paginação
+        if total_pages > 1:
+            col_prev, col_next = st.columns(2)
+            with col_prev:
+                if st.session_state['signals_page'] > 1:
+                    if st.button("Carregar Anteriores", key="prev_signals"):
+                        st.session_state['signals_page'] -= 1
+                        st.rerun()
+            with col_next:
+                if st.session_state['signals_page'] < total_pages:
+                    if st.button("Carregar Mais", key="next_signals"):
+                        st.session_state['signals_page'] += 1
+                        st.rerun()
     else:
         st.info("Nenhum sinal gerado para exibir.")
 
@@ -1547,7 +1829,6 @@ with tab2:
         (filtered_df.apply(lambda row: get_tp_sl(row, 'sl_percent'), axis=1).isin(sl_filter))
     ]
 
-    # Exibir alertas agrupados por robô
     if alerts:
         robots = set([alert.split(":")[0].replace("🔔 ", "").replace("🚨 ", "").replace("⚠️ ", "").replace("📈 ", "").replace("📉 ", "") for alert in alerts])
         for robot in robots:
@@ -1563,33 +1844,11 @@ with tab2:
                     else:
                         st.markdown(f"<div class='alert alert-success'>{alert}</div>", unsafe_allow_html=True)
     else:
-        st.info("Nenhum alerta no momento.")
+        st.info("Nenhum alerta ou notificação no momento.")
 
-# Aba 3: Configurações de Estratégia
 with tab3:
     st.header("Configurações de Estratégia")
-
-    # Seção de Reset do Bot
-    st.header("Reset do Bot")
-    st.warning("⚠️ Atenção: Esta ação irá resetar todas as ordens e estatísticas do bot!")
-    
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        reset_password = st.text_input("Senha de Reset", type="password")
-    with col2:
-        if st.button("Reset Bot", type="primary"):
-            if reset_password:
-                success, message = reset_bot_data(reset_password)
-                if success:
-                    st.success(message)
-                    # Recarregar a página após 3 segundos
-                    st.rerun()
-                else:
-                    st.error(message)
-            else:
-                st.error("Por favor, digite a senha de reset!")
-
-    st.divider()  # Adiciona uma linha divisória
+    st.info("Configure os parâmetros das estratégias de trading.")
 
     # Lista de indicadores
     indicadores_simples = [
@@ -1687,7 +1946,6 @@ with tab3:
         else:
             st.error("Por favor, insira um nome para a estratégia.")
 
-# Aba 4: Oportunidades Perdidas
 with tab4:
     st.header("Oportunidades Perdidas")
     st.info("Visualize os sinais que foram rejeitados devido a limites de ordens.")
@@ -1710,10 +1968,29 @@ with tab4:
         st.subheader("Últimas 5 Oportunidades Perdidas")
         st.table(filtered_missed.head(5)[['timestamp', 'robot_name', 'par', 'timeframe', 'direcao', 'score_tecnico', 'reason']])
 
-        # Botão "Ver Mais"
-        if len(filtered_missed) > 5:
-            if st.button("Ver Todas as Oportunidades Perdidas"):
-                st.table(filtered_missed[['timestamp', 'robot_name', 'par', 'timeframe', 'direcao', 'score_tecnico', 'reason']])
+        # Infinite scroll simulado para oportunidades perdidas
+        if 'missed_opportunities_page' not in st.session_state:
+            st.session_state['missed_opportunities_page'] = 1
+
+        page_size = 5
+        start_idx = (st.session_state['missed_opportunities_page'] - 1) * page_size
+        end_idx = min(start_idx + page_size, len(filtered_missed))
+        total_pages = (len(filtered_missed) + page_size - 1) // page_size
+
+        st.table(filtered_missed.iloc[start_idx:end_idx][['timestamp', 'robot_name', 'par', 'timeframe', 'direcao', 'score_tecnico', 'reason']])
+
+        if total_pages > 1:
+            col_prev, col_next = st.columns(2)
+            with col_prev:
+                if st.session_state['missed_opportunities_page'] > 1:
+                    if st.button("Carregar Anteriores", key="prev_missed"):
+                        st.session_state['missed_opportunities_page'] -= 1
+                        st.rerun()
+            with col_next:
+                if st.session_state['missed_opportunities_page'] < total_pages:
+                    if st.button("Carregar Mais", key="next_missed"):
+                        st.session_state['missed_opportunities_page'] += 1
+                        st.rerun()
 
         # Gráfico de Oportunidades Perdidas por Robô
         st.subheader("Distribuição de Oportunidades Perdidas por Robô")
@@ -1733,174 +2010,4 @@ previous_active_strategies = st.session_state.get('previous_active_strategies', 
 for strategy_name, strategy_config in strategies.items():
     if strategy_name in active_strategies and active_strategies[strategy_name]:
         if strategy_name not in previous_active_strategies or not previous_active_strategies[strategy_name]:
-            new_order = generate_orders(strategy_name, strategies[strategy_name])
-            if new_order:
-                signal_id = new_order['signal_id']
-                alerts.append(f"🔔 {new_order['timestamp']} - Robô {strategy_name}: Nova ordem aberta: {signal_id} ({new_order['par']}) - {new_order['direcao']}")
-    previous_active_strategies[strategy_name] = active_strategies.get(strategy_name, False)
-
-st.session_state['previous_active_strategies'] = previous_active_strategies
-
-# Exibir os robôs em containers lado a lado
-cols = st.columns(3)  # Dividir em 3 colunas para organização
-for idx, (strategy_name, strategy_config) in enumerate(strategies.items()):
-    col = cols[idx % 3]  # Alternar entre as colunas
-    with col:
-        if strategy_name not in active_strategies:
-            active_strategies[strategy_name] = False
-
-        win_rate, avg_pnl, total_signals = calcular_confiabilidade_historica(strategy_name, "LONG", df_closed)
-        open_orders = len(df_open[df_open['strategy_name'] == strategy_name])
-        robot_df = df_closed[df_closed['strategy_name'] == strategy_name]
-        num_tp = len(robot_df[robot_df['resultado'] == 'TP'])
-        num_sl = len(robot_df[robot_df['resultado'] == 'SL'])
-        roi = robot_df['pnl_realizado'].mean() if not robot_df.empty else 0
-
-        if strategy_name not in st.session_state:
-            st.session_state[strategy_name] = {'activation_time': None}
-        if active_strategies[strategy_name] and st.session_state[strategy_name]['activation_time'] is None:
-            st.session_state[strategy_name]['activation_time'] = datetime.now()
-        if not active_strategies[strategy_name]:
-            st.session_state[strategy_name]['activation_time'] = None
-
-        online_time = "Desativado"
-        if active_strategies[strategy_name] and st.session_state[strategy_name]['activation_time']:
-            time_diff = datetime.now() - st.session_state[strategy_name]['activation_time']
-            hours, remainder = divmod(time_diff.total_seconds(), 3600)
-            minutes, _ = divmod(remainder, 60)
-            online_time = f"{int(hours)}h {int(minutes)}m"
-
-        active_indicators = [ind for ind, active in strategy_config["indicadores_ativos"].items() if active]
-        strategy_summary = f"{', '.join(active_indicators)}, TP: {strategy_config['tp_percent']}%, SL: {strategy_config['sl_percent']}%"
-
-        st.markdown(f"""
-        <div class="robot-tag">
-            <h4>{strategy_name}</h4>
-            <p>📊 {strategy_summary}</p>
-            <p>🎯 Acertos: {win_rate:.2f}%</p>
-            <p>📈 Ordens: {open_orders}</p>
-            <p>⏳ Online: {online_time}</p>
-            <p>✅ TP: {num_tp} | ❌ SL: {num_sl}</p>
-            <p>💰 ROI%: {roi:.2f}%</p>
-            <div class="button-container">
-                <button class="toggle-button{' toggle-button-off' if not active_strategies[strategy_name] else ''}" onclick="this.closest('form').submit()">{ 'Desligar' if active_strategies[strategy_name] else 'Ligar' }</button>
-                <button class="edit-button" onclick="this.closest('form').submit()">Editar</button>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Botões de controle
-        col_toggle, col_edit = st.columns([1, 1])
-        with col_toggle:
-            button_label = "Desligar" if active_strategies[strategy_name] else "Ligar"
-            if st.button(button_label, key=f"toggle_{strategy_name}"):
-                active_strategies[strategy_name] = not active_strategies[strategy_name]
-                st.session_state['active_strategies'] = active_strategies
-                save_robot_status(active_strategies)
-                st.rerun()
-        with col_edit:
-            if st.button("Editar", key=f"edit_{strategy_name}", help="Editar parâmetros do robô"):
-                with st.expander(f"Editar Parâmetros - {strategy_name}"):
-                    new_tp = st.number_input("TP (%)", min_value=0.1, max_value=100.0, value=strategy_config['tp_percent'], step=0.1, key=f"tp_{strategy_name}")
-                    new_sl = st.number_input("SL (%)", min_value=0.1, max_value=100.0, value=strategy_config['sl_percent'], step=0.1, key=f"sl_{strategy_name}")
-                    new_leverage = st.number_input("Leverage (x)", min_value=1, max_value=125, value=strategy_config['leverage'], step=1, key=f"leverage_{strategy_name}")
-                    prioritize_signals = st.checkbox("Ativar Priorização de Sinais", value=strategy_config.get('prioritize_signals', False), key=f"prioritize_{strategy_name}")
-
-                    # Configurar limites por timeframe e direção
-                    st.subheader("Limites por Timeframe e Direção")
-                    limits = strategy_config.get('limits', {tf: {"LONG": 1, "SHORT": 1} for tf in ["1m", "5m", "15m", "1h", "4h", "1d"]})
-                    new_limits = {}
-                    for tf in ["1m", "5m", "15m", "1h", "4h", "1d"]:
-                        st.subheader(f"Limites para {tf}")
-                        long_limit = st.number_input(f"Máximo de ordens LONG ({tf})", min_value=0, max_value=10, value=limits.get(tf, {}).get("LONG", 1), step=1, key=f"long_{tf}_{strategy_name}")
-                        short_limit = st.number_input(f"Máximo de ordens SHORT ({tf})", min_value=0, max_value=10, value=limits.get(tf, {}).get("SHORT", 1), step=1, key=f"short_{tf}_{strategy_name}")
-                        new_limits[tf] = {"LONG": long_limit, "SHORT": short_limit}
-
-                    if st.button("Salvar Alterações", key=f"save_{strategy_name}"):
-                        strategy_config['tp_percent'] = new_tp
-                        strategy_config['sl_percent'] = new_sl
-                        strategy_config['leverage'] = new_leverage
-                        strategy_config['prioritize_signals'] = prioritize_signals
-                        strategy_config['limits'] = new_limits
-                        strategies[strategy_name] = strategy_config
-                        save_strategies(strategies)
-                        st.success(f"Parâmetros de {strategy_name} atualizados com sucesso!")
-                        st.rerun()
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Botão de Atualização
-if st.button("Atualizar"):
-    st.rerun()
-
-def render_notifications_panel():
-    """
-    Renderiza o painel de notificações no dashboard
-    """
-    try:
-        from notification_manager import get_recent_notifications, mark_notification_as_read
-        
-        # Obter notificações recentes (máximo 10)
-        notifications = get_recent_notifications(limit=10)
-        
-        if not notifications:
-            st.info("Não há notificações para exibir")
-            return
-        
-        # Exibir as 2 notificações mais recentes
-        st.subheader(f"Notificações Recentes ({len(notifications)})")
-        
-        for i, notification in enumerate(notifications[:2]):
-            notification_type = notification.get('type', 'info')
-            css_class = f"notification notification-{notification_type}"
-            
-            # Formatar a timestamp
-            timestamp = datetime.strptime(notification['timestamp'], "%Y-%m-%d %H:%M:%S")
-            formatted_time = timestamp.strftime("%d/%m/%Y %H:%M")
-            
-            # Renderizar a notificação
-            st.markdown(f"""
-            <div class="{css_class}" id="notification-{notification['id']}">
-                <div class="notification-header">
-                    <span class="notification-source">{notification['source']}</span>
-                    <span class="notification-timestamp">{formatted_time}</span>
-                </div>
-                <div class="notification-message">{notification['message']}</div>
-                {f'<div class="notification-details">{notification["details"]}</div>' if 'details' in notification else ''}
-            </div>
-            """, unsafe_allow_html=True)
-            
-            if st.button(f"Marcar como lida", key=f"mark_read_{notification['id']}"):
-                mark_notification_as_read(notification['id'])
-                st.rerun()
-        
-        # Botão para ver mais notificações
-        if len(notifications) > 2:
-            if st.button("Ver Todas as Notificações"):
-                with st.expander("Todas as Notificações", expanded=True):
-                    for notification in notifications:
-                        notification_type = notification.get('type', 'info')
-                        css_class = f"notification notification-{notification_type}"
-                        
-                        # Formatar a timestamp
-                        timestamp = datetime.strptime(notification['timestamp'], "%Y-%m-%d %H:%M:%S")
-                        formatted_time = timestamp.strftime("%d/%m/%Y %H:%M")
-                        
-                        # Renderizar a notificação
-                        st.markdown(f"""
-                        <div class="{css_class}" id="notification-{notification['id']}">
-                            <div class="notification-header">
-                                <span class="notification-source">{notification['source']}</span>
-                                <span class="notification-timestamp">{formatted_time}</span>
-                            </div>
-                            <div class="notification-message">{notification['message']}</div>
-                            {f'<div class="notification-details">{notification["details"]}</div>' if 'details' in notification else ''}
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        if st.button(f"Marcar como lida", key=f"mark_read_all_{notification['id']}"):
-                            mark_notification_as_read(notification['id'])
-                            st.rerun()
-    except Exception as e:
-        st.error(f"Erro ao carregar notificações: {e}")
-        logger.error(f"Erro ao renderizar notificações: {e}")
+            generate_orders(strategy_name, strategy_config)

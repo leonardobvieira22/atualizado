@@ -1,10 +1,18 @@
 {
-    "Rob\u00f4 00": true,
     "ROBOT 1 LEO": true,
     "ROBOT PADRAO 1": true,
     "hard": true,
     "only1": true,
     "frouxo": true,
-    "swing_trade_composite": true,
-    "robo do um porcento ": true
+    "robo do um porcento ": true,
+    "ultima 10": true,
+    "ema max": true,
+    "sma max": true,
+    "bolinguer + vol max": true,
+    "Robo 00": true,
+    "GPT 00": true,
+    "Momentum Fast": true,
+    "Swing Alpha": true,
+    "Sentiment Guard": true,
+    "Composite Trend": true
 }

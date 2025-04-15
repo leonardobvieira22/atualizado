@@ -23,7 +23,7 @@ CONFIG = {
     'risk_per_trade': 1.0,
     'dry_run': DRY_RUN,
     'mercado': 'futures',
-    'timeout_ordem': 30,
+    'timeout_ordem': 999999,
     'max_trades_simultaneos': 100,  # Aumentado para permitir mais ordens
     'price_cache_duration': 5,
     'backtest_funding_rate': 0.0001,
@@ -40,10 +40,10 @@ CONFIG = {
     'timeframe_settings': {  # Novas configurações por timeframe
         '1m': {'realtime_enabled': True, 'weight': 1.0},
         '5m': {'realtime_enabled': True, 'weight': 1.0},
-        '15m': {'realtime_enabled': True, 'weight': 1.0},
-        '1h': {'realtime_enabled': True, 'weight': 1.2},
-        '4h': {'realtime_enabled': True, 'weight': 1.2},
-        '1d': {'realtime_enabled': True, 'weight': 1.3}
+        '15m': {'realtime_enabled': True, 'weight': 1.1},
+        '1h': {'realtime_enabled': True, 'weight': 1.1},
+        '4h': {'realtime_enabled': True, 'weight': 1.0},
+        '1d': {'realtime_enabled': True, 'weight': 1.0}
     },
     'quantity_in_usdt': 10.0,  # Adicionado para corrigir o erro de quantidade
     'indicators': {
@@ -80,8 +80,8 @@ CONFIG = {
         'timeframes': TIMEFRAMES,
         'candle_count': 200,  # Aumentado para evitar "dados insuficientes"
         'entry_value_usdt': 10.0,
-        'slippage_percent': 0.1,
-        'fee_percent': 0.04,
+        'slippage_percent': 0.2,
+        'fee_percent': 0.10,
         'signal_strategies': [
             {"name": "sma_only", "indicators": ["sma"]},
             {"name": "ema_only", "indicators": ["ema"]},

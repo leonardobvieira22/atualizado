@@ -1,5 +1,5 @@
 {
-    "Rob\u00f4 00": {
+    "Robo 00": {
         "indicadores_ativos": {
             "SMA": true,
             "EMA": true,
@@ -405,5 +405,380 @@
             "4h",
             "1d"
         ]
+    },
+    "ultima 10": {
+        "indicadores_ativos": {
+            "SMA": true,
+            "EMA": true,
+            "RSI": true,
+            "MACD": true,
+            "ADX": true,
+            "Volume": true,
+            "Bollinger": true,
+            "Estocastico": true,
+            "VWAP": true,
+            "OBV": true,
+            "Fibonacci": true,
+            "Sentimento": true,
+            "Swing Trade Composite": true
+        },
+        "confianca_minima": {
+            "Sentimento": 0.99,
+            "Swing Trade Composite": 1.0
+        },
+        "tp_percent": 2.5,
+        "sl_percent": 1.0,
+        "leverage": 22,
+        "max_trades_simultaneos": 10,
+        "score_tecnico_min": 1.0,
+        "ml_confidence_min": 0.69,
+        "timeframes": [
+            "1m",
+            "5m",
+            "15m",
+            "1h",
+            "4h",
+            "1d"
+        ]
+    },
+    "sma max": {
+        "indicadores_ativos": {
+            "SMA": true,
+            "EMA": false,
+            "RSI": false,
+            "MACD": false,
+            "ADX": false,
+            "Volume": false,
+            "Bollinger": false,
+            "Estocastico": false,
+            "VWAP": false,
+            "OBV": false,
+            "Fibonacci": false,
+            "Sentimento": false,
+            "Swing Trade Composite": false
+        },
+        "confianca_minima": {
+            "Sentimento": 0.5,
+            "Swing Trade Composite": 0.99
+        },
+        "tp_percent": 2.0,
+        "sl_percent": 1.0,
+        "leverage": 22,
+        "max_trades_simultaneos": 1,
+        "score_tecnico_min": 0.99,
+        "ml_confidence_min": 1.0,
+        "timeframes": [
+            "1m",
+            "5m",
+            "15m",
+            "1h",
+            "4h",
+            "1d"
+        ]
+    },
+    "ema max": {
+        "indicadores_ativos": {
+            "SMA": false,
+            "EMA": true,
+            "RSI": false,
+            "MACD": false,
+            "ADX": false,
+            "Volume": false,
+            "Bollinger": false,
+            "Estocastico": false,
+            "VWAP": false,
+            "OBV": false,
+            "Fibonacci": false,
+            "Sentimento": false,
+            "Swing Trade Composite": true
+        },
+        "confianca_minima": {
+            "Sentimento": 0.5,
+            "Swing Trade Composite": 0.99
+        },
+        "tp_percent": 2.0,
+        "sl_percent": 1.0,
+        "leverage": 22,
+        "max_trades_simultaneos": 1,
+        "score_tecnico_min": 1.0,
+        "ml_confidence_min": 0.99,
+        "timeframes": [
+            "1m",
+            "5m",
+            "15m",
+            "1h",
+            "4h",
+            "1d"
+        ]
+    },
+    "bolinguer + vol max": {
+        "indicadores_ativos": {
+            "SMA": false,
+            "EMA": false,
+            "RSI": false,
+            "MACD": false,
+            "ADX": false,
+            "Volume": true,
+            "Bollinger": true,
+            "Estocastico": false,
+            "VWAP": false,
+            "OBV": false,
+            "Fibonacci": false,
+            "Sentimento": false,
+            "Swing Trade Composite": false
+        },
+        "confianca_minima": {
+            "Sentimento": 0.5,
+            "Swing Trade Composite": 0.99
+        },
+        "tp_percent": 2.0,
+        "sl_percent": 1.0,
+        "leverage": 22,
+        "max_trades_simultaneos": 1,
+        "score_tecnico_min": 0.99,
+        "ml_confidence_min": 1.0,
+        "timeframes": [
+            "1m",
+            "5m",
+            "15m",
+            "1h",
+            "4h",
+            "1d"
+        ]
+    },
+    "GPT 00": {
+        "indicadores_ativos": {
+            "SMA": true,
+            "EMA": true,
+            "RSI": true,
+            "MACD": true,
+            "ADX": true,
+            "Volume": true,
+            "Bollinger": true,
+            "Estocastico": true,
+            "VWAP": true,
+            "OBV": true,
+            "Fibonacci": true,
+            "Sentimento": true,
+            "Swing Trade Composite": true
+        },
+        "confianca_minima": {
+            "Sentimento": 0.5,
+            "Swing Trade Composite": 0.5
+        },
+        "tp_percent": 2.0,
+        "sl_percent": 1.0,
+        "leverage": 22,
+        "max_trades_simultaneos": 1,
+        "score_tecnico_min": 1.0,
+        "ml_confidence_min": 0.5,
+        "prioritize_signals": false,
+        "timeframes": [
+            "1m",
+            "5m",
+            "15m",
+            "1h",
+            "4h",
+            "1d"
+        ],
+        "limits": {
+            "1m": {
+                "LONG": 1,
+                "SHORT": 1
+            },
+            "5m": {
+                "LONG": 1,
+                "SHORT": 1
+            },
+            "15m": {
+                "LONG": 1,
+                "SHORT": 1
+            },
+            "1h": {
+                "LONG": 1,
+                "SHORT": 1
+            },
+            "4h": {
+                "LONG": 1,
+                "SHORT": 1
+            },
+            "1d": {
+                "LONG": 1,
+                "SHORT": 1
+            }
+        }
+    },
+    "Momentum Fast": {
+        "indicadores_ativos": {
+            "EMA": true,
+            "RSI": true,
+            "MACD": true,
+            "ADX": false,
+            "Volume": true,
+            "SMA": false,
+            "Bollinger": false,
+            "Estocastico": false,
+            "VWAP": false,
+            "OBV": false,
+            "Fibonacci": false,
+            "Sentimento": false,
+            "Swing Trade Composite": false
+        },
+        "confianca_minima": {},
+        "tp_percent": 0.8,
+        "sl_percent": 0.4,
+        "leverage": 50,
+        "max_trades_simultaneos": 3,
+        "score_tecnico_min": 0.7,
+        "ml_confidence_min": 0.7,
+        "prioritize_signals": true,
+        "timeframes": [
+            "1m",
+            "5m"
+        ],
+        "limits": {
+            "1m": {
+                "LONG": 2,
+                "SHORT": 1
+            },
+            "5m": {
+                "LONG": 1,
+                "SHORT": 1
+            }
+        }
+    },
+    "Swing Alpha": {
+        "indicadores_ativos": {
+            "SMA": true,
+            "EMA": true,
+            "RSI": false,
+            "MACD": false,
+            "ADX": true,
+            "Volume": true,
+            "Bollinger": true,
+            "Estocastico": true,
+            "VWAP": false,
+            "OBV": true,
+            "Fibonacci": true,
+            "Sentimento": true,
+            "Swing Trade Composite": true
+        },
+        "confianca_minima": {
+            "Sentimento": 0.7,
+            "Swing Trade Composite": 0.8
+        },
+        "tp_percent": 5.0,
+        "sl_percent": 2.5,
+        "leverage": 8,
+        "max_trades_simultaneos": 2,
+        "score_tecnico_min": 0.5,
+        "ml_confidence_min": 0.6,
+        "prioritize_signals": false,
+        "timeframes": [
+            "1h",
+            "4h",
+            "1d"
+        ],
+        "limits": {
+            "1h": {
+                "LONG": 1,
+                "SHORT": 1
+            },
+            "4h": {
+                "LONG": 1,
+                "SHORT": 1
+            },
+            "1d": {
+                "LONG": 1,
+                "SHORT": 1
+            }
+        }
+    },
+    "Sentiment Guard": {
+        "indicadores_ativos": {
+            "SMA": false,
+            "EMA": false,
+            "RSI": false,
+            "MACD": false,
+            "ADX": false,
+            "Volume": false,
+            "Bollinger": false,
+            "Estocastico": false,
+            "VWAP": false,
+            "OBV": false,
+            "Fibonacci": false,
+            "Sentimento": true,
+            "Swing Trade Composite": false
+        },
+        "confianca_minima": {
+            "Sentimento": 0.85
+        },
+        "tp_percent": 1.2,
+        "sl_percent": 0.6,
+        "leverage": 10,
+        "max_trades_simultaneos": 1,
+        "score_tecnico_min": 0.2,
+        "ml_confidence_min": 0.9,
+        "prioritize_signals": true,
+        "timeframes": [
+            "15m",
+            "1h"
+        ],
+        "limits": {
+            "15m": {
+                "LONG": 1,
+                "SHORT": 1
+            },
+            "1h": {
+                "LONG": 1,
+                "SHORT": 1
+            }
+        }
+    },
+    "Composite Trend": {
+        "indicadores_ativos": {
+            "SMA": false,
+            "EMA": true,
+            "RSI": true,
+            "MACD": true,
+            "ADX": true,
+            "Volume": false,
+            "Bollinger": false,
+            "Estocastico": false,
+            "VWAP": true,
+            "OBV": false,
+            "Fibonacci": false,
+            "Sentimento": false,
+            "Swing Trade Composite": true
+        },
+        "confianca_minima": {
+            "Swing Trade Composite": 0.7
+        },
+        "tp_percent": 3.5,
+        "sl_percent": 1.5,
+        "leverage": 15,
+        "max_trades_simultaneos": 2,
+        "score_tecnico_min": 0.8,
+        "ml_confidence_min": 0.4,
+        "prioritize_signals": false,
+        "timeframes": [
+            "5m",
+            "15m",
+            "1h"
+        ],
+        "limits": {
+            "5m": {
+                "LONG": 1,
+                "SHORT": 1
+            },
+            "15m": {
+                "LONG": 1,
+                "SHORT": 1
+            },
+            "1h": {
+                "LONG": 1,
+                "SHORT": 1
+            }
+        }
     }
 }

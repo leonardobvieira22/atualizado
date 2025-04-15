@@ -6,6 +6,8 @@ from datetime import datetime
 import uuid
 from config import CONFIG, SYMBOLS, TIMEFRAMES
 from utils import logger
+from trade_manager import check_timeframe_direction_limit, check_active_trades
+from data_manager import get_quantity
 
 def load_data(file_path="sinais_detalhados.csv", columns=None):
     """
@@ -84,37 +86,61 @@ def calculate_performance(df):
         return {"total_signals": 0, "win_rate": 0.0, "avg_pnl": 0.0}
 
 def generate_orders(strategy_name, strategy_config):
-    """Gera ordens simuladas para exibição no dashboard."""
+    """Gera ordens simuladas para exibição no dashboard, respeitando limites de ordens abertas e valor fixo de 10 USD por ordem."""
     try:
         tp_percent = strategy_config.get('tp_percent', CONFIG.get('tp_percent', 0.5))
         sl_percent = strategy_config.get('sl_percent', CONFIG.get('sl_percent', 0.3))
         leverage = strategy_config.get('leverage', CONFIG.get('leverage', 10))
         indicators = strategy_config.get('indicadores_ativos', {'EMA': True, 'RSI': True, 'MACD': True})
-
         orders = []
+        active_trades = check_active_trades()  # Lê ordens abertas reais
+        config = CONFIG
+        config['quantity_in_usdt'] = 10.0  # Garante valor fixo de 10 USD por ordem
         for pair in SYMBOLS:
             for tf in TIMEFRAMES:
-                order = {
-                    "signal_id": str(uuid.uuid4()),
-                    "par": pair,
-                    "direcao": "LONG",
-                    "preco_entrada": 0.0,
-                    "quantity": 1.0,
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "timeframe": tf,
-                    "strategy_name": strategy_name,
-                    "contributing_indicators": ";".join([k for k, v in indicators.items() if v]),
-                    "motivos": json.dumps(["Simulado para dashboard"]),
-                    "localizadores": json.dumps({}),
-                    "parametros": json.dumps({
-                        "tp_percent": tp_percent,
-                        "sl_percent": sl_percent,
-                        "leverage": leverage
-                    }),
-                    "estado": "aberto",
-                    "aceito": True
-                }
-                orders.append(order)
+                for direction in ['LONG', 'SHORT']:
+                    if not check_timeframe_direction_limit(pair, tf, direction, strategy_name, active_trades, config):
+                        continue
+                    # Buscar preço de entrada simulado (último close do histórico)
+                    historical_file = f"historical_data_{pair}_{tf}.csv"
+                    if os.path.exists(historical_file):
+                        df_hist = pd.read_csv(historical_file)
+                        if not df_hist.empty:
+                            entry_price = float(df_hist['close'].iloc[-1])
+                        else:
+                            entry_price = 1.0
+                    else:
+                        entry_price = 1.0
+                    quantity = get_quantity(config, pair, entry_price) or 0.0
+                    order = {
+                        "signal_id": str(uuid.uuid4()),
+                        "par": pair,
+                        "direcao": direction,
+                        "preco_entrada": entry_price,
+                        "quantity": quantity,
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "timeframe": tf,
+                        "strategy_name": strategy_name,
+                        "contributing_indicators": ";".join([k for k, v in indicators.items() if v]),
+                        "motivos": json.dumps(["Simulado para dashboard"]),
+                        "localizadores": json.dumps({}),
+                        "parametros": json.dumps({
+                            "tp_percent": tp_percent,
+                            "sl_percent": sl_percent,
+                            "leverage": leverage
+                        }),
+                        "estado": "aberto",
+                        "aceito": True
+                    }
+                    orders.append(order)
+                    # Atualiza lista local para impedir múltiplas simulações do mesmo tipo
+                    active_trades.append({
+                        'par': pair,
+                        'timeframe': tf,
+                        'direcao': direction,
+                        'strategy_name': strategy_name,
+                        'estado': 'aberto'
+                    })
         return orders
     except Exception as e:
         logger.error(f"Erro ao gerar ordens para {strategy_name}: {e}")
@@ -392,7 +418,7 @@ def reset_bot_data(password_input):
             "oportunidades_perdidas.csv",
             "trades_dry_run.json",
             "wallet_dry_run.json",
-            "strategy_confidence.json"
+            
         ]
         
         # Criar backups
@@ -427,3 +453,49 @@ def reset_bot_data(password_input):
     except Exception as e:
         logger.error(f"Erro ao realizar reset do bot: {e}")
         return False, f"Erro ao realizar reset: {str(e)}"
+
+def calculate_advanced_metrics(df):
+    """
+    Calcula métricas quantitativas avançadas para cada estratégia:
+    - Sharpe Ratio
+    - Drawdown Máximo
+    - Expectância
+    - Payoff Ratio
+    - Total PnL
+    - Win Rate
+    Retorna um dicionário com as métricas por estratégia.
+    """
+    import numpy as np
+    metrics = {}
+    if df.empty or 'strategy_name' not in df.columns:
+        return metrics
+    grouped = df[df['estado'] == 'fechado'].groupby('strategy_name')
+    for strategy, group in grouped:
+        pnls = group['pnl_realizado'].dropna().values
+        returns = pnls / 100  # Considerando PnL em %
+        total_pnl = np.sum(pnls)
+        win_trades = group[group['pnl_realizado'] > 0]
+        loss_trades = group[group['pnl_realizado'] <= 0]
+        win_rate = len(win_trades) / len(group) * 100 if len(group) > 0 else 0
+        avg_win = win_trades['pnl_realizado'].mean() if not win_trades.empty else 0
+        avg_loss = loss_trades['pnl_realizado'].mean() if not loss_trades.empty else 0
+        payoff_ratio = abs(avg_win / avg_loss) if avg_loss != 0 else np.nan
+        expectancia = ((win_rate/100) * avg_win) + ((1 - win_rate/100) * avg_loss)
+        # Sharpe Ratio (assumindo taxa livre de risco 0)
+        sharpe = np.mean(returns) / np.std(returns) if np.std(returns) > 0 else np.nan
+        # Drawdown Máximo
+        equity_curve = np.cumsum(returns)
+        high_water_mark = np.maximum.accumulate(equity_curve)
+        drawdowns = equity_curve - high_water_mark
+        max_drawdown = drawdowns.min() if len(drawdowns) > 0 else 0
+        metrics[strategy] = {
+            'total_pnl': round(total_pnl, 2),
+            'win_rate': round(win_rate, 2),
+            'avg_win': round(avg_win, 2),
+            'avg_loss': round(avg_loss, 2),
+            'payoff_ratio': round(payoff_ratio, 2) if not np.isnan(payoff_ratio) else None,
+            'expectancia': round(expectancia, 2),
+            'sharpe': round(sharpe, 2) if not np.isnan(sharpe) else None,
+            'max_drawdown': round(max_drawdown, 2)
+        }
+    return metrics

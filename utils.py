@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import time
 import requests
+import unicodedata
 
 # Configuração do logger
 logging.basicConfig(
@@ -170,3 +171,23 @@ def calcular_confiabilidade_historica(strategy, direction, df_closed):
     avg_pnl = ordens_passadas["pnl_realizado"].mean() if len(ordens_passadas) > 0 else 0
     total_signals = len(ordens_passadas)
     return round(win_rate, 2), round(avg_pnl, 2), total_signals
+
+def normalize_strategy_name(name: str) -> str:
+    """
+    Normaliza o nome da estratégia para padronização em todo o sistema.
+    Remove acentos, converte para minúsculas, remove espaços extras e caracteres especiais.
+    Args:
+        name (str): Nome original da estratégia.
+    Returns:
+        str: Nome normalizado.
+    """
+    if not isinstance(name, str):
+        return ""
+    # Remove acentos
+    name = unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').decode('ASCII')
+    # Converte para minúsculas
+    name = name.lower()
+    # Remove espaços extras e caracteres especiais comuns
+    name = name.strip().replace(' ', '_')
+    name = ''.join(c for c in name if c.isalnum() or c == '_')
+    return name

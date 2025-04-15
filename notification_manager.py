@@ -38,10 +38,23 @@ def load_notifications():
     """
     if os.path.exists(NOTIFICATIONS_FILE):
         try:
-            with open(NOTIFICATIONS_FILE, 'r') as f:
-                return json.load(f)
+            with open(NOTIFICATIONS_FILE, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+                if not content:
+                    # Arquivo vazio, sobrescrever com lista vazia
+                    with open(NOTIFICATIONS_FILE, 'w', encoding='utf-8') as fw:
+                        json.dump([], fw)
+                    logger.warning(f"Arquivo de notificações '{NOTIFICATIONS_FILE}' estava vazio e foi resetado.")
+                    return []
+                return json.loads(content)
         except json.JSONDecodeError:
             # Caso o arquivo esteja corrompido, criar novo
+            with open(NOTIFICATIONS_FILE, 'w', encoding='utf-8') as fw:
+                json.dump([], fw)
+            logger.error(f"Arquivo de notificações '{NOTIFICATIONS_FILE}' corrompido. Resetado para lista vazia.")
+            return []
+        except Exception as e:
+            logger.error(f"Erro inesperado ao carregar notificações: {e}")
             return []
     return []
 
@@ -64,9 +77,7 @@ def add_notification(message, notification_type="INFO", source="Sistema", detail
     """
     try:
         init_notifications()
-        
-        with open(NOTIFICATIONS_FILE, 'r', encoding='utf-8') as f:
-            notifications = json.load(f)
+        notifications = load_notifications()
         
         # Verificar se já existe notificação similar nas últimas 24h
         now = datetime.now()
