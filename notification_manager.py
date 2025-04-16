@@ -391,17 +391,13 @@ def cleanup_old_notifications(max_age_days=30):
 
 def send_telegram_alert(message: str):
     """
-    Envia alerta para o Telegram usando o bot configurado via variáveis de ambiente.
+    Envia alerta para o Telegram usando o token e chat_id definidos no código.
     """
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID")
-    if not token or not chat_id:
-        logger.warning("TELEGRAM_BOT_TOKEN ou TELEGRAM_CHAT_ID não configurados.")
-        return False
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    chat_id = "6097421181"
+    telegram_api_url = "https://api.telegram.org/bot8091827388:AAGUkSq6rxchs0OitnLQWzEjrer7AWWSgmY/sendMessage"
     payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
     try:
-        resp = requests.post(url, data=payload, timeout=5)
+        resp = requests.post(telegram_api_url, data=payload, timeout=5)
         if resp.status_code == 200:
             logger.info(f"Alerta enviado ao Telegram: {message}")
             return True

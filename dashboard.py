@@ -183,7 +183,7 @@ st.markdown("""
 }
     body {
         background-color: #f0f2f6;
-        color: #333333;
+        color: #fc6805;
         font-family: 'Roboto', sans-serif;
         margin: 0;
         padding: 20px;

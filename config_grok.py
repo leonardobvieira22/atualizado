@@ -3,9 +3,11 @@ from dotenv import load_dotenv
 
 # Carrega variáveis do .env
 load_dotenv()
+#XAI_API_KEY=xai-UIuzRZj03YWT7pzkCJVlPl6m1z3L2F88VQUMCTV6bJlhCiEL5UzoLblqvMXrBzHSQ746noUAVH98yKsf
+#XAI_API_URL=https://api.x.ai/v1
 
-XAI_API_KEY = os.getenv("XAI_API_KEY")
-XAI_API_URL = os.getenv("XAI_API_URL", "https://api.x.ai/v1")
+XAI_API_KEY = os.getenv("UIuzRZj03YWT7pzkCJVlPl6m1z3L2F88VQUMCTV6bJlhCiEL5UzoLblqvMXrBzHSQ746noUAVH98yKsf")
+XAI_API_URL = os.getenv("https://api.x.ai/v1", "https://api.x.ai/v1")
 BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
 BINANCE_SECRET_KEY = os.getenv("BINANCE_SECRET_KEY")
 ANALYSIS_INTERVAL = int(os.getenv("ANALYSIS_INTERVAL", 60))
