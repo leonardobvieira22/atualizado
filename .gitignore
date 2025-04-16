@@ -245,6 +245,16 @@ streamlit.log
 *.log
 
 # Arquivos específicos do bot
+bot.log
+precos_log.csv
+sinais_detalhados.csv
+oportunidades_perdidas.csv
+historical_data_*.csv
+backtest_*.csv
+trades_*.csv
+wallet_*.csv
 .cache/
 __pycache__/
 *.pyc
+*.log
+streamlit.log
