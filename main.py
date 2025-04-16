@@ -449,6 +449,39 @@ try:
             logger.info("Inicializando LearningEngine...")
             learning_engine = LearningEngine()
             logger.info("LearningEngine inicializado com sucesso.")
+            # Exibir métricas do modelo no terminal
+            print("\n===== STATUS DO MODELO DE MACHINE LEARNING =====")
+            print(f"Acurácia atual: {learning_engine.accuracy * 100:.2f}%")
+            print(f"Features utilizadas: {', '.join(learning_engine.features)}")
+            if hasattr(learning_engine, 'confusion_matrix_') and getattr(learning_engine, 'confusion_matrix_', None) is not None:
+                print("\nMatriz de Confusão:")
+                print(learning_engine.confusion_matrix_)
+            else:
+                print("\nMatriz de Confusão: (treine o modelo para visualizar)")
+            if hasattr(learning_engine, 'feature_importances_') and getattr(learning_engine, 'feature_importances_', None) is not None:
+                print("\nImportância das Features:")
+                importances = list(zip(learning_engine.features, learning_engine.feature_importances_))
+                importances.sort(key=lambda x: x[1], reverse=True)
+                for i, (feat, imp) in enumerate(importances, 1):
+                    print(f"{i:2d}. {feat:<15}: {imp:.4f}")
+            else:
+                print("\nImportância das Features: (treine o modelo para visualizar)")
+            if hasattr(learning_engine, 'classification_report_') and getattr(learning_engine, 'classification_report_', None) is not None:
+                print("\nRelatório de Classificação:")
+                print(learning_engine.classification_report_)
+            else:
+                print("\nRelatório de Classificação: (treine o modelo para visualizar)")
+            print("\nO que a Machine Learning será capaz de executar quando totalmente integrada:")
+            print("- Filtrar sinais ruins automaticamente, bloqueando trades de baixo potencial.")
+            print("- Priorizar e ranquear sinais de alta probabilidade de sucesso.")
+            print("- Adaptar-se ao mercado aprendendo com novos dados de trades.")
+            print("- Ajustar parâmetros das estratégias de acordo com o desempenho real.")
+            print("- Gerar alertas inteligentes sobre mudanças de padrão ou performance.")
+            print("- Exibir previsões e probabilidades de sucesso para cada trade sugerido.")
+            print("- Permitir simulação de cenários e backtests inteligentes baseados no modelo.")
+            print("- Fornecer explicações sobre o motivo de cada decisão do modelo.")
+            print("- Visualizar a evolução do aprendizado e das métricas do modelo ao longo do tempo.")
+            print("===============================================\n")
         except Exception as e:
             logger.error(f"Erro ao inicializar LearningEngine: {e}")
             raise

@@ -139,3 +139,106 @@ class BinanceUtils:
         except Exception as e:
             logger.error(f"Erro ao calcular volatilidade para {symbol}: {e}")
             return None
+
+    def get_closed_positions_history(self, symbol=None, start_time=None, end_time=None, limit=1000):
+        """
+        Reconstrói o histórico de posições fechadas (consolidado) a partir dos trades, similar ao Position History da Binance.
+        Args:
+            symbol (str): Símbolo (ex: 'BTCUSDT'). Se None, busca todos.
+            start_time (int): Timestamp inicial em ms.
+            end_time (int): Timestamp final em ms.
+            limit (int): Limite de trades a buscar por chamada.
+        Returns:
+            List[dict]: Lista de posições fechadas com info consolidada.
+        """
+        import time
+        trades = []
+        try:
+            if symbol:
+                trades = self.client.futures_account_trades(symbol=symbol, startTime=start_time, endTime=end_time, limit=limit)
+            else:
+                symbols = [m['symbol'] for m in self.client.futures_exchange_info()['symbols']]
+                for sym in symbols:
+                    trades += self.client.futures_account_trades(symbol=sym, startTime=start_time, endTime=end_time, limit=limit)
+        except Exception as e:
+            logger.error(f"Erro ao buscar trades futuros: {e}")
+            return []
+        if not trades:
+            return []
+
+        # Ordena por tempo
+        trades = sorted(trades, key=lambda x: x['time'])
+        positions = []
+        pos = None
+        qty_open = 0.0
+
+        for t in trades:
+            qty = float(t['qty']) if t['side'] == 'BUY' else -float(t['qty'])
+            price = float(t['price'])
+            commission = float(t['commission'])
+            realized_pnl = float(t.get('realizedPnl', 0))
+            time_trade = t['time']
+            symbol = t['symbol']
+
+            if pos is None:
+                pos = {
+                    'symbol': symbol,
+                    'side': t['side'],
+                    'entry_time': time_trade,
+                    'entry_price': price,
+                    'qty': qty,
+                    'trades': [t],
+                    'commission': commission,
+                    'realized_pnl': realized_pnl
+                }
+                qty_open = qty
+            else:
+                # Mesma posição aberta
+                if (qty_open > 0 and t['side'] == 'BUY') or (qty_open < 0 and t['side'] == 'SELL'):
+                    # Aumentando posição
+                    # Atualiza preço médio de entrada
+                    total_qty = abs(qty_open) + abs(qty)
+                    pos['entry_price'] = (pos['entry_price'] * abs(qty_open) + price * abs(qty)) / total_qty
+                    pos['qty'] += qty
+                    pos['trades'].append(t)
+                    pos['commission'] += commission
+                    pos['realized_pnl'] += realized_pnl
+                    qty_open += qty
+                else:
+                    # Fechando posição (ou invertendo)
+                    close_qty = min(abs(qty_open), abs(qty)) * (1 if qty_open > 0 else -1)
+                    pos['trades'].append(t)
+                    pos['commission'] += commission
+                    pos['realized_pnl'] += realized_pnl
+                    close_price = price
+                    close_time = time_trade
+                    positions.append({
+                        'symbol': pos['symbol'],
+                        'side': 'LONG' if qty_open > 0 else 'SHORT',
+                        'entry_time': pos['entry_time'],
+                        'close_time': close_time,
+                        'entry_price': pos['entry_price'],
+                        'close_price': close_price,
+                        'qty': abs(close_qty),
+                        'commission': pos['commission'],
+                        'realized_pnl': pos['realized_pnl']
+                    })
+                    # Se sobrou quantidade, abre nova posição
+                    qty_open = qty_open + qty
+                    if abs(qty_open) > 1e-8:
+                        pos = {
+                            'symbol': symbol,
+                            'side': t['side'],
+                            'entry_time': time_trade,
+                            'entry_price': price,
+                            'qty': qty_open,
+                            'trades': [t],
+                            'commission': commission,
+                            'realized_pnl': realized_pnl
+                        }
+                    else:
+                        pos = None
+                        qty_open = 0.0
+
+        # Garante que só retorna posições realmente fechadas (qty == 0)
+        return positions

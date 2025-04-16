@@ -771,7 +771,7 @@
         "sl_percent": 0.4,
         "leverage": 50,
         "max_trades_simultaneos": 12,
-        "score_tecnico_min": 0.7999999999999999,
+        "score_tecnico_min": 1.0,
         "ml_confidence_min": 0.7,
         "prioritize_signals": true,
         "timeframes": [
@@ -834,7 +834,7 @@
         "sl_percent": 2.5,
         "leverage": 8,
         "max_trades_simultaneos": 12,
-        "score_tecnico_min": 0.6,
+        "score_tecnico_min": 1.0,
         "ml_confidence_min": 0.6,
         "prioritize_signals": false,
         "timeframes": [
@@ -958,7 +958,7 @@
         "sl_percent": 1.5,
         "leverage": 15,
         "max_trades_simultaneos": 12,
-        "score_tecnico_min": 0.9,
+        "score_tecnico_min": 1.0,
         "ml_confidence_min": 0.4,
         "prioritize_signals": false,
         "timeframes": [

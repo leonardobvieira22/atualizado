@@ -6,6 +6,7 @@ import json
 from sklearn.linear_model import LogisticRegression
 from utils import logger
 from strategy_manager import load_strategies, save_strategies
+from sklearn.metrics import confusion_matrix, classification_report
 
 class LearningEngine:
     def __init__(self, model_path="learning_model.pkl"):
@@ -60,6 +61,15 @@ class LearningEngine:
             self.model.fit(X, y)
             self.accuracy = self.model.score(X, y)
             logger.info(f"Modelo treinado com sucesso. Acurácia: {self.accuracy:.2f}")
+
+            # Métricas extras para visualização
+            y_pred = self.model.predict(X)
+            self.confusion_matrix_ = confusion_matrix(y, y_pred)
+            if hasattr(self.model, 'coef_'):
+                self.feature_importances_ = np.abs(self.model.coef_[0])
+            else:
+                self.feature_importances_ = np.zeros(len(self.features))
+            self.classification_report_ = classification_report(y, y_pred)
 
             with open(self.model_path, 'wb') as f:
                 pickle.dump(self.model, f)

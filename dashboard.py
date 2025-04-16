@@ -28,11 +28,21 @@ CONFIG_FILE = "config.json"
 STRATEGIES_FILE = "strategies.json"
 ROBOT_STATUS_FILE = "robot_status.json"
 MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
-#ultima tentativa de ver
 
-#verificar se atualizou git
+# Após as funções globais existentes (como generate_orders, check_alerts, etc.)
 
-#verificar dnv
+# Função para contar indicadores frequentes
+def get_frequent_indicators(indicators_series):
+    all_indicators = []
+    for indicators in indicators_series:
+        if isinstance(indicators, str):
+            all_indicators.extend(indicators.split(';'))
+    if not all_indicators:
+        return "N/A"
+    from collections import Counter
+    most_common = Counter(all_indicators).most_common(4)  # Top 4 indicadores
+    return ", ".join([indicator for indicator, count in most_common])
+
 # Verificar se as credenciais estão presentes no st.secrets
 if "binance" not in st.secrets or "api_key" not in st.secrets["binance"] or "api_secret" not in st.secrets["binance"]:
     try:
@@ -602,7 +612,7 @@ st.markdown("""
         background-color: #f8f9fa;
         margin-bottom: 10px;
         border-radius: 4px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         transition: background-color 0.3s;
     }
 
@@ -674,7 +684,150 @@ st.markdown("""
     .mark-read-button:hover {
         background-color: #e9ecef;
     }
+
+    .robot-card {
+        background-color: #ffffff;
+        border-radius: 20px;
+        padding: 20px;
+        margin: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 300px;
+        position: relative;
+        font-family: Arial, sans-serif;
+    }
+
+    .profile-pic {
+        width: 60px;
+        height: 60px;
+        background-color: #e0e0e0;
+        border-radius: 50%;
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .more-options {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 20px;
+        color: #888;
+    }
+
+    .robot-card h3 {
+        margin-top: 80px;
+        text-align: center;
+        font-size: 1.5em;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .stats {
+        display: flex;
+        justify-content: space-around;
+        margin: 10px 0;
+    }
+
+    .stats div {
+        text-align: center;
+    }
+
+    .stats span {
+        display: block;
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .stats div {
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    .follow-btn {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #f7c948;
+        border: none;
+        border-radius: 20px;
+        color: #333;
+        font-size: 1em;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 10px 0;
+        text-align: center;
+    }
+
+    .follow-btn:hover {
+        background-color: #f0b428;
+    }
+
+    .robot-card p {
+        margin: 5px 0;
+        font-size: 0.9em;
+        color: #666;
+        text-align: left;
+    }
+
+    .robot-card p strong {
+        color: #333;
+    }
     </style>
+""", unsafe_allow_html=True)
+
+# Adicione este CSS para padronizar todos os botões do dashboard
+st.markdown("""
+<style>
+/* Botões padrão do dashboard (azul, texto branco) */
+.stButton > button,
+.binance-yellow,
+.binance-gray,
+.binance-refresh,
+.binance-closeall {
+    background-color: #007bff !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+    border: none !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.12) !important;
+    transition: background-color 0.3s, transform 0.2s !important;
+}
+.stButton > button:hover,
+.binance-yellow:hover,
+.binance-gray:hover,
+.binance-refresh:hover,
+.binance-closeall:hover {
+    background-color: #0056b3 !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+}
+.stButton > button:active,
+.binance-yellow:active,
+.binance-gray:active,
+.binance-refresh:active,
+.binance-closeall:active {
+    transform: translateY(0) !important;
+}
+
+/* Força fundo azul e texto branco para todos os botões input, select, etc */
+button, input[type=button], input[type=submit], input[type=reset], select {
+    background-color: #007bff !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 500 !important;
+}
+button:hover, input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover, select:hover {
+    background-color: #0056b3 !important;
+    color: #fff !important;
+}
+</style>
 """, unsafe_allow_html=True)
 
 # Sincronizar estratégias e status dos robôs antes de carregar
@@ -990,6 +1143,10 @@ def check_alerts(df_open):
             if "Erro ao verificar histórico de preços" in log:
                 alerts.append(f"⚠️ Sistema: Erro detectado: {log.strip()}")
 
+    # --- CORREÇÃO: só tenta ler o arquivo se ele existir ---
+    if not os.path.exists(SINALS_FILE):
+        return alerts
+
     df = pd.read_csv(SINALS_FILE)
     df_closed = df[df['estado'] == 'fechado']
     if len(df_closed[df_closed['resultado'].isin(['TP', 'SL'])]) < 5:
@@ -1006,7 +1163,7 @@ def reset_bot_data(reset_password):
 
     try:
         backup_dir = "backup"
-        os.makedirs(backup_dir, existindo=True)
+        os.makedirs(backup_dir, exist_ok=True)
 
         if os.path.exists(SINALS_FILE):
             shutil.copy(SINALS_FILE, os.path.join(backup_dir, os.path.basename(SINALS_FILE)))
@@ -1095,7 +1252,8 @@ else:
 
 if os.path.exists(MISSED_OPPORTUNITIES_FILE):
     df_missed = pd.read_csv(MISSED_OPPORTUNITIES_FILE)
-    df_missed['timestamp'] = pd.to_datetime(df_missed['timestamp'])
+    # Corrige: converte apenas valores que parecem datas, outros viram NaT
+    df_missed['timestamp'] = pd.to_datetime(df_missed['timestamp'], errors="coerce")
 else:
     df_missed = pd.DataFrame(columns=[
         'timestamp', 'robot_name', 'par', 'timeframe', 'direcao', 'score_tecnico',
@@ -1146,7 +1304,10 @@ with col_notifications:
         st.info("Notifications panel is not implemented yet.")
     render_notifications_panel()
 
-tab1, tab2, tab3, tab4 = st.tabs(["Visão Geral", "Ordens", "Configurações de Estratégia", "Oportunidades Perdidas"])
+# Adiciona a nova aba "Meus Robôs 🤖" e "ML Machine" ao lado de "Ordens Binance"
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+    "Visão Geral", "Ordens", "Configurações de Estratégia", "Oportunidades Perdidas", "Ordens Binance", "Meus Robôs 🤖", "ML Machine"
+])
 
 with tab1:
     st.header("Status dos Robôs")
@@ -1236,22 +1397,6 @@ with tab1:
 
     st.markdown(status_df.to_html(index=False, classes="status-table"), unsafe_allow_html=True)
 
-    st.subheader("Evolução do PNL por Robô")
-    if not df_closed.empty:
-        chart_data = pd.DataFrame()
-        for robot_name in status_df['Robô']:
-            robot_df = df_closed[df_closed['strategy_name'] == robot_name].sort_values('timestamp')
-            if not robot_df.empty:
-                robot_df['timestamp'] = pd.to_datetime(robot_df['timestamp'])
-                robot_df['Cumulative PNL'] = robot_df['pnl_realizado'].cumsum()
-                chart_data[robot_name] = robot_df.set_index('timestamp')['Cumulative PNL']
-        if not chart_data.empty:
-            st.line_chart(chart_data)
-        else:
-            st.info("Nenhuma ordem fechada para exibir o gráfico.")
-    else:
-        st.info("Nenhuma ordem fechada para exibir o gráfico.")
-
     st.subheader("Distribuição de Ordens por Resultado")
     if not df_closed.empty:
         result_counts = df_closed.groupby(['strategy_name', 'resultado']).size().unstack(fill_value=0)
@@ -1312,25 +1457,6 @@ with tab1:
     else:
         st.info("Nenhuma ordem aberta para exibir estatísticas.")
 
-    st.header("Performance por Estratégia")
-    if not df_closed.empty:
-        strategy_stats = []
-        for strategy in df_closed['strategy_name'].unique():
-            strategy_df = df_closed[df_closed['strategy_name'] == strategy]
-            total_orders = len(strategy_df)
-            win_rate = len(strategy_df[strategy_df['pnl_realizado'] >= 0]) / total_orders * 100 if total_orders > 0 else 0
-            avg_pnl = strategy_df['pnl_realizado'].mean() if total_orders > 0 else 0
-            strategy_stats.append({
-                "Estratégia": strategy,
-                "Total de Ordens": total_orders,
-                "Taxa de Vitória (%)": win_rate,
-                "PNL Médio (%)": avg_pnl
-            })
-        strategy_df = pd.DataFrame(strategy_stats)
-        st.table(strategy_df)
-    else:
-        st.info("Nenhuma ordem fechada para exibir a performance por estratégia.")
-
     st.subheader("Distribuição de Ordens por Resultado (Geral)")
     if not df_closed.empty:
         result_counts = df_closed['resultado'].value_counts().reset_index()
@@ -1369,7 +1495,7 @@ with tab1:
         st.plotly_chart(fig)
         st.table(grouped)
     else:
-        st.info("Nenhum dado disponível para exibir o desempenho por combinação.")
+                st.info("Nenhum dado disponível para exibir o desempenho por combinação.")
 
     st.header("Treinamento do Modelo")
     if st.button("Forçar Treinamento do Modelo"):
@@ -2019,6 +2145,406 @@ with tab4:
     else:
         st.info("Nenhuma oportunidade perdida registrada.")
 
+with tab5:
+    # --- Identidade Visual Binance ---
+    st.markdown("""
+    <style>
+    body, .stApp { background-color: #1A1D26 !important; color: #F5F5F5; font-family: 'Inter', 'Roboto', sans-serif; }
+    .binance-table th, .binance-table td { border: 1px solid #23262F; padding: 8px; }
+    .binance-table { width: 100%; border-collapse: collapse; background: #23262F; color: #F5F5F5; }
+    .binance-table tr:nth-child(even) { background: #181A20; }
+    .binance-table tr:hover { background: #262930; }
+    .binance-long { color: #0ECB81; font-weight: bold; }
+    .binance-short { color: #F6465D; font-weight: bold; }
+    .binance-yellow { background: #F0B90B !important; color: #181A20 !important; font-weight: bold; border-radius: 4px; border: none; padding: 4px 12px; margin-right: 4px; }
+    .binance-yellow:hover { background: #FFD700 !important; }
+    .binance-gray { background: #23262F !important; color: #F5F5F5 !important; border-radius: 4px; border: 1px solid #393C49; padding: 4px 12px; }
+    .binance-gray:hover { background: #F0B90B !important; color: #181A20 !important; }
+    .binance-pnl-pos { color: #0ECB81; font-weight: bold; }
+    .binance-pnl-neg { color: #F6465D; font-weight: bold; }
+    .binance-nav { background: #181A20; border-radius: 8px; padding: 8px 0; margin-bottom: 16px; display: flex; gap: 16px; }
+    .binance-nav-btn { color: #F5F5F5; background: none; border: none; font-size: 16px; padding: 8px 20px; cursor: pointer; border-radius: 6px; }
+    .binance-nav-btn.selected, .binance-nav-btn:hover { background: #23262F; color: #F0B90B; }
+    .binance-refresh { background: #23262F; color: #F0B90B; border: none; border-radius: 4px; padding: 4px 16px; margin-left: 8px; }
+    .binance-refresh:hover { background: #F0B90B; color: #181A20; }
+    .binance-closeall { background: #F0B90B; color: #181A20; border: none; border-radius: 4px; padding: 6px 18px; font-weight: bold; margin-bottom: 12px; }
+    .binance-closeall:hover { background: #FFD700; }
+    .binance-delay { color: #F0B90B; font-size: 12px; margin-bottom: 8px; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # --- Menu de Navegação Binance ---
+    if 'binance_nav_selected' not in st.session_state:
+        st.session_state['binance_nav_selected'] = "Open Orders"
+    nav_options = ["Open Orders", "Closed Orders"]
+    # Remover os botões brancos antigos:
+    # nav_cols = st.columns(len(nav_options))
+    # for i, opt in enumerate(nav_options):
+    #     if nav_cols[i].button(opt, key=f"nav_{opt}", help=f"Ver {opt}", use_container_width=True):
+    #         st.session_state['binance_nav_selected'] = opt
+
+    # Substituir por apenas o menu visual (fundo escuro, texto dourado)
+    st.markdown('<div class="binance-nav">' + ''.join([
+        f'<button class="binance-nav-btn {"selected" if st.session_state["binance_nav_selected"]==opt else ""}" onclick="window.location.reload();">{opt}</button>' for opt in nav_options
+    ]) + '</div>', unsafe_allow_html=True)
+
+    # --- Dados reais da Binance ---
+    from binance.client import Client
+    from config import DRY_RUN, REAL_API_KEY, REAL_API_SECRET, DRY_RUN_API_KEY, DRY_RUN_API_SECRET
+
+    # Inicializa o client com as chaves corretas
+    if DRY_RUN:
+        binance_client = Client(DRY_RUN_API_KEY, DRY_RUN_API_SECRET)
+    else:
+        binance_client = Client(REAL_API_KEY, REAL_API_SECRET)
+
+    def get_open_binance_orders():
+        try:
+            positions = binance_client.futures_account()['positions']
+            open_orders = []
+            for pos in positions:
+                amt = float(pos['positionAmt'])
+                if amt != 0:
+                    symbol = pos['symbol']
+                    entry = float(pos['entryPrice'])
+                    # Corrige erro de ausência de markPrice
+                    if 'markPrice' in pos and pos['markPrice']:
+                        mark = float(pos['markPrice'])
+                    else:
+                        mark = float(binance_client.futures_mark_price(symbol=symbol)['markPrice'])
+                    pnl = float(pos['unrealizedProfit'])
+                    side = 'Long' if amt > 0 else 'Short'
+                    leverage = int(pos['leverage'])
+                    size = abs(amt) * mark
+                    roi = (pnl / (abs(amt) * entry) * 100) if entry > 0 else 0
+                    open_orders.append({
+                        'symbol': symbol,
+                        'size': size,
+                        'entry': entry,
+                        'mark': mark,
+                        'pnl': pnl,
+                        'roi': roi,
+                        'side': side,
+                        'leverage': leverage,
+                        'positionAmt': amt  # Adiciona o valor real da posição
+                    })
+            return open_orders
+        except Exception as e:
+            st.error(f"Erro ao buscar ordens abertas da Binance: {e}")
+            return []
+
+    def get_closed_binance_orders(limit=20):
+        try:
+            closed = binance_client.futures_account_trades()
+            # Filtra apenas ordens fechadas (isBuyer/isMaker pode ser usado para lógica mais avançada)
+            closed_orders = []
+            for o in closed[-limit:][::-1]:
+                closed_orders.append({
+                    'symbol': o['symbol'],
+                    'type': 'Perp',
+                    'status': 'Closed',
+                    'closing_pnl': float(o.get('realizedPnl', 0)),
+                    'entry': float(o.get('price', 0)),
+                    'close': float(o.get('price', 0)),
+                    'oi': float(o.get('qty', 0)),
+                    'vol': float(o.get('qty', 0)),
+                    'opened': pd.to_datetime(o['time'], unit='ms').strftime('%d/%m/%Y %H:%M:%S'),
+                    'closed': pd.to_datetime(o['time'], unit='ms').strftime('%d/%m/%Y %H:%M:%S')
+                })
+            return closed_orders
+        except Exception as e:
+            st.error(f"Erro ao buscar ordens fechadas da Binance: {e}")
+            return []
+
+    # --- Open Orders (reais) ---
+    if st.session_state['binance_nav_selected'] == "Open Orders":
+        st.markdown('<div class="binance-delay">Atualização automática a cada 1-2 minutos. <b>Delay esperado!</b></div>', unsafe_allow_html=True)
+        # Remover botões duplicados de refresh/closeall se existirem acima do menu
+        # st.button("Refresh", key="refresh_open_orders", help="Atualizar ordens", use_container_width=True)
+        # st.button("Close All Positions", key="close_all_binance", help="Fechar todas as posições", use_container_width=True, type="primary")
+        open_orders = get_open_binance_orders()
+        total_pnl = sum([o['pnl'] for o in open_orders])
+        pnl_class_total = 'binance-pnl-pos' if total_pnl >= 0 else 'binance-pnl-neg'
+        st.markdown(f'<div style="font-size:18px;font-weight:bold;margin-bottom:8px;">Total PNL: <span class="{pnl_class_total}">{total_pnl:.2f} USDT</span></div>', unsafe_allow_html=True)
+
+        for o in open_orders:
+            pnl_class = 'binance-pnl-pos' if o['pnl'] >= 0 else 'binance-pnl-neg'
+            side_class = 'binance-long' if o['side'] == 'Long' else 'binance-short'
+            market_btn_key = f"close_market_{o['symbol']}"
+            limit_btn_key = f"close_limit_{o['symbol']}"
+
+            cols = st.columns([2, 2, 2, 2, 2, 2, 2, 2])
+            with cols[0]:
+                st.markdown(f"{o['symbol']}")
+            with cols[1]:
+                st.markdown(f"{o['size']:.6f} USDT")
+            with cols[2]:
+                st.markdown(f"{o['entry']:.6f}")
+            with cols[3]:
+                st.markdown(f"{o['mark']:.6f}")
+            with cols[4]:
+                st.markdown(f"<span class='{pnl_class}'>{o['pnl']:.2f} USDT ({o['roi']:.2f}%)</span>", unsafe_allow_html=True)
+            with cols[5]:
+                st.markdown(f"<span class='{side_class}'>{o['side']}</span>", unsafe_allow_html=True)
+            with cols[6]:
+                st.markdown(f"Perp {o['leverage']}x")
+            with cols[7]:
+                # Botão Market funcional (já fecha a posição na Binance)
+                if st.button("Market", key=market_btn_key, help="Fechar posição a mercado", use_container_width=True):
+                    try:
+                        qty = abs(o['positionAmt'])
+                        if qty == 0:
+                            st.warning(f"Sem posição aberta em {o['symbol']}.")
+                        else:
+                            side = 'SELL' if o['side'] == 'Long' else 'BUY'
+                            binance_client.futures_create_order(
+                                symbol=o['symbol'],
+                                side=side,
+                                type='MARKET',
+                                quantity=qty,
+                                reduceOnly=True
+                            )
+                            st.success(f"Posição {o['symbol']} fechada com sucesso via Market!")
+                            st.experimental_rerun()
+                    except Exception as e:
+                        st.error(f"Erro ao fechar posição {o['symbol']}: {e}")
+                # Botão Limit funcional
+                limit_price = st.number_input(
+                    f"Preço limite para {o['symbol']}",
+                    min_value=0.0,
+                    value=float(o['mark']),
+                    key=f"limit_price_{o['symbol']}"
+                )
+                if st.button("Limit", key=limit_btn_key, help="Fechar posição a limite", use_container_width=True):
+                    try:
+                        qty = abs(o['positionAmt'])
+                        if qty == 0:
+                            st.warning(f"Sem posição aberta em {o['symbol']}.")
+                        else:
+                            side = 'SELL' if o['side'] == 'Long' else 'BUY'
+                            binance_client.futures_create_order(
+                                symbol=o['symbol'],
+                                side=side,
+                                type='LIMIT',
+                                quantity=qty,
+                                price=limit_price,
+                                timeInForce='GTC',
+                                reduceOnly=True
+                            )
+                            st.success(f"Ordem LIMIT enviada para fechar {o['symbol']} ({side}) em {limit_price}.")
+                            st.experimental_rerun()
+                    except Exception as e:
+                        st.error(f"Erro ao enviar ordem LIMIT para {o['symbol']}: {e}")
+
+    # --- Closed Orders (reais) ---
+    if st.session_state['binance_nav_selected'] == "Closed Orders":
+        st.markdown('<div style="margin-bottom:12px;">'
+            '<select style="margin-right:8px;padding:4px 8px;border-radius:4px;background:#23262F;color:#F5F5F5;">'
+            '<option>1 Day</option><option>1 Week</option><option>1 Month</option><option>3 Months</option>'
+            '</select>'
+            '<select style="margin-right:8px;padding:4px 8px;border-radius:4px;background:#23262F;color:#F5F5F5;">'
+            '<option>All Symbols</option><option>DOGEUSDT</option><option>XRPUSDT</option>'
+            '</select>'
+            '<button class="binance-refresh">Reset</button>'
+            '</div>', unsafe_allow_html=True)
+        closed_orders = get_closed_binance_orders()
+        for o in closed_orders:
+            pnl_class = 'binance-pnl-pos' if o['closing_pnl'] >= 0 else 'binance-pnl-neg'
+            st.markdown(f'<div style="background:#23262F;border-radius:8px;padding:16px;margin-bottom:12px;">'
+                f'<div style="font-size:18px;font-weight:bold;">{o["symbol"]}</div>'
+                f'<div style="font-size:14px;color:#F0B90B;">{o["type"]} | {o["status"]}</div>'
+                f'<div style="margin:8px 0 4px 0;">Closing PNL: <span class="{pnl_class}">{o["closing_pnl"]:+.2f} USDT</span></div>'
+                f'<div>Entry Price: {o["entry"]:.6f} USDT | Avg. Close Price: {o["close"]:.6f} USDT</div>'
+                f'<div>Max Open Interest: {o["oi"]:,} | Closed Vol.: {o["vol"]:,}</div>'
+                f'<div>Opened: {o["opened"]} | Closed: {o["closed"]}</div>'
+                '</div>', unsafe_allow_html=True)
+
+# Nova aba "Meus Robôs 🤖"
+with tab6:
+    # Ajuste no CSS para o emoji de robô e botões deslizantes
+    st.markdown("""
+    <style>
+    .profile-pic {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #00d4ff, #1e3c72); /* Gradiente moderno */
+        border-radius: 50%;
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 36px; /* Tamanho maior para o emoji */
+        color: #ffffff; /* Cor do emoji */
+        box-shadow: 0 0 8px rgba(0, 212, 255, 0.5); /* Sombra para destaque */
+    }
+    .toggle-switch {
+        position: relative;
+        width: 40px;
+        height: 20px;
+        background-color: #ccc; /* Cinza quando desligado */
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin: 0 5px;
+    }
+    .toggle-switch.active {
+        background-color: #28a745; /* Verde quando ligado */
+    }
+    .toggle-switch .toggle-circle {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background-color: white;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+    }
+    .toggle-switch.active .toggle-circle {
+        transform: translateX(20px); /* Move o círculo para a direita quando ligado */
+    }
+    .toggle-switch:hover {
+        opacity: 0.9;
+    }
+    .toggle-label {
+        font-size: 0.9em;
+        color: #666;
+        margin-right: 5px;
+    }
+    .robot-card .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 5px 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.header("Meus Robôs 🤖")
+    st.info("Visualize o desempenho de cada robô com base nas negociações fechadas.")
+
+    # Filtrar apenas negociações fechadas (sem filtro de par específico)
+    df_closed = df[df['estado'] == 'fechado']
+
+    if not df_closed.empty:
+        # Converter timestamps para datetime
+        df_closed['timestamp'] = pd.to_datetime(df_closed['timestamp'])
+        df_closed['timestamp_saida'] = pd.to_datetime(df_closed['timestamp_saida'])
+
+        # Agrupar por strategy_name para calcular métricas gerais
+        summary = df_closed.groupby('strategy_name').agg(
+            num_negociacoes=('signal_id', 'count'),
+            pnl_total=('pnl_realizado', 'sum'),
+            negociacoes_positivas=('pnl_realizado', lambda x: (x > 0).sum()),
+            lucro_percentual_medio=('lucro_percentual', 'mean'),
+            duracao_media=('timestamp', lambda x: ((df_closed.loc[x.index, 'timestamp_saida'] - x).dt.total_seconds() / 3600).mean()),
+            taxa_aceitas=('aceito', lambda x: (x == True).sum()),
+            score_qualidade_medio=('quality_score', 'mean'),
+            percent_long=('direcao', lambda x: (x == 'LONG').sum()),
+            percent_short=('direcao', lambda x: (x == 'SHORT').sum()),
+            taxa_sl=('resultado', lambda x: (x == 'SL').sum()),
+            indicadores_frequentes=('contributing_indicators', lambda x: get_frequent_indicators(x)),
+            timeframe_mais_usado=('timeframe', lambda x: x.mode().iloc[0] if not x.mode().empty else 'N/A')
+        ).reset_index()
+
+        # Ajustar métricas
+        summary['taxa_vitoria'] = (summary['negociacoes_positivas'] / summary['num_negociacoes'] * 100).round(2)
+        summary['media_pnl'] = (summary['pnl_total'] / summary['num_negociacoes']).round(4)
+        summary['lucro_percentual_medio'] = summary['lucro_percentual_medio'].round(2)
+        summary['duracao_media'] = summary['duracao_media'].round(1)
+        summary['taxa_aceitas'] = (summary['taxa_aceitas'] / summary['num_negociacoes'] * 100).round(2)
+        summary['score_qualidade_medio'] = summary['score_qualidade_medio'].round(2)
+        summary['percent_long'] = (summary['percent_long'] / summary['num_negociacoes'] * 100).round(2)
+        summary['percent_short'] = (summary['percent_short'] / summary['num_negociacoes'] * 100).round(2)
+        summary['taxa_sl'] = (summary['taxa_sl'] / summary['num_negociacoes'] * 100).round(2)
+
+        # Calcular par mais lucrativo por robô
+        par_summary = df_closed.groupby(['strategy_name', 'par'])['pnl_realizado'].sum().reset_index()
+        par_most_profitable = par_summary.loc[par_summary.groupby('strategy_name')['pnl_realizado'].idxmax()][['strategy_name', 'par', 'pnl_realizado']]
+
+        # Calcular timeframe mais lucrativo e direção mais lucrativa para o par mais lucrativo
+        timeframe_direction_summary = df_closed.groupby(['strategy_name', 'par', 'timeframe', 'direcao'])['pnl_realizado'].sum().reset_index()
+        par_timeframe_direction = {}
+        for _, row in par_most_profitable.iterrows():
+            strategy = row['strategy_name']
+            par = row['par']
+            # Filtrar para o par mais lucrativo
+            df_par = timeframe_direction_summary[(timeframe_direction_summary['strategy_name'] == strategy) & (timeframe_direction_summary['par'] == par)]
+            # Timeframe mais lucrativo
+            timeframe_profitable = df_par.groupby('timeframe')['pnl_realizado'].sum().idxmax()
+            # Direção mais lucrativa
+            direction_profitable = df_par.groupby('direcao')['pnl_realizado'].sum().idxmax()
+            par_timeframe_direction[strategy] = {
+                'par': par,
+                'timeframe': timeframe_profitable,
+                'direction': direction_profitable
+            }
+
+        # Exibir os cards lado a lado usando st.columns
+        num_cols_per_row = 4  # Número de cards por linha
+        for i in range(0, len(summary), num_cols_per_row):
+            cols = st.columns(num_cols_per_row)
+            for j, col in enumerate(cols):
+                idx = i + j
+                if idx < len(summary):
+                    row = summary.iloc[idx]
+                    strategy_name = row['strategy_name']
+                    # Obter status do robô
+                    is_active = st.session_state.get('active_strategies', {}).get(strategy_name, False)
+                    # Obter par mais lucrativo, timeframe e direção
+                    par_info = par_timeframe_direction.get(strategy_name, {'par': 'N/A', 'timeframe': 'N/A', 'direction': 'N/A'})
+
+                    with col:
+                        card_html = f"""
+                        <div class="robot-card">
+                            <div class="profile-pic">🤖</div>
+                            <div class="more-options">⋮</div>
+                            <h3>{strategy_name}</h3>
+                            <div class="stats">
+                                <div><span>{row['num_negociacoes']}</span> Negociações</div>
+                                <div><span>{row['pnl_total']:.4f}</span> PNL Total</div>
+                            </div>
+                            <div class="toggle-container">
+                                <span class="toggle-label">{'Ativado' if is_active else 'Desativado'}</span>
+                                <div class="toggle-switch {'active' if is_active else ''}">
+                                    <div class="toggle-circle"></div>
+                                </div>
+                            </div>
+                            <div class="toggle-container">
+                                <span class="toggle-label">Dry Run {'Ativado' if is_active else 'Desativado'}</span>
+                                <div class="toggle-switch {'active' if is_active else ''}">
+                                    <div class="toggle-circle"></div>
+                                </div>
+                            </div>
+                            <div class="toggle-container">
+                                <span class="toggle-label">Binance {'Ativado' if is_active else 'Desativado'}</span>
+                                <div class="toggle-switch {'active' if is_active else ''}">
+                                    <div class="toggle-circle"></div>
+                                </div>
+                            </div>
+                            <p><strong>Taxa de Vitória:</strong> {row['taxa_vitoria']:.2f}%</p>
+                            <p><strong>Média de PNL:</strong> {row['media_pnl']:.4f}</p>
+                            <p><strong>Lucro Percentual Médio:</strong> {row['lucro_percentual_medio']:.2f}%</p>
+                            <p><strong>Duração Média (horas):</strong> {row['duracao_media']:.1f}</p>
+                            <p><strong>Taxa de Negociações Aceitas:</strong> {row['taxa_aceitas']:.2f}%</p>
+                            <p><strong>Score de Qualidade Médio:</strong> {row['score_qualidade_medio']:.2f}</p>
+                            <p><strong>Percentual LONG/SHORT:</strong> {row['percent_long']:.2f}% / {row['percent_short']:.2f}%</p>
+                            <p><strong>Taxa de Stop-Loss:</strong> {row['taxa_sl']:.2f}%</p>
+                            <p><strong>Indicadores Frequentes:</strong> {row['indicadores_frequentes']}</p>
+                            <p><strong>Timeframe Mais Usado:</strong> {row['timeframe_mais_usado']}</p>
+                            <p><strong>Timeframe Vencedor:</strong> 1h</p>
+                            <p><strong>Par Mais Lucrativo:</strong> {par_info['par']}</p>
+                            <p><strong>Timeframe Mais Lucrativo (Par):</strong> {par_info['timeframe']}</p>
+                            <p><strong>Direção Mais Lucrativa (Par):</strong> {par_info['direction']}</p>
+                        </div>
+                        """
+                        st.markdown(card_html, unsafe_allow_html=True)
+    else:
+        st.info("Nenhuma negociação fechada encontrada.")
+
 # Seção de Robôs Ativos
 st.markdown("**Robôs Ativos**")
 st.markdown('<div class="robot-container">', unsafe_allow_html=True)
@@ -2030,3 +2556,42 @@ for strategy_name, strategy_config in strategies.items():
     if strategy_name in active_strategies and active_strategies[strategy_name]:
         if strategy_name not in previous_active_strategies or not previous_active_strategies[strategy_name]:
             generate_orders(strategy_name, strategy_config)
+
+with tab7:
+    st.header("ML Machine - Treinamento e Métricas do Modelo de Aprendizado")
+    st.info("Acompanhe o desempenho do modelo de Machine Learning, treine novamente e visualize métricas detalhadas.")
+
+    # Visualização da acurácia
+    st.subheader("Acurácia do Modelo de Aprendizado")
+    st.metric(label="Acurácia Atual", value=f"{learning_engine.accuracy * 100:.2f}%")
+
+    # Botão para treinar o modelo
+    if st.button("Forçar Treinamento do Modelo ML", key="ml_train_button"):
+        try:
+            learning_engine.train()
+            st.success("Modelo treinado com sucesso!")
+        except Exception as e:
+            st.error(f"Erro ao treinar o modelo: {e}")
+
+    # Visualização dos indicadores/features
+    st.subheader("Indicadores Utilizados pelo Modelo")
+    st.write(", ".join(learning_engine.features))
+
+    # Exemplo de visualização de matriz de confusão e importância das features (se disponíveis)
+    if hasattr(learning_engine, 'confusion_matrix_'):
+        import plotly.figure_factory as ff
+        cm = learning_engine.confusion_matrix_
+        z = cm.tolist() if hasattr(cm, 'tolist') else cm
+        fig = ff.create_annotated_heatmap(z, x=["Negativo", "Positivo"], y=["Negativo", "Positivo"], colorscale='Blues')
+        st.plotly_chart(fig, use_container_width=True)
+        st.caption("Matriz de Confusão do Modelo")
+    if hasattr(learning_engine, 'feature_importances_'):
+        import plotly.graph_objects as go
+        fig = go.Figure([go.Bar(x=learning_engine.features, y=learning_engine.feature_importances_)])
+        fig.update_layout(title="Importância das Features", xaxis_title="Feature", yaxis_title="Importância")
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Outras métricas customizadas
+    if hasattr(learning_engine, 'classification_report_'):
+        st.subheader("Relatório de Classificação")
+        st.text(learning_engine.classification_report_)
