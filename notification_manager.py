@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import logging
 import uuid
+import requests
 
 # Configuração do logger
 logger = logging.getLogger("notification_manager")
@@ -387,3 +388,26 @@ def cleanup_old_notifications(max_age_days=30):
         save_notifications(new_notifications)
         
     return len(old_notifications)
+
+def send_telegram_alert(message: str):
+    """
+    Envia alerta para o Telegram usando o bot configurado via variáveis de ambiente.
+    """
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    if not token or not chat_id:
+        logger.warning("TELEGRAM_BOT_TOKEN ou TELEGRAM_CHAT_ID não configurados.")
+        return False
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
+    try:
+        resp = requests.post(url, data=payload, timeout=5)
+        if resp.status_code == 200:
+            logger.info(f"Alerta enviado ao Telegram: {message}")
+            return True
+        else:
+            logger.error(f"Falha ao enviar alerta Telegram: {resp.text}")
+            return False
+    except Exception as e:
+        logger.error(f"Erro ao enviar alerta Telegram: {e}")
+        return False

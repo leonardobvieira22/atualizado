@@ -132,3 +132,25 @@ class LearningEngine:
                 save_strategies(strategies)
         except Exception as e:
             logger.error(f"Erro ao ajustar parâmetros da estratégia {strategy_name}: {e}")
+
+    def save_training_data(self, pair, signal, insights, result):
+        """Salva dados de treinamento para o modelo de aprendizado."""
+        file = 'learning_data.csv'
+        data = {
+            'pair': pair,
+            'direcao': signal.get('direcao'),
+            'close': signal.get('close'),
+            'stop': signal.get('stop'),
+            'take': signal.get('take'),
+            'motivo': signal.get('motivo'),
+            'sentimento': signal.get('sentimento'),
+            'insights': insights,
+            'ml_confidence': signal.get('ml_confidence'),
+            'result': result,
+            'timestamp': signal.get('timestamp')
+        }
+        import pandas as pd
+        import os
+        df = pd.DataFrame([data])
+        header = not os.path.exists(file)
+        df.to_csv(file, mode='a', index=False, header=header)

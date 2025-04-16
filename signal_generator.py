@@ -2,6 +2,86 @@ import pandas as pd
 import numpy as np
 from utils import logger
 
+class SignalGenerator:
+    def __init__(self):
+        pass
+
+    def generate_signal(self, data, insights, pair):
+        """
+        Gera um sinal combinando indicadores locais e insights do Grok.
+        Args:
+            data (pd.DataFrame): Dados de mercado e indicadores locais.
+            insights (str): Texto retornado pela API do Grok.
+            pair (str): Par analisado.
+        Returns:
+            dict: Sinal gerado (direção, stop, take, motivo, sentimento, etc.)
+        """
+        # Indicadores locais
+        rsi = data['rsi'].iloc[-1] if 'rsi' in data.columns else None
+        ema12 = data['ema12'].iloc[-1] if 'ema12' in data.columns else None
+        ema50 = data['ema50'].iloc[-1] if 'ema50' in data.columns else None
+        close = data['close'].iloc[-1] if 'close' in data.columns else None
+        direcao = None
+        motivo = []
+        stop = None
+        take = None
+        sentimento = None
+
+        # Lógica local simples
+        if rsi and ema12 and ema50:
+            if rsi > 70 and ema12 < ema50:
+                direcao = 'SELL'
+                motivo.append('RSI sobrecomprado e EMA12 < EMA50')
+            elif rsi < 30 and ema12 > ema50:
+                direcao = 'BUY'
+                motivo.append('RSI sobrevendido e EMA12 > EMA50')
+
+        # Ajuste com insights do Grok
+        if insights:
+            insights_lower = insights.lower()
+            if 'compra recomendada' in insights_lower or 'sinal de compra' in insights_lower:
+                direcao = 'BUY'
+                motivo.append('Grok: Compra recomendada')
+            if 'venda recomendada' in insights_lower or 'sinal de venda' in insights_lower:
+                direcao = 'SELL'
+                motivo.append('Grok: Venda recomendada')
+            # Stop-loss sugerido
+            import re
+            stop_match = re.search(r'stop-?loss.*?(\d+\.?\d*)', insights_lower)
+            if stop_match:
+                stop = float(stop_match.group(1))
+                motivo.append(f'Grok: Stop-loss sugerido {stop}')
+            # Take-profit sugerido
+            take_match = re.search(r'take-?profit.*?(\d+\.?\d*)', insights_lower)
+            if take_match:
+                take = float(take_match.group(1))
+                motivo.append(f'Grok: Take-profit sugerido {take}')
+            # Sentimento
+            if 'sentimento positivo' in insights_lower:
+                sentimento = 'positivo'
+            elif 'sentimento negativo' in insights_lower:
+                sentimento = 'negativo'
+
+        return {
+            'pair': pair,
+            'direcao': direcao,
+            'close': close,
+            'stop': stop,
+            'take': take,
+            'motivo': '; '.join(motivo),
+            'sentimento': sentimento,
+            'timestamp': pd.Timestamp.now()
+        }
+
+    def save_signal(self, pair, signal):
+        """Salva o sinal gerado em sinais_detalhados.csv."""
+        if not signal or not signal.get('direcao'):
+            return
+        df = pd.DataFrame([signal])
+        file = 'sinais_detalhados.csv'
+        header = not pd.io.common.file_exists(file)
+        df.to_csv(file, mode='a', index=False, header=header)
+
 def generate_signal(historical_data, timeframe, strategy_config, config, learning_engine, binance_utils):
     """
     Gera um sinal de compra (LONG) ou venda (SHORT) com base nos indicadores da estratégia.

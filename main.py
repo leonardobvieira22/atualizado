@@ -1,4 +1,5 @@
 import sys
+#teste atualizacao 160420251104
 import time
 import threading
 import os
@@ -23,6 +24,197 @@ from trade_manager import check_active_trades, generate_combination_key, save_si
 from trade_simulator import simulate_trade, simulate_trade_backtest
 from backtest import run_backtest
 from strategy_manager import sync_strategies_and_status
+import requests
+import asyncio
+import json
+from binance.client import Client
+import logging
+from signal_generator import SignalGenerator
+
+class UltraBot:
+    def __init__(self):
+        self.client = Client(REAL_API_KEY, REAL_API_SECRET)
+        self.headers = {"Authorization": f"Bearer {os.getenv('XAI_API_KEY')}", "Content-Type": "application/json"}
+        self.last_analysis = {pair: 0 for pair in SYMBOLS}
+        self.cache_file = "insights_cache.json"
+        self.cache = self.load_cache()
+        self.signal_generator = SignalGenerator()
+        self.learning_engine = LearningEngine()
+
+    def load_cache(self):
+        try:
+            with open(self.cache_file, "r") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}
+
+    def save_cache(self):
+        with open(self.cache_file, "w") as f:
+            json.dump(self.cache, f)
+
+    def fetch_market_data(self, pair, timeframe):
+        klines = self.client.get_klines(symbol=pair, interval=timeframe, limit=100)
+        df = pd.DataFrame(klines, columns=[
+            "timestamp", "open", "high", "low", "close", "volume",
+            "close_time", "quote_volume", "trades", "taker_buy_base",
+            "taker_buy_quote", "ignore"
+        ])
+        df["close"] = df["close"].astype(float)
+        return df
+
+    def read_orders(self):
+        try:
+            df = pd.read_csv("sinais_detalhados.csv")
+            # Garante que as colunas essenciais existem
+            for col in ["pair", "type", "price", "quantity", "timestamp"]:
+                if col not in df.columns:
+                    df[col] = None
+            return df
+        except FileNotFoundError:
+            # Cria DataFrame vazio com as colunas corretas
+            return pd.DataFrame(columns=["pair", "type", "price", "quantity", "timestamp"])
+
+    def read_prices(self):
+        try:
+            return pd.read_csv("precos_log.csv")
+        except FileNotFoundError:
+            return pd.DataFrame(columns=["pair", "price", "timestamp"])
+
+    def read_log(self):
+        try:
+            with open("bot.log", "r") as f:
+                return f.readlines()[-10:]
+        except FileNotFoundError:
+            return []
+
+    def calculate_indicators(self, data):
+        data['rsi'] = self.compute_rsi(data['close'], period=14)
+        data['ema12'] = data['close'].ewm(span=12, adjust=False).mean()
+        data['ema50'] = data['close'].ewm(span=50, adjust=False).mean()
+        return data[['close', 'rsi', 'ema12', 'ema50']].tail(5)
+
+    def compute_rsi(self, series, period):
+        delta = series.diff()
+        gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+        rs = gain / loss
+        return 100 - (100 / (1 + rs))
+
+    def validate_signal_locally(self, data):
+        rsi = data['rsi'].iloc[-1]
+        ema12 = data['ema12'].iloc[-1]
+        ema50 = data['ema50'].iloc[-1]
+        if rsi > 70 and ema12 < ema50:
+            return "Venda potencial (sobrecomprado)"
+        elif rsi < 30 and ema12 > ema50:
+            return "Compra potencial (sobrevendido)"
+        return None
+
+    async def analyze_with_grok(self, data_dict, active_pairs):
+        cache_key = f"{','.join(active_pairs)}_{int(time.time() // 300)}"
+        if cache_key in self.cache:
+            logging.info(f"Usando cache para {active_pairs}")
+            return self.cache[cache_key]
+
+        prompt = "Análise em tempo real (escalpagem, 1m):\n"
+        for pair in active_pairs:
+            data = self.calculate_indicators(data_dict[pair])
+            orders = self.read_orders().query(f"pair == '{pair}' and timestamp > '{datetime.now().timestamp() - 300}'")
+            prices = self.read_prices().query(f"pair == '{pair}'").tail(3)
+            log_lines = self.read_log()
+            prompt += (
+                f"\nPar: {pair}\n"
+                f"Indicadores: RSI={data['rsi'].iloc[-1]:.2f}, EMA12={data['ema12'].iloc[-1]:.4f}, EMA50={data['ema50'].iloc[-1]:.4f}\n"
+                f"Preço atual: {data['close'].iloc[-1]:.4f}\n"
+                f"Ordens abertas: {orders[['price', 'quantity']].to_string()}\n"
+                f"Preços recentes: {prices[['price']].to_string()}\n"
+                f"Logs: {''.join(log_lines)}\n"
+                f"Valide sinais de compra/venda, sugira stop-loss/take-profit. Busque posts no X de hoje sobre {pair} de usuários influentes e avalie o sentimento.\n"
+            )
+        payload = {
+            "model": "grok-beta",
+            "messages": [{"role": "user", "content": prompt}],
+            "stream": True
+        }
+        try:
+            response = requests.post(
+                f"https://api.x.ai/v1/chat/completions",
+                json=payload, headers=self.headers, stream=True, timeout=10
+            )
+            response.raise_for_status()
+            insights = ""
+            for chunk in response.iter_lines():
+                if chunk:
+                    insights += chunk.decode("utf-8") + "\n"
+            self.cache[cache_key] = insights
+            self.save_cache()
+            return insights
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Erro na API do Grok: {e}")
+            return f"Erro na análise: {str(e)}"
+
+    async def run(self):
+        while True:
+            active_pairs = []
+            data_dict = {}
+            orders = self.read_orders()
+            for pair in SYMBOLS:
+                current_time = time.time()
+                has_open_orders = not orders.query(f"pair == '{pair}' and type == 'open'").empty
+                interval = 120 if "DOGE" in pair else 300
+                if has_open_orders or (current_time - self.last_analysis[pair] >= interval):
+                    data = self.fetch_market_data(pair, TIMEFRAMES[0])
+                    data = self.calculate_indicators(data)
+                    signal = self.validate_signal_locally(data)
+                    if signal or has_open_orders:
+                        data_dict[pair] = data
+                        active_pairs.append(pair)
+                        self.last_analysis[pair] = current_time
+            if active_pairs:
+                insights = await self.analyze_with_grok(data_dict, active_pairs)
+                logging.info(f"Insights para {active_pairs}: {insights}")
+                # Gerar e salvar sinais com base nos insights e learning engine
+                for pair in active_pairs:
+                    signal = self.signal_generator.generate_signal(data_dict[pair], insights, pair)
+                    # Adiciona confiança do modelo ML
+                    ml_pred = self.learning_engine.predict(data_dict[pair])
+                    signal['ml_confidence'] = ml_pred.get('confidence', 0.0)
+                    self.signal_generator.save_signal(pair, signal)
+                    # Salva dados para aprendizado
+                    self.learning_engine.save_training_data = getattr(self.learning_engine, 'save_training_data', lambda *a, **kw: None)
+                    self.learning_engine.save_training_data(pair, signal, insights, None)
+                # Salvar insights
+                pd.DataFrame({
+                    "pair": [", ".join(active_pairs)],
+                    "timeframe": [TIMEFRAMES[0]],
+                    "insights": [insights],
+                    "timestamp": [datetime.now()]
+                }).to_csv("sinais_detalhados.csv", mode="a", index=False, 
+                          header=not os.path.exists("sinais_detalhados.csv"))
+                # Treinamento periódico
+                if hasattr(self.learning_engine, 'train'):
+                    self.learning_engine.train()
+            await asyncio.sleep(60)
+
+def main():
+    bot = UltraBot()
+    asyncio.run(bot.run())
+
+if __name__ == "__main__":
+    # Inicia o dashboard Streamlit de forma bloqueante (herda o terminal)
+    import subprocess
+    import sys
+    import os
+    dashboard_path = os.path.join(os.path.dirname(__file__), "dashboard.py")
+    dashboard_proc = subprocess.Popen([
+        sys.executable, "-m", "streamlit", "run", dashboard_path, "--server.port", "8580"
+    ])
+    try:
+        main()
+    finally:
+        # Ao encerrar o main.py, encerra também o dashboard
+        dashboard_proc.terminate()
+        dashboard_proc.wait()
 
 try:
     # Inicializar o CsvWriter com filename e columns
@@ -427,6 +619,15 @@ try:
         print("┌────────────────── Status das Chaves API ──────────────────┐")
         print(f"│ Chave Real: {'Válida' if real_status['connected'] else 'Erro'} - Permissões: Leitura: {real_status['permissions'].get('read', False)}, Spot Trading: {real_status['permissions'].get('spot', False)}, Futures: {real_status['permissions'].get('futures', False)} │")
         print("└──────────────────────────────────────────────────────────┘")
+        if not real_status['connected'] or not any(real_status['permissions'].values()):
+            print("\033[91m[ALERTA] Sua chave da Binance está conectando, mas não possui todas as permissões necessárias.")
+            print("Possíveis causas:")
+            print("- Permissões insuficientes na chave API (habilite leitura, spot e futures no painel da Binance)")
+            print("- Restrição de IP na chave (adicione o IP do seu computador ou remova a restrição para teste)")
+            print("- Delay de propagação após alteração de permissões (aguarde alguns minutos)")
+            print("- Endpoint de permissão da Binance pode estar temporariamente indisponível, mas a chave pode funcionar para preços.")
+            print("Se você está recebendo preços normalmente, o bot pode operar parcialmente, mas funções de trading podem falhar!")
+            print("\033[0m")
 
         client = real_status.get("client")
         if not client:

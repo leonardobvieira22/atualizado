@@ -1,4 +1,4 @@
-import streamlit as st
+VOU USAR ESSA VERSAO ESTA MELHOR import streamlit as st
 import pandas as pd
 import numpy as np
 import json
@@ -20,7 +20,6 @@ import shutil
 from dashboard_utils import calculate_advanced_metrics
 from strategy_manager import sync_strategies_and_status
 from trade_manager import check_timeframe_direction_limit, check_active_trades, save_signal_log
-from notification_manager import send_telegram_alert
 
 st.set_page_config(page_title="UltraBot Dashboard 9.0", layout="wide")
 
@@ -949,10 +948,6 @@ def close_order(signal_id, mark_price, reason):
     df.at[order_idx, 'estado'] = "fechado"
     df.to_csv(SINALS_FILE, index=False)
     logger.info(f"Ordem {signal_id} fechada automaticamente com motivo {reason} e PNL de {profit_percent:.2f}%.")
-    # Envia alerta para o Telegram em caso de TP, SL ou erro relevante
-    if reason in ["TP", "SL"] or profit_percent < -5:
-        msg = f"[ALERTA] Ordem {signal_id} ({order['par']}) fechada: {reason}\nRobô: {order['strategy_name']}\nDireção: {direction}\nPNL: {profit_percent:.2f}%\nTimeframe: {order['timeframe']}"
-        send_telegram_alert(msg)
 
 def download_historical_data(symbol, interval='1d', lookback='30 days'):
     try:
@@ -1309,10 +1304,8 @@ with col_notifications:
         st.info("Notifications panel is not implemented yet.")
     render_notifications_panel()
 
-# Adiciona a nova aba "Meus Robôs 🤖" e "ML Machine" ao lado de "Ordens Binance"
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-    "Visão Geral", "Ordens", "Configurações de Estratégia", "Oportunidades Perdidas", "Ordens Binance", "Meus Robôs 🤖", "ML Machine"
-])
+# Adiciona a nova aba "Meus Robôs 🤖" ao lado de "Ordens Binance"
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Visão Geral", "Ordens", "Configurações de Estratégia", "Oportunidades Perdidas", "Ordens Binance", "Meus Robôs 🤖"])
 
 with tab1:
     st.header("Status dos Robôs")
@@ -2179,9 +2172,9 @@ with tab5:
     """, unsafe_allow_html=True)
 
     # --- Menu de Navegação Binance ---
-    if 'binance_nav_selected' not in st.session_state:
-        st.session_state['binance_nav_selected'] = "Open Orders"
     nav_options = ["Open Orders", "Closed Orders"]
+    if 'binance_nav_selected' not in st.session_state:
+        st.session_state['binance_nav_selected'] = nav_options[0]
     # Remover os botões brancos antigos:
     # nav_cols = st.columns(len(nav_options))
     # for i, opt in enumerate(nav_options):
@@ -2428,6 +2421,70 @@ with tab6:
     </style>
     """, unsafe_allow_html=True)
 
+    # Nova aba "Meus Robôs 🤖"
+with tab6:
+    # Ajuste no CSS para o emoji de robô e botões deslizantes
+    st.markdown("""
+    <style>
+    .profile-pic {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #00d4ff, #1e3c72); /* Gradiente moderno */
+        border-radius: 50%;
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 36px; /* Tamanho maior para o emoji */
+        color: #ffffff; /* Cor do emoji */
+        box-shadow: 0 0 8px rgba(0, 212, 255, 0.5); /* Sombra para destaque */
+    }
+    .toggle-switch {
+        position: relative;
+        width: 40px;
+        height: 20px;
+        background-color: #ccc; /* Cinza quando desligado */
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin: 0 5px;
+    }
+    .toggle-switch.active {
+        background-color: #28a745; /* Verde quando ligado */
+    }
+    .toggle-switch .toggle-circle {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background-color: white;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+    }
+    .toggle-switch.active .toggle-circle {
+        transform: translateX(20px); /* Move o círculo para a direita quando ligado */
+    }
+    .toggle-switch:hover {
+        opacity: 0.9;
+    }
+    .toggle-label {
+        font-size: 0.9em;
+        color: #666;
+        margin-right: 5px;
+    }
+    .robot-card .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 5px 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.header("Meus Robôs 🤖")
     st.info("Visualize o desempenho de cada robô com base nas negociações fechadas.")
 
@@ -2561,53 +2618,3 @@ for strategy_name, strategy_config in strategies.items():
     if strategy_name in active_strategies and active_strategies[strategy_name]:
         if strategy_name not in previous_active_strategies or not previous_active_strategies[strategy_name]:
             generate_orders(strategy_name, strategy_config)
-
-with tab7:
-    st.header("ML Machine - Treinamento e Métricas do Modelo de Aprendizado")
-    st.info("Acompanhe o desempenho do modelo de Machine Learning, treine novamente e visualize métricas detalhadas.")
-
-    # Visualização da acurácia
-    st.subheader("Acurácia do Modelo de Aprendizado")
-    st.metric(label="Acurácia Atual", value=f"{learning_engine.accuracy * 100:.2f}%")
-
-    # Botão para treinar o modelo
-    if st.button("Forçar Treinamento do Modelo ML", key="ml_train_button"):
-        try:
-            learning_engine.train()
-            st.success("Modelo treinado com sucesso!")
-        except Exception as e:
-            st.error(f"Erro ao treinar o modelo: {e}")
-
-    # Visualização dos indicadores/features
-    st.subheader("Indicadores Utilizados pelo Modelo")
-    st.write(", ".join(learning_engine.features))
-
-    # Exemplo de visualização de matriz de confusão e importância das features (se disponíveis)
-    if hasattr(learning_engine, 'confusion_matrix_'):
-        import plotly.figure_factory as ff
-        cm = learning_engine.confusion_matrix_
-        z = cm.tolist() if hasattr(cm, 'tolist') else cm
-        fig = ff.create_annotated_heatmap(z, x=["Negativo", "Positivo"], y=["Negativo", "Positivo"], colorscale='Blues')
-        st.plotly_chart(fig, use_container_width=True)
-        st.caption("Matriz de Confusão do Modelo")
-    if hasattr(learning_engine, 'feature_importances_'):
-        import plotly.graph_objects as go
-        fig = go.Figure([go.Bar(x=learning_engine.features, y=learning_engine.feature_importances_)])
-        fig.update_layout(title="Importância das Features", xaxis_title="Feature", yaxis_title="Importância")
-        st.plotly_chart(fig, use_container_width=True)
-
-    # Outras métricas customizadas
-    if hasattr(learning_engine, 'classification_report_'):
-        st.subheader("Relatório de Classificação")
-        st.text(learning_engine.classification_report_)
-
-    st.subheader("Impacto do Sentimento no X")
-    if 'insights' in df.columns:
-        sentiment_counts = df['insights'].str.contains('sentimento positivo', case=False, na=False).sum()
-        st.write(f"Insights com sentimento positivo: {sentiment_counts}")
-        sentiment_neg = df['insights'].str.contains('sentimento negativo', case=False, na=False).sum()
-        st.write(f"Insights com sentimento negativo: {sentiment_neg}")
-        st.write(f"Total de sinais analisados: {len(df)}")
-        st.write(f"Proporção positiva: {sentiment_counts / len(df):.2%}" if len(df) > 0 else "Sem dados suficientes.")
-    else:
-        st.info("Ainda não há dados de sentimento do X nos insights.")
