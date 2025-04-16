@@ -682,6 +682,7 @@ try:
                     signals_in_iteration += 1
                     bot_status["signals_generated"] += 1
 
+                from trade_manager import check_global_and_robot_limit
                 # Remover limitação global: processar todos os sinais da fila
                 while not signal_queue.empty():
                     _, signal_data = signal_queue.get()
@@ -689,6 +690,13 @@ try:
                     strategy_config = active_strategies[strategy_name]
                     strategy_active_trades = [trade for trade in active_trades_dry_run if trade['strategy_name'] == strategy_name]
                     combo_key = signal_data['combination_key']
+                    # Checagem de limite global e por robô
+                    if not check_global_and_robot_limit(strategy_name, active_trades_dry_run):
+                        logger.warning(f"Limite global (540) ou por robô (36) atingido para {strategy_name}. Sinal {signal_data['signal_id']} rejeitado.")
+                        save_signal(signal_data, accepted=False, mode="dry_run")
+                        save_signal_log(signal_data, accepted=False, mode="dry_run")
+                        rejected_signals.put((-signal_data['quality_score'], signal_data))
+                        continue
                     strategy_max_trades = strategy_config.get("max_trades_simultaneos", 1)
                     if len(strategy_active_trades) >= strategy_max_trades:
                         logger.warning(f"Limite de trades simultâneos atingido para {strategy_name} ({len(strategy_active_trades)}/{strategy_max_trades}). Sinal {signal_data['signal_id']} rejeitado.")
@@ -733,6 +741,9 @@ try:
                     strategy_config = active_strategies[strategy_name]
                     strategy_active_trades = [trade for trade in active_trades_dry_run if trade['strategy_name'] == strategy_name]
                     combo_key = signal_data['combination_key']
+                    # Checagem de limite global e por robô
+                    if not check_global_and_robot_limit(strategy_name, active_trades_dry_run):
+                        continue
                     strategy_max_trades = strategy_config.get("max_trades_simultaneos", 1)
                     if len(strategy_active_trades) >= strategy_max_trades:
                         rejected_signals.put((-signal_data['quality_score'], signal_data))

@@ -28,7 +28,10 @@ CONFIG_FILE = "config.json"
 STRATEGIES_FILE = "strategies.json"
 ROBOT_STATUS_FILE = "robot_status.json"
 MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
+#ultima tentativa de ver
+
 #verificar se atualizou git
+
 #verificar dnv
 # Verificar se as credenciais estão presentes no st.secrets
 if "binance" not in st.secrets or "api_key" not in st.secrets["binance"] or "api_secret" not in st.secrets["binance"]:
@@ -871,42 +874,25 @@ def generate_orders(robot_name, strategy_config):
     timeframes = sorted(timeframes, key=lambda tf: tf_weights.get(tf, 1.0), reverse=True)
 
     for timeframe in timeframes:
-        # Verificar limite de ordens antes de gerar nova ordem
         active_trades = check_active_trades()
-        # Limite global de trades simultâneos
-        max_global = strategy_config.get('max_trades_simultaneos')
-        if max_global is None:
-            # Tenta buscar do config global
-            from strategy_manager import load_config
-            config_global = load_config() if callable(load_config) else {}
-            max_global = config_global.get('max_trades_simultaneos', 50)
-        if len(active_trades) >= max_global:
-            logger.warning(f"Limite global de trades simultâneos ({max_global}) atingido. Ordem não será criada.")
+        # Limite de 36 ordens abertas por robô
+        robot_open_orders = [t for t in active_trades if t['strategy_name'] == robot_name and t['estado'] == 'aberto']
+        if len(robot_open_orders) >= 36:
+            logger.warning(f"Limite de 36 ordens abertas por robô atingido para {robot_name}. Ordem não será criada.")
             save_signal_log({
                 'strategy_name': robot_name,
                 'par': selected_pair,
                 'timeframe': timeframe,
-                'direcao': direction if 'direction' in locals() else 'LONG',
+                'direcao': 'LONG',
                 'contributing_indicators': contributing_indicators
             }, accepted=False, mode='DASHBOARD')
             continue
-        direction = None  # será definido após indicadores
+        direction = None
         historical_data = download_historical_data(selected_pair, interval=timeframe, lookback='30 days')
         if historical_data is None or len(historical_data) < 50:
             logger.warning(f"Dados insuficientes para {selected_pair} no timeframe {timeframe}.")
             continue
-
         indicators = calculate_indicators(historical_data, active_indicators)
-
-        localizadores = {
-            "EMA12>EMA50": str(indicators.get("EMA12>EMA50", False)).lower(),
-            "RSI Sobrevendido": str(indicators.get("RSI Sobrevendido", False)).lower(),
-            "MACD Cruzamento Alta": str(indicators.get("MACD Cruzamento Alta", False)).lower(),
-            "Swing_Trade_Composite_LONG": str(indicators.get("Swing_Trade_Composite_LONG", False)).lower(),
-            "Swing_Trade_Composite_SHORT": str(indicators.get("Swing_Trade_Composite_SHORT", False)).lower(),
-            "ML_Confidence": strategy_config['ml_confidence_min']
-        }
-
         should_generate_order = any([
             indicators.get("EMA12>EMA50", False),
             indicators.get("RSI Sobrevendido", False),
@@ -914,17 +900,14 @@ def generate_orders(robot_name, strategy_config):
             indicators.get("Swing_Trade_Composite_LONG", False),
             indicators.get("Swing_Trade_Composite_SHORT", False)
         ])
-
         if not should_generate_order:
             logger.info(f"Nenhuma condição atendida para {robot_name} no par {selected_pair}.")
             continue
-
         direction = "LONG" if indicators.get("EMA12>EMA50", False) or indicators.get("MACD Cruzamento Alta", False) or indicators.get("Swing_Trade_Composite_LONG", False) else "SHORT"
-
-        # VERIFICAÇÃO DE LIMITE DE ORDENS
-        if not check_timeframe_direction_limit(selected_pair, timeframe, direction, robot_name, active_trades, strategy_config):
-            logger.warning(f"Limite de ordens atingido para {robot_name} em {selected_pair}/{timeframe}/{direction}. Ordem não será criada.")
-            # Registrar oportunidade perdida
+        # Só pode haver 1 ordem aberta por robô/par/timeframe/direção
+        already_open = [t for t in robot_open_orders if t['par'] == selected_pair and t['timeframe'] == timeframe and t['direcao'] == direction]
+        if already_open:
+            logger.warning(f"Já existe ordem aberta para {robot_name} em {selected_pair}/{timeframe}/{direction}. Ordem não será criada.")
             save_signal_log({
                 'strategy_name': robot_name,
                 'par': selected_pair,
@@ -933,9 +916,7 @@ def generate_orders(robot_name, strategy_config):
                 'contributing_indicators': contributing_indicators
             }, accepted=False, mode='DASHBOARD')
             continue
-
         entry_price = historical_data['close'].iloc[-1]
-        # Calcular quantity baseado em USDT (padrão 10 USDT)
         quantity_in_usdt = strategy_config.get('quantity_in_usdt', 10.0)
         quantity = quantity_in_usdt / entry_price if entry_price > 0 else 1.0
         new_order = {
@@ -953,19 +934,17 @@ def generate_orders(robot_name, strategy_config):
             'estado': "aberto",
             'strategy_name': robot_name,
             'contributing_indicators': contributing_indicators,
-            'localizadores': json.dumps(localizadores),
+            'localizadores': json.dumps({}),
             'motivos': "Ordem gerada com base em indicadores reais",
             'timeframe': timeframe,
             'aceito': True,
             'parametros': json.dumps(params),
             'quality_score': 0.5
         }
-
         df = pd.concat([df, pd.DataFrame([new_order])], ignore_index=True)
         df.to_csv(SINALS_FILE, index=False)
         logger.info(f"Ordem simulada gerada para {robot_name} no par {selected_pair}.")
         return new_order
-
     logger.warning(f"Nenhum timeframe gerou ordens para {robot_name} no par {selected_pair}.")
     return None
 
@@ -1445,9 +1424,38 @@ with tab1:
     else:
         st.info("Nenhuma ordem fechada para exibir métricas avançadas.")
 
+    # Filtros para ativar/desativar cada robô
+    st.subheader("Ativar/Desativar Robôs")
+    if 'active_strategies' not in st.session_state:
+        st.session_state['active_strategies'] = load_robot_status()
+    for strategy_name in strategies.keys():
+        ativo = st.session_state['active_strategies'].get(strategy_name, True)
+        novo_ativo = st.checkbox(f"{strategy_name}", value=ativo, key=f"toggle_{strategy_name}")
+        st.session_state['active_strategies'][strategy_name] = novo_ativo
+
 with tab2:
     st.header("Ordens")
     st.info("Visualize e filtre ordens simuladas (dry run), ordens fechadas e sinais gerados.")
+
+    # Card global de resumo acima dos filtros
+    st.subheader("Resumo Geral de Ordens")
+    total_abertas = len(df[df['estado'] == 'aberto'])
+    total_fechadas = len(df[df['estado'] == 'fechado'])
+    pnl_aberto = df[df['estado'] == 'aberto']['lucro_percentual'].sum(skipna=True)
+    pnl_fechado = df[df['estado'] == 'fechado']['pnl_realizado'].sum(skipna=True)
+    colA, colB, colC, colD = st.columns([2,2,2,2])
+    colA.metric("Ordens em Aberto", total_abertas)
+    colB.metric("Ordens Fechadas", total_fechadas)
+    colC.metric("PNL Ordens Abertas (%)", f"{pnl_aberto:.2f}")
+    colD.metric("PNL Ordens Fechadas (%)", f"{pnl_fechado:.2f}")
+    # Botão de fechar todas as ordens
+    if colD.button("Fechar Todas as Ordens", key="close_all_orders", help="Fecha todas as ordens em aberto", use_container_width=True):
+        for _, row in df[df['estado'] == 'aberto'].iterrows():
+            mark_price = get_mark_price(row['par'])
+            if mark_price is not None:
+                close_order_manually(row['signal_id'], mark_price)
+        st.success("Todas as ordens em aberto foram fechadas!")
+        st.rerun()
 
     # Filtros
     col1, col2 = st.columns(2)

@@ -6,7 +6,7 @@ from datetime import datetime
 import uuid
 from config import CONFIG, SYMBOLS, TIMEFRAMES
 from utils import logger
-from trade_manager import check_timeframe_direction_limit, check_active_trades
+from trade_manager import check_timeframe_direction_limit, check_active_trades, check_global_and_robot_limit
 from data_manager import get_quantity
 
 def load_data(file_path="sinais_detalhados.csv", columns=None):
@@ -96,6 +96,10 @@ def generate_orders(strategy_name, strategy_config):
         active_trades = check_active_trades()  # Lê ordens abertas reais
         config = CONFIG
         config['quantity_in_usdt'] = 10.0  # Garante valor fixo de 10 USD por ordem
+        # Checagem de limite global e por robô
+        if not check_global_and_robot_limit(strategy_name, active_trades):
+            logger.warning(f"Limite global (540) ou por robô (36) atingido para {strategy_name}. Nenhuma ordem será gerada no dashboard.")
+            return []
         for pair in SYMBOLS:
             for tf in TIMEFRAMES:
                 for direction in ['LONG', 'SHORT']:

@@ -4,7 +4,7 @@ from binance.exceptions import BinanceAPIException
 import pandas as pd
 import json
 from datetime import datetime
-from trade_manager import check_timeframe_direction_limit, check_active_trades
+from trade_manager import check_timeframe_direction_limit, check_active_trades, check_global_and_robot_limit
 
 SINALS_FILE = "sinais_detalhados.csv"
 
@@ -56,6 +56,12 @@ class OrderExecutor:
         """
         # Checagem centralizada de limite de ordens por direção/par/timeframe/robô
         active_trades = check_active_trades()
+        # Checagem de limite global e por robô
+        if not check_global_and_robot_limit(self.config['strategy_name'], active_trades):
+            logger.warning(f"Limite global (540) ou por robô (36) atingido para {self.config['strategy_name']}. Ordem não será criada.")
+            with open("oportunidades_perdidas.csv", "a") as f:
+                f.write(f"{pd.Timestamp.now()},{self.config['strategy_name']},{par},{self.config['timeframe']},{direcao},N/A,N/A,Limite global ou por robô atingido\n")
+            return {"status": "ignored", "reason": "limite global ou por robô atingido"}
         can_open = check_timeframe_direction_limit(
             par,
             self.config['timeframe'],

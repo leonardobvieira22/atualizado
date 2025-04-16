@@ -20,7 +20,6 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -179,3 +178,73 @@ bot.log
 precos_log.csv
 sinais_detalhados.csv
 oportunidades_perdidas.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Logs e databases
+*.log
+*.sqlite3
+
+# Ambientes virtuais
+venv/
+ENV/
+env/
+.env
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+
+# Arquivos específicos do projeto
+secrets.toml
+*.csv
+*.json
+*.pkl
+historical_data_*
+
+# Arquivos específicos do projeto e dados
+*.csv
+sinais_detalhados.csv
+oportunidades_perdidas.csv
+precos_log.csv
+historical_data_*.csv
+backtest_*.csv
+trades_*.csv
+wallet_*.csv
+
+# Cache e logs
+.cache/
+__pycache__/
+*.pyc
+bot.log
+streamlit.log
+*.log
+
+# Arquivos específicos do bot
+.cache/
+__pycache__/
+*.pyc
