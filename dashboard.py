@@ -831,6 +831,52 @@ button:hover, input[type=button]:hover, input[type=submit]:hover, input[type=res
 </style>
 """, unsafe_allow_html=True)
 
+# --- CSS customizado para espaçamento, tabelas e notificações ---
+st.markdown('''
+<style>
+/* Espaçamento maior nos submenus (tabs 1 a 7) */
+[data-testid="stVerticalBlock"] > div[role="tabpanel"] {
+    padding: 36px 32px 36px 32px !important;
+}
+
+/* Notificações: texto branco, negrito, emojis por tipo */
+.alert {
+    color: #fff !important;
+    font-weight: bold !important;
+    border-radius: 8px !important;
+    padding: 16px 24px !important;
+    margin: 12px 0 !important;
+    font-size: 1.1em !important;
+    display: flex;
+    align-items: center;
+}
+.alert-success { background: #1998CF !important; }
+.alert-warning { background: #F0B90B !important; color: #23262F !important; }
+.alert-danger  { background: #E02424 !important; }
+.alert-info    { background: #1998CF !important; }
+
+/* Tabela de ordens: fundo escuro, texto branco negrito, bordas claras */
+.order-table, .order-table th, .order-table td {
+    background: #23262F !important;
+    color: #fff !important;
+    font-weight: bold !important;
+    border: 2px solid #E6EDF0 !important;
+}
+.order-table th {
+    background: #1998CF !important;
+    color: #fff !important;
+    font-weight: bold !important;
+    border-bottom: 3px solid #E6EDF0 !important;
+}
+.order-table tr:nth-child(even) { background: #181A20 !important; }
+.order-table tr:hover { background: #262930 !important; }
+
+/* PNL positivo/negativo */
+.pnl-pos { color: #1DB954 !important; font-weight: bold !important; }
+.pnl-neg { color: #E02424 !important; font-weight: bold !important; }
+</style>
+''', unsafe_allow_html=True)
+
 # Sincronizar estratégias e status dos robôs antes de carregar
 sync_strategies_and_status()
 
@@ -1315,6 +1361,50 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
 ])
 
 with tab1:
+
+    st.header("Estatísticas Gerais")
+    if not df_open.empty:
+        total_value = 0
+        total_pnl = 0
+        for _, row in df_open.iterrows():
+            mark_price = get_mark_price(row['par'])
+            if mark_price is None:
+                continue
+            entry_price = float(row['preco_entrada'])
+            quantity = float(row['quantity'])
+            direction = row['direcao']
+            total_value += entry_price * quantity
+            if direction == "LONG":
+                pnl = (mark_price - entry_price) / entry_price * 100
+            else:
+                pnl = (entry_price - mark_price) / entry_price * 100
+            total_pnl += pnl
+
+        num_open = len(df_open)
+        num_open_positive = len(df_open[df_open.apply(lambda row: (get_mark_price(row['par']) - float(row['preco_entrada'])) / float(row['preco_entrada']) * 100 >= 0 if row['direcao'] == 'LONG' else (float(row['preco_entrada']) - get_mark_price(row['par'])) / float(row['preco_entrada']) * 100 >= 0, axis=1)])
+        num_open_negative = num_open - num_open_positive
+        num_closed_positive = len(df_closed[df_closed['pnl_realizado'] >= 0])
+        num_closed_negative = len(df_closed[df_closed['pnl_realizado'] < 0])
+        win_rate = (num_closed_positive / len(df_closed) * 100) if len(df_closed) > 0 else 0
+        avg_pnl = df_closed['pnl_realizado'].mean() if not df_closed.empty else 0
+
+        col1, col2, col3 = st.columns(3)
+        col1.markdown(f"<div class='metric'><div class='metric-label'>Valor Total em Ordens (USDT)</div><div class='metric-value'>{total_value:.2f}</div></div>", unsafe_allow_html=True)
+        col2.markdown(f"<div class='metric'><div class='metric-label'>PNL Total (%)</div><div class='metric-value'>{total_pnl:.2f}</div></div>", unsafe_allow_html=True)
+        col3.markdown(f"<div class='metric'><div class='metric-label'>Ordens Abertas</div><div class='metric-value'>{num_open}</div></div>", unsafe_allow_html=True)
+
+        col4, col5, col6 = st.columns(3)
+        col4.markdown(f"<div class='metric'><div class='metric-label'>Ordens Abertas (PNL Positivo)</div><div class='metric-value'>{num_open_positive}</div></div>", unsafe_allow_html=True)
+        col5.markdown(f"<div class='metric'><div class='metric-label'>Ordens Abertas (PNL Negativo)</div><div class='metric-value'>{num_open_negative}</div></div>", unsafe_allow_html=True)
+        col6.markdown(f"<div class='metric'><div class='metric-label'>Taxa de Vitória (%)</div><div class='metric-value'>{win_rate:.2f}</div></div>", unsafe_allow_html=True)
+
+        col7, col8, col9 = st.columns(3)
+        col7.markdown(f"<div class='metric'><div class='metric-label'>Ordens Fechadas (PNL Positivo)</div><div class='metric-value'>{num_closed_positive}</div></div>", unsafe_allow_html=True)
+        col8.markdown(f"<div class='metric'><div class='metric-label'>Ordens Fechadas (PNL Negativo)</div><div class='metric-value'>{num_closed_negative}</div></div>", unsafe_allow_html=True)
+        col9.markdown(f"<div class='metric'><div class='metric-label'>PNL Médio por Ordem (%)</div><div class='metric-value'>{avg_pnl:.2f}</div></div>", unsafe_allow_html=True)
+    else:
+        st.info("Nenhuma ordem aberta para exibir estatísticas.")
+        
     st.header("Status dos Robôs")
     active_strategies = st.session_state.get('active_strategies', load_robot_status())
     status_data = []
@@ -1402,65 +1492,9 @@ with tab1:
 
     st.markdown(status_df.to_html(index=False, classes="status-table"), unsafe_allow_html=True)
 
-    st.subheader("Distribuição de Ordens por Resultado")
-    if not df_closed.empty:
-        result_counts = df_closed.groupby(['strategy_name', 'resultado']).size().unstack(fill_value=0)
-        if not result_counts.empty:
-            fig = px.bar(
-                result_counts,
-                barmode='stack',
-                title="Distribuição de Ordens por Resultado",
-                labels={'value': 'Número de Ordens', 'strategy_name': 'Robô', 'resultado': 'Resultado'},
-                height=400
-            )
-            st.plotly_chart(fig)
-        else:
-            st.info("Nenhuma ordem fechada para exibir o gráfico.")
-    else:
-        st.info("Nenhuma ordem fechada para exibir o gráfico.")
+    
 
-    st.header("Estatísticas Gerais")
-    if not df_open.empty:
-        total_value = 0
-        total_pnl = 0
-        for _, row in df_open.iterrows():
-            mark_price = get_mark_price(row['par'])
-            if mark_price is None:
-                continue
-            entry_price = float(row['preco_entrada'])
-            quantity = float(row['quantity'])
-            direction = row['direcao']
-            total_value += entry_price * quantity
-            if direction == "LONG":
-                pnl = (mark_price - entry_price) / entry_price * 100
-            else:
-                pnl = (entry_price - mark_price) / entry_price * 100
-            total_pnl += pnl
-
-        num_open = len(df_open)
-        num_open_positive = len(df_open[df_open.apply(lambda row: (get_mark_price(row['par']) - float(row['preco_entrada'])) / float(row['preco_entrada']) * 100 >= 0 if row['direcao'] == 'LONG' else (float(row['preco_entrada']) - get_mark_price(row['par'])) / float(row['preco_entrada']) * 100 >= 0, axis=1)])
-        num_open_negative = num_open - num_open_positive
-        num_closed_positive = len(df_closed[df_closed['pnl_realizado'] >= 0])
-        num_closed_negative = len(df_closed[df_closed['pnl_realizado'] < 0])
-        win_rate = (num_closed_positive / len(df_closed) * 100) if len(df_closed) > 0 else 0
-        avg_pnl = df_closed['pnl_realizado'].mean() if not df_closed.empty else 0
-
-        col1, col2, col3 = st.columns(3)
-        col1.markdown(f"<div class='metric'><div class='metric-label'>Valor Total em Ordens (USDT)</div><div class='metric-value'>{total_value:.2f}</div></div>", unsafe_allow_html=True)
-        col2.markdown(f"<div class='metric'><div class='metric-label'>PNL Total (%)</div><div class='metric-value'>{total_pnl:.2f}</div></div>", unsafe_allow_html=True)
-        col3.markdown(f"<div class='metric'><div class='metric-label'>Ordens Abertas</div><div class='metric-value'>{num_open}</div></div>", unsafe_allow_html=True)
-
-        col4, col5, col6 = st.columns(3)
-        col4.markdown(f"<div class='metric'><div class='metric-label'>Ordens Abertas (PNL Positivo)</div><div class='metric-value'>{num_open_positive}</div></div>", unsafe_allow_html=True)
-        col5.markdown(f"<div class='metric'><div class='metric-label'>Ordens Abertas (PNL Negativo)</div><div class='metric-value'>{num_open_negative}</div></div>", unsafe_allow_html=True)
-        col6.markdown(f"<div class='metric'><div class='metric-label'>Taxa de Vitória (%)</div><div class='metric-value'>{win_rate:.2f}</div></div>", unsafe_allow_html=True)
-
-        col7, col8, col9 = st.columns(3)
-        col7.markdown(f"<div class='metric'><div class='metric-label'>Ordens Fechadas (PNL Positivo)</div><div class='metric-value'>{num_closed_positive}</div></div>", unsafe_allow_html=True)
-        col8.markdown(f"<div class='metric'><div class='metric-label'>Ordens Fechadas (PNL Negativo)</div><div class='metric-value'>{num_closed_negative}</div></div>", unsafe_allow_html=True)
-        col9.markdown(f"<div class='metric'><div class='metric-label'>PNL Médio por Ordem (%)</div><div class='metric-value'>{avg_pnl:.2f}</div></div>", unsafe_allow_html=True)
-    else:
-        st.info("Nenhuma ordem aberta para exibir estatísticas.")
+    
 
     st.subheader("Distribuição de Ordens por Resultado (Geral)")
     if not df_closed.empty:
@@ -1471,36 +1505,7 @@ with tab1:
     else:
         st.info("Nenhuma ordem fechada para exibir o gráfico.")
 
-    st.header("Desempenho por Combinação")
-    if not df.empty:
-        df['pnl_current'] = df.apply(
-            lambda row: (get_mark_price(row['par']) - float(row['preco_entrada'])) / float(row['preco_entrada']) * 100
-            if row['estado'] == 'aberto' and row['direcao'] == 'LONG'
-            else (float(row['preco_entrada']) - get_mark_price(row['par'])) / float(row['preco_entrada']) * 100
-            if row['estado'] == 'aberto' and row['direcao'] == 'SHORT'
-            else row['pnl_realizado'], axis=1
-        )
-        grouped = df.groupby(['strategy_name', 'timeframe', 'direcao']).agg({
-            'pnl_current': 'mean',
-            'signal_id': 'count'
-        }).reset_index()
-        grouped.rename(columns={'pnl_current': 'PNL Médio (%)', 'signal_id': 'Total Ordens'}, inplace=True)
-
-        fig = px.bar(
-            grouped,
-            x='timeframe',
-            y='PNL Médio (%)',
-            color='direcao',
-            barmode='group',
-            facet_col='strategy_name',
-            title="PNL Médio por Combinação (Robô, Timeframe, Direção)",
-            labels={'timeframe': 'Timeframe', 'PNL Médio (%)': 'PNL Médio (%)', 'direcao': 'Direção'},
-            height=600
-        )
-        st.plotly_chart(fig)
-        st.table(grouped)
-    else:
-                st.info("Nenhum dado disponível para exibir o desempenho por combinação.")
+    
 
     st.header("Treinamento do Modelo")
     if st.button("Forçar Treinamento do Modelo"):
@@ -1516,14 +1521,7 @@ with tab1:
     st.subheader("Indicadores Utilizados pelo Modelo")
     st.write(", ".join(learning_engine.features))
 
-    st.header("Configurações Atuais")
-    config = load_config()
-    col1, col2, col3, col4 = st.columns(4)
-    col1.write(f"**TP Percentual Padrão:** {config.get('tp_percent', 2.0)}%")
-    col2.write(f"**SL Percentual Padrão:** {config.get('sl_percent', 1.0)}%")
-    col3.write(f"**Leverage:** {config.get('leverage', 22)}x")
-    col4.write(f"**Máximo de Trades Simultaneos:** {config.get('max_trades_simultaneos', 50)}")
-
+    
     st.header("Métricas Quantitativas Avançadas por Robô")
     if not df_closed.empty:
         advanced_metrics = calculate_advanced_metrics(df_closed)
@@ -1546,6 +1544,7 @@ with tab1:
             for k in list(format_dict.keys()):
                 if not pd.api.types.is_numeric_dtype(metrics_df[k]):
                     del format_dict[k]
+            
             if format_dict:
                 st.dataframe(metrics_df.style.format(format_dict), use_container_width=True)
             else:
@@ -1556,13 +1555,7 @@ with tab1:
         st.info("Nenhuma ordem fechada para exibir métricas avançadas.")
 
     # Filtros para ativar/desativar cada robô
-    st.subheader("Ativar/Desativar Robôs")
-    if 'active_strategies' not in st.session_state:
-        st.session_state['active_strategies'] = load_robot_status()
-    for strategy_name in strategies.keys():
-        ativo = st.session_state['active_strategies'].get(strategy_name, True)
-        novo_ativo = st.checkbox(f"{strategy_name}", value=ativo, key=f"toggle_{strategy_name}")
-        st.session_state['active_strategies'][strategy_name] = novo_ativo
+    #removido ativar desativar robos
 
 with tab2:
     st.header("Ordens")
@@ -1574,12 +1567,43 @@ with tab2:
     total_fechadas = len(df[df['estado'] == 'fechado'])
     pnl_aberto = df[df['estado'] == 'aberto']['lucro_percentual'].sum(skipna=True)
     pnl_fechado = df[df['estado'] == 'fechado']['pnl_realizado'].sum(skipna=True)
+
+    # Cores para PNL
+    def get_pnl_color(value):
+        if value > 0:
+            return '#1DB954'  # verde
+        elif value < 0:
+            return '#E02424'  # vermelho
+        else:
+            return '#1998CF'  # neutro
+
+    card_style = lambda color: f"background-color:#E6EDF0;padding:32px 0 32px 0;border-radius:12px;margin-bottom:18px;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;"
+    value_style = lambda color: f"color:{color};font-size:2.2em;font-weight:bold;"
+    label_style = "color:#1998CF;font-size:1.1em;font-weight:600;margin-bottom:10px;"
+
     colA, colB, colC, colD = st.columns([2,2,2,2])
-    colA.metric("Ordens em Aberto", total_abertas)
-    colB.metric("Ordens Fechadas", total_fechadas)
-    colC.metric("PNL Ordens Abertas (%)", f"{pnl_aberto:.2f}")
-    colD.metric("PNL Ordens Fechadas (%)", f"{pnl_fechado:.2f}")
-    # Botão de fechar todas as ordens
+    with colA:
+        st.markdown(f"<div style='{card_style('#1998CF')}'>"
+                    f"<div style='{label_style}'>Ordens em Aberto</div>"
+                    f"<div style='{value_style('#1998CF')}'>{total_abertas}</div>"
+                    f"</div>", unsafe_allow_html=True)
+    with colB:
+        st.markdown(f"<div style='{card_style('#1998CF')}'>"
+                    f"<div style='{label_style}'>Ordens Fechadas</div>"
+                    f"<div style='{value_style('#1998CF')}'>{total_fechadas}</div>"
+                    f"</div>", unsafe_allow_html=True)
+    with colC:
+        st.markdown(f"<div style='{card_style(get_pnl_color(pnl_aberto))}'>"
+                    f"<div style='{label_style}'>PNL Ordens Abertas (%)</div>"
+                    f"<div style='{value_style(get_pnl_color(pnl_aberto))}'>{pnl_aberto:.2f}</div>"
+                    f"</div>", unsafe_allow_html=True)
+    with colD:
+        st.markdown(f"<div style='{card_style(get_pnl_color(pnl_fechado))}'>"
+                    f"<div style='{label_style}'>PNL Ordens Fechadas (%)</div>"
+                    f"<div style='{value_style(get_pnl_color(pnl_fechado))}'>{pnl_fechado:.2f}</div>"
+                    f"</div>", unsafe_allow_html=True)
+
+    # Botão de fechar    todas as ordens
     if colD.button("Fechar Todas as Ordens", key="close_all_orders", help="Fecha todas as ordens em aberto", use_container_width=True):
         for _, row in df[df['estado'] == 'aberto'].iterrows():
             mark_price = get_mark_price(row['par'])
@@ -2551,9 +2575,7 @@ with tab6:
         st.info("Nenhuma negociação fechada encontrada.")
 
 # Seção de Robôs Ativos
-st.markdown("**Robôs Ativos**")
-st.markdown('<div class="robot-container">', unsafe_allow_html=True)
-active_strategies = st.session_state.get('active_strategies', load_robot_status())
+#removido by leleo
 
 # Verificar mudanças no status dos robôs e gerar ordens
 previous_active_strategies = st.session_state.get('previous_active_strategies', {})
