@@ -96,6 +96,7 @@ def generate_orders(strategy_name, strategy_config):
         active_trades = check_active_trades()  # Lê ordens abertas reais
         config = CONFIG
         config['quantity_in_usdt'] = 10.0  # Garante valor fixo de 10 USD por ordem
+        modo_ao_contrario = config.get('modo_ao_contrario', False)
         # Checagem de limite global e por robô
         if not check_global_and_robot_limit(strategy_name, active_trades):
             logger.warning(f"Limite global (540) ou por robô (36) atingido para {strategy_name}. Nenhuma ordem será gerada no dashboard.")
@@ -103,7 +104,18 @@ def generate_orders(strategy_name, strategy_config):
         for pair in SYMBOLS:
             for tf in TIMEFRAMES:
                 for direction in ['LONG', 'SHORT']:
-                    if not check_timeframe_direction_limit(pair, tf, direction, strategy_name, active_trades, config):
+                    direcao_original = direction
+                    modo_contrario = False
+                    modo_contrario_emoji = ''
+                    direcao_final = direction
+                    motivos = ["Simulado para dashboard"]
+                    if modo_ao_contrario:
+                        direcao_final = 'SHORT' if direction == 'LONG' else 'LONG'
+                        modo_contrario = True
+                        modo_contrario_emoji = '🔵 [modo ao contrario]'
+                        motivos.append(f"Ordem invertida pelo modo ao contrário ({direcao_original} → {direcao_final})")
+                        logger.info(f"Ordem invertida: Estratégia {strategy_name}, Par {pair}, Timeframe {tf}, Direção original: {direcao_original}, Direção enviada: {direcao_final} (modo invertido ativado)")
+                    if not check_timeframe_direction_limit(pair, tf, direcao_final, strategy_name, active_trades, config):
                         continue
                     # Buscar preço de entrada simulado (último close do histórico)
                     historical_file = f"historical_data_{pair}_{tf}.csv"
@@ -119,14 +131,17 @@ def generate_orders(strategy_name, strategy_config):
                     order = {
                         "signal_id": str(uuid.uuid4()),
                         "par": pair,
-                        "direcao": direction,
+                        "direcao": direcao_final,
+                        "direcao_original": direcao_original,
+                        "modo_contrario": modo_contrario,
+                        "modo_contrario_emoji": modo_contrario_emoji,
                         "preco_entrada": entry_price,
                         "quantity": quantity,
                         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         "timeframe": tf,
                         "strategy_name": strategy_name,
                         "contributing_indicators": ";".join([k for k, v in indicators.items() if v]),
-                        "motivos": json.dumps(["Simulado para dashboard"]),
+                        "motivos": json.dumps(motivos),
                         "localizadores": json.dumps({}),
                         "parametros": json.dumps({
                             "tp_percent": tp_percent,
@@ -141,7 +156,7 @@ def generate_orders(strategy_name, strategy_config):
                     active_trades.append({
                         'par': pair,
                         'timeframe': tf,
-                        'direcao': direction,
+                        'direcao': direcao_final,
                         'strategy_name': strategy_name,
                         'estado': 'aberto'
                     })

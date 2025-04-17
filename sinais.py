@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import ta
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,16 @@ class SignalGenerator:
         return df
 
     def generate_signal(self, df, pair, timeframe, strategy_name, confidence_data=None):
+        # Checagem de pausa de sinais
+        try:
+            with open("config.json", "r") as f:
+                config_json = json.load(f)
+            if config_json.get("pausar_sinais", False):
+                logger.info("Geração de sinais pausada por configuração (pausar_sinais=true). Nenhum sinal será gerado.")
+                return None
+        except Exception as e:
+            logger.error(f"Erro ao ler config.json para pausar_sinais: {e}")
+
         indicators = next(s["indicators"] for s in self.config["backtest_config"]["signal_strategies"] if s["name"] == strategy_name)
         score = 0
         reasons = []

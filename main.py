@@ -30,16 +30,56 @@ import json
 from binance.client import Client
 import logging
 from signal_generator import SignalGenerator
+from grok_periodic_check import GrokPeriodicCheck
+
+logger.info("Carregando variáveis de ambiente...")
+load_dotenv()
+if not os.getenv('XAI_API_KEY'):
+    logger.error("XAI_API_KEY não configurada. Adicione ao arquivo .env.")
+    sys.exit(1)
+logger.info("Variáveis de ambiente carregadas.")
 
 class UltraBot:
     def __init__(self):
         self.client = Client(REAL_API_KEY, REAL_API_SECRET)
-        self.headers = {"Authorization": f"Bearer {os.getenv('XAI_API_KEY')}", "Content-Type": "application/json"}
+        self.api_key = os.getenv('XAI_API_KEY')
+        if not self.api_key:
+            logger.error("Chave XAI_API_KEY não encontrada nas variáveis de ambiente.")
+            raise ValueError("Configure a XAI_API_KEY no .env ou no sistema.")
+        self.headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
         self.last_analysis = {pair: 0 for pair in SYMBOLS}
         self.cache_file = "insights_cache.json"
         self.cache = self.load_cache()
         self.signal_generator = SignalGenerator()
         self.learning_engine = LearningEngine()
+        self.validate_grok_api()
+        self.grok_checker = GrokPeriodicCheck(data_dir="data")
+
+    def validate_grok_api(self):
+        """Valida a conexão com a API do Grok/XAI usando um POST de teste."""
+        import requests
+        payload = {
+            "messages": [
+                {"role": "system", "content": "You are a test assistant."},
+                {"role": "user", "content": "Testing. Just say hi and hello world and nothing else."}
+            ],
+            "model": "grok-3-latest",
+            "stream": False,
+            "temperature": 0
+        }
+        try:
+            response = requests.post(
+                "https://api.x.ai/v1/chat/completions",
+                json=payload, headers=self.headers, timeout=30
+            )
+            if response.status_code == 200 and 'error' not in response.text.lower():
+                logger.info("API do Grok validada com sucesso.")
+            else:
+                logger.error(f"Falha na validação da API do Grok: {response.text}")
+                raise ValueError("Chave da API inválida ou serviço indisponível.")
+        except Exception as e:
+            logger.error(f"Erro ao validar API do Grok: {e}")
+            raise
 
     def load_cache(self):
         try:
@@ -111,49 +151,89 @@ class UltraBot:
         return None
 
     async def analyze_with_grok(self, data_dict, active_pairs):
+        import json
         cache_key = f"{','.join(active_pairs)}_{int(time.time() // 300)}"
         if cache_key in self.cache:
-            logging.info(f"Usando cache para {active_pairs}")
+            logger.info(f"Usando cache para {active_pairs}")
             return self.cache[cache_key]
 
-        prompt = "Análise em tempo real (escalpagem, 1m):\n"
+        insights = {
+            "pairs": {},
+            "timestamp": datetime.now().isoformat(),
+            "errors": []
+        }
+        prompt = (
+            "Você é um analista de trading avançado. Forneça uma análise detalhada em tempo real (escalpagem, 1m) para os pares fornecidos. "
+            "Valide sinais de compra/venda, sugira stop-loss/take-profit e estime confiança (0-1). "
+            "Busque sentimento de mercado em posts recentes no X sobre cada par e resuma (bullish, bearish, neutro). "
+            "Retorne a resposta em JSON com: {'pair': {'signal': 'buy/sell/none', 'confidence': float, 'sl': float, 'tp': float, 'sentiment': 'bullish/bearish/neutral', 'reason': str}}.\n\n"
+        )
         for pair in active_pairs:
-            data = self.calculate_indicators(data_dict[pair])
-            orders = self.read_orders().query(f"pair == '{pair}' and timestamp > '{datetime.now().timestamp() - 300}'")
-            prices = self.read_prices().query(f"pair == '{pair}'").tail(3)
-            log_lines = self.read_log()
-            prompt += (
-                f"\nPar: {pair}\n"
-                f"Indicadores: RSI={data['rsi'].iloc[-1]:.2f}, EMA12={data['ema12'].iloc[-1]:.4f}, EMA50={data['ema50'].iloc[-1]:.4f}\n"
-                f"Preço atual: {data['close'].iloc[-1]:.4f}\n"
-                f"Ordens abertas: {orders[['price', 'quantity']].to_string()}\n"
-                f"Preços recentes: {prices[['price']].to_string()}\n"
-                f"Logs: {''.join(log_lines)}\n"
-                f"Valide sinais de compra/venda, sugira stop-loss/take-profit. Busque posts no X de hoje sobre {pair} de usuários influentes e avalie o sentimento.\n"
-            )
+            try:
+                data = self.calculate_indicators(data_dict[pair])
+                orders = self.read_orders().query(f"pair == '{pair}' and timestamp > '{datetime.now().timestamp() - 300}'")
+                prices = self.read_prices().query(f"pair == '{pair}'").tail(3)
+                log_lines = self.read_log()
+                prompt += (
+                    f"Par: {pair}\n"
+                    f"Indicadores: RSI={data['rsi'].iloc[-1]:.2f}, EMA12={data['ema12'].iloc[-1]:.4f}, EMA50={data['ema50'].iloc[-1]:.4f}\n"
+                    f"Preço atual: {data['close'].iloc[-1]:.4f}\n"
+                    f"Ordens abertas:\n{orders[['price', 'quantity']].to_string()}\n"
+                    f"Preços recentes:\n{prices[['price']].to_string()}\n"
+                    f"Logs recentes:\n{''.join(log_lines[-5:])}\n\n"
+                )
+            except Exception as e:
+                logger.error(f"Erro ao preparar dados para {pair}: {e}")
+                insights["errors"].append(f"Dados para {pair}: {str(e)}")
+                continue
+
         payload = {
-            "model": "grok-beta",
+            "model": "grok-3-latest",
             "messages": [{"role": "user", "content": prompt}],
-            "stream": True
+            "stream": False,
+            "temperature": 0.3,
+            "max_tokens": 2000
         }
         try:
             response = requests.post(
-                f"https://api.x.ai/v1/chat/completions",
-                json=payload, headers=self.headers, stream=True, timeout=10
+                "https://api.x.ai/v1/chat/completions",
+                json=payload, headers=self.headers, timeout=30
             )
             response.raise_for_status()
-            insights = ""
-            for chunk in response.iter_lines():
-                if chunk:
-                    insights += chunk.decode("utf-8") + "\n"
+            result = response.json()
+            content = result["choices"][0]["message"]["content"]
+            try:
+                parsed_insights = json.loads(content)
+                for pair in active_pairs:
+                    if pair in parsed_insights:
+                        insights["pairs"][pair] = parsed_insights[pair]
+                        # Integrar com LearningEngine
+                        self.learning_engine.update_signal_confidence(
+                            pair, parsed_insights[pair].get("signal", "none"),
+                            parsed_insights[pair].get("confidence", 0.0)
+                        )
+            except json.JSONDecodeError:
+                logger.warning("Resposta do Grok não é JSON válido. Usando fallback.")
+                insights["errors"].append("Formato de resposta inválido.")
             self.cache[cache_key] = insights
             self.save_cache()
             return insights
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                logger.warning("Limite de taxa atingido na API do Grok. Aguardando...")
+                await asyncio.sleep(60)
+            else:
+                logger.error(f"Erro HTTP na API do Grok: {e}")
+                insights["errors"].append(f"HTTP: {str(e)}")
+            return insights
         except requests.exceptions.RequestException as e:
-            logging.error(f"Erro na API do Grok: {e}")
-            return f"Erro na análise: {str(e)}"
+            logger.error(f"Erro na API do Grok: {e}")
+            insights["errors"].append(f"Request: {str(e)}")
+            return insights
 
     async def run(self):
+        # Inicia verificações periódicas do Grok em tarefa assíncrona
+        asyncio.create_task(self.grok_checker.run())
         while True:
             active_pairs = []
             data_dict = {}
@@ -439,6 +519,11 @@ try:
         """Verifica e fecha ordens abertas que já atingiram TP ou SL."""
         try:
             df = pd.read_csv(SINALS_FILE)
+            # Corrige tipos das colunas para evitar FutureWarning
+            if 'resultado' in df.columns:
+                df['resultado'] = df['resultado'].astype('object')
+            if 'timestamp_saida' in df.columns:
+                df['timestamp_saida'] = df['timestamp_saida'].astype('object')
             open_orders = df[df['estado'] == 'aberto']
 
             for index, order in open_orders.iterrows():
@@ -454,10 +539,10 @@ try:
 
                 if direction == "LONG":
                     tp_price = entry_price * (1 + tp_percent / 100)
-                    sl_price = entry_price * (1 - sl_percent / 100)
+                    sl_price = entry_price * (1 - tp_percent / 100)
                 else:
                     tp_price = entry_price * (1 - tp_percent / 100)
-                    sl_price = entry_price * (1 + sl_percent / 100)
+                    sl_price = entry_price * (1 + tp_percent / 100)
 
                 if (direction == "LONG" and mark_price >= tp_price) or (direction == "SHORT" and mark_price <= tp_price):
                     close_order(order['signal_id'], mark_price, "TP")
@@ -757,6 +842,12 @@ try:
 
         logger.info("Iniciando loop principal do UltraBot...")
         iteration_count = 0
+
+        # Inicializar grok_insights.csv se não existir
+        if not os.path.exists("grok_insights.csv"):
+            pd.DataFrame(columns=["pair", "timeframe", "insights", "timestamp"]).to_csv("grok_insights.csv", index=False)
+            logger.info("Arquivo grok_insights.csv criado.")
+
         while True:
             iteration_count += 1
             logger.info(f"--- Início da iteração {iteration_count} do loop principal ---")
@@ -794,12 +885,27 @@ try:
                         logger.error(f"[ERRO] Falha ao salvar preço em precos_log.csv para {pair}: {e}")
                     signals_by_tf = {}
 
+                    # Carregar insights recentes do Grok para o par
+                    grok_insights = {}
+                    try:
+                        insights_df = pd.read_csv("grok_insights.csv")
+                        recent_insights = insights_df[insights_df["pair"] == pair].tail(1)
+                        if not recent_insights.empty:
+                            grok_insights = json.loads(recent_insights.iloc[0]["insights"])
+                    except Exception as e:
+                        logger.warning(f"Erro ao carregar insights do Grok para {pair}: {e}")
+
                     # Gerar sinais em tempo real (se habilitado)
                     for strategy_name, strategy_config in active_strategies.items():
                         for tf in strategy_config.get("timeframes", TIMEFRAMES):
                             direction, score, details, contributing_indicators, strategy_name = generate_realtime_signal(
                                 client, pair, tf, strategy_config, config, learning_engine, binance_utils
                             )
+                            # Ajustar score com base no Grok se houver insight
+                            if grok_insights:
+                                score = score * 0.7 + grok_insights.get("confidence", 0.0) * 0.3
+                                if "reasons" in details:
+                                    details["reasons"].append(f"Grok: {grok_insights.get('reason', 'Sem motivo')}")
                             if direction and score >= MIN_SCORE_THRESHOLD:
                                 signals_by_tf[tf] = {
                                     "direction": direction,
@@ -813,6 +919,15 @@ try:
                                 logger.info(f"Sinal em tempo real gerado para {pair} ({tf}): {direction} (score={score})")
                             elif direction:
                                 logger.info(f"Sinal rejeitado para {pair} ({tf}): score {score} abaixo do limite {MIN_SCORE_THRESHOLD}")
+
+                    # Salvar insights do Grok para o par
+                    if grok_insights:
+                        pd.DataFrame({
+                            "pair": [pair],
+                            "timeframe": [tf],
+                            "insights": [json.dumps(grok_insights)],
+                            "timestamp": [datetime.now().isoformat()]
+                        }).to_csv("grok_insights.csv", mode="a", index=False, header=False)
 
                     # Gerar sinais baseados em velas fechadas
                     for tf in TIMEFRAMES:

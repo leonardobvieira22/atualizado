@@ -6,15 +6,27 @@ import time
 import asyncio
 from datetime import datetime
 from config_grok import *
+import json
 
 # Configurar logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, 
                     format="%(asctime)s - %(levelname)s - %(message)s")
 
+ANALYSIS_INTERVAL = 300  # 5 minutos
+
 class UltraBotGrok:
     def __init__(self):
         self.client = Client(BINANCE_API_KEY, BINANCE_SECRET_KEY)
         self.headers = {"Authorization": f"Bearer {XAI_API_KEY}"}
+
+    def is_grok_paused(self):
+        try:
+            with open("config.json", "r") as f:
+                config = json.load(f)
+            return config.get("pausar_grok", False)
+        except Exception as e:
+            logging.error(f"Erro ao ler config.json para pausar_grok: {e}")
+            return False
 
     def fetch_market_data(self, pair, timeframe):
         """Obtém dados de mercado da Binance."""
@@ -78,6 +90,10 @@ class UltraBotGrok:
 
     async def run(self):
         while True:
+            if self.is_grok_paused():
+                logging.info("Execução do Grok pausada por configuração (pausar_grok=true). Aguardando...")
+                await asyncio.sleep(30)
+                continue
             for pair in TRADING_PAIRS:
                 for timeframe in TIMEFRAMES:
                     data = self.fetch_market_data(pair, timeframe)

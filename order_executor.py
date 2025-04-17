@@ -38,9 +38,10 @@ class OrderExecutor:
             logger.error(f"Erro ao configurar alavancagem para {par}: {e}")
             raise
 
-    def executar_ordem(self, par, direcao, capital, stop_loss, take_profit, mercado='futures', dry_run=False):
+    def executar_ordem(self, par, direcao, capital, stop_loss, take_profit, mercado='futures', dry_run=False, dry_run_id=None):
         """
         Executa uma ordem de mercado ou simula em dry run.
+        Agora faz log detalhado e vincula o signal_id local ao id da Binance e ao id da ordem dry run.
 
         Args:
             par (str): Par de negociação (ex.: "DOGEUSDT").
@@ -50,6 +51,7 @@ class OrderExecutor:
             take_profit (float): Percentual de take profit.
             mercado (str): Tipo de mercado (default: 'futures').
             dry_run (bool): Se True, simula a ordem sem executá-la.
+            dry_run_id (str): ID da ordem dry run para vinculação cruzada.
 
         Returns:
             dict: Detalhes da ordem executada ou simulada.
@@ -90,8 +92,8 @@ class OrderExecutor:
             return {"status": "ignored", "reason": "existing open order for direction and timeframe"}
 
         if dry_run:
-            logger.info(f"[DRY RUN] Simulando ordem {direcao} em {par} com capital {capital} USDT, SL: {stop_loss}%, TP: {take_profit}%")
-            return {"status": "simulated", "order_id": None}
+            logger.info(f"[DRY RUN] Simulando ordem {direcao} em {par} com capital {capital} USDT, SL: {stop_loss}%, TP: {take_profit}%, signal_id={dry_run_id}")
+            return {"status": "simulated", "order_id": dry_run_id}
 
         lado = SIDE_BUY if direcao == "LONG" else SIDE_SELL
         try:
@@ -109,13 +111,15 @@ class OrderExecutor:
                 type=ORDER_TYPE_MARKET,
                 quantity=quantidade
             )
+            binance_order_id = ordem.get('orderId')
+            logger.info(f"[REAL ORDER] Ordem REAL executada: par={par}, direcao={direcao}, capital={capital}, quantidade={quantidade}, preco_entrada={preco}, binance_order_id={binance_order_id}, strategy={self.config.get('strategy_name')}, timeframe={self.config.get('timeframe')}")
 
             # Calcular preços de TP e SL
             sl_preco = preco * (1 - stop_loss / 100) if direcao == "LONG" else preco * (1 + stop_loss / 100)
             tp_preco = preco * (1 + take_profit / 100) if direcao == "LONG" else preco * (1 - take_profit / 100)
 
             # Criar ordens de TP e SL
-            self.client.futures_create_order(
+            tp_order = self.client.futures_create_order(
                 symbol=par,
                 side=SIDE_SELL if direcao == "LONG" else SIDE_BUY,
                 type=ORDER_TYPE_LIMIT,
@@ -124,7 +128,7 @@ class OrderExecutor:
                 stopPrice=tp_preco,
                 timeInForce='GTC'
             )
-            self.client.futures_create_order(
+            sl_order = self.client.futures_create_order(
                 symbol=par,
                 side=SIDE_SELL if direcao == "LONG" else SIDE_BUY,
                 type=ORDER_TYPE_LIMIT,
@@ -133,9 +137,31 @@ class OrderExecutor:
                 stopPrice=sl_preco,
                 timeInForce='GTC'
             )
+            logger.info(f"[REAL ORDER] TP/SL criados: tp_order_id={tp_order.get('orderId')}, sl_order_id={sl_order.get('orderId')}, binance_order_id={binance_order_id}, signal_id={ordem.get('clientOrderId')}")
 
-            logger.info(f"Ordem {direcao} executada em {par}: {ordem}")
-            return ordem
+            # Vinculação de IDs: salva no CSV local
+            df = pd.read_csv(SINALS_FILE)
+            # Busca ordem aberta mais recente para este robô/par/timeframe/direcao
+            idx = df[(df['estado'] == 'aberto') & (df['strategy_name'] == self.config['strategy_name']) & (df['par'] == par) & (df['direcao'] == direcao) & (df['timeframe'] == self.config['timeframe'])].index
+            if len(idx) > 0:
+                df.at[idx[-1], 'binance_order_id'] = binance_order_id
+                df.at[idx[-1], 'tp_order_id'] = tp_order.get('orderId')
+                df.at[idx[-1], 'sl_order_id'] = sl_order.get('orderId')
+                if dry_run_id:
+                    df.at[idx[-1], 'dry_run_id'] = dry_run_id
+                df.to_csv(SINALS_FILE, index=False)
+                logger.info(f"[VINCULO] Ordem local vinculada: signal_id={df.at[idx[-1], 'signal_id']}, binance_order_id={binance_order_id}, dry_run_id={dry_run_id}")
+            else:
+                logger.warning(f"[VINCULO] Não foi possível vincular binance_order_id ao signal_id local (ordem não encontrada no CSV)")
+
+            return {
+                "status": "executed",
+                "binance_order_id": binance_order_id,
+                "tp_order_id": tp_order.get('orderId'),
+                "sl_order_id": sl_order.get('orderId'),
+                "signal_id": ordem.get('clientOrderId'),
+                "dry_run_id": dry_run_id
+            }
         except BinanceAPIException as e:
             logger.error(f"Erro ao executar ordem em {par}: {e}")
             raise

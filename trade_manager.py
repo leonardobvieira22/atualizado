@@ -17,7 +17,8 @@ csv_writer = CsvWriter(
         'signal_id', 'par', 'direcao', 'preco_entrada', 'preco_saida', 'quantity',
         'lucro_percentual', 'pnl_realizado', 'resultado', 'timestamp', 'timestamp_saida',
         'estado', 'strategy_name', 'contributing_indicators', 'localizadores',
-        'motivos', 'timeframe', 'aceito', 'parametros', 'quality_score'
+        'motivos', 'timeframe', 'aceito', 'parametros', 'quality_score', 'modo_contrario',
+        'visual_tag'  # Nova coluna para visualização dry run
     ]
 )
 
@@ -104,8 +105,16 @@ def save_signal(signal_data, accepted, mode):
         signal_data['estado'] = signal_data.get('estado', 'aberto')
         signal_data['aceito'] = accepted
         signal_data['mode'] = mode
+        # Adiciona modo_contrario se não existir
+        if 'modo_contrario' not in signal_data:
+            signal_data['modo_contrario'] = False
+        # Adiciona visual_tag azul para dry run
+        if mode and (str(mode).lower() == 'dry' or str(mode).lower() == 'dryrun' or str(mode).lower() == 'dry_run' or str(mode).lower() == 'dashboard'):
+            signal_data['visual_tag'] = '🟦'
+        else:
+            signal_data['visual_tag'] = ''
         csv_writer.write_row(signal_data)
-        logger.info(f"Sinal salvo com sucesso: {signal_data['signal_id']}, accepted={accepted}, mode={mode}")
+        logger.info(f"Sinal salvo com sucesso: {signal_data['signal_id']}, accepted={accepted}, mode={mode}, modo_contrario={signal_data['modo_contrario']}, visual_tag={signal_data['visual_tag']}")
     except Exception as e:
         logger.error(f"Erro ao salvar sinal: {e}")
 
@@ -185,26 +194,34 @@ def close_order(signal_id, exit_price, result="Manual"):
     try:
         df = pd.read_csv("sinais_detalhados.csv")
         order_idx = df.index[df['signal_id'] == signal_id].tolist()[0]
-        
+        modo_contrario = False
+        if 'modo_contrario' in df.columns:
+            modo_contrario = bool(df.at[order_idx, 'modo_contrario'])
         df.at[order_idx, 'preco_saida'] = exit_price
         df.at[order_idx, 'timestamp_saida'] = get_local_timestamp()
         df.at[order_idx, 'estado'] = 'fechado'
         df.at[order_idx, 'resultado'] = result
-        
         # Calcular lucro
         entry_price = float(df.at[order_idx, 'preco_entrada'])
         direction = df.at[order_idx, 'direcao']
-        
         if direction == "LONG":
             profit_percent = ((exit_price - entry_price) / entry_price) * 100
         else:
             profit_percent = ((entry_price - exit_price) / entry_price) * 100
-            
         df.at[order_idx, 'lucro_percentual'] = profit_percent
         df.at[order_idx, 'pnl_realizado'] = profit_percent
-        
         df.to_csv("sinais_detalhados.csv", index=False)
-        logger.info(f"Ordem {signal_id} fechada com sucesso. Resultado: {result}, PNL: {profit_percent:.2f}%")
+        msg = f"Ordem {signal_id} fechada com sucesso. Resultado: {result}, PNL: {profit_percent:.2f}%"
+        if modo_contrario:
+            msg += " [modo ao contrario]"
+        logger.info(msg)
+        # Enviar alerta Telegram se relevante
+        if result in ["TP", "SL"] or profit_percent < -5:
+            from notification_manager import send_telegram_alert
+            telegram_msg = f"[ALERTA] Ordem {signal_id} ({df.at[order_idx, 'par']}) fechada: {result}\nRobô: {df.at[order_idx, 'strategy_name']}\nDireção: {direction}\nPNL: {profit_percent:.2f}%\nTimeframe: {df.at[order_idx, 'timeframe']}"
+            if modo_contrario:
+                telegram_msg += " [modo ao contrario]"
+            send_telegram_alert(telegram_msg)
         return True
     except Exception as e:
         logger.error(f"Erro ao fechar ordem {signal_id}: {e}")

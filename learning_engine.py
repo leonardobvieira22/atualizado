@@ -45,13 +45,69 @@ class LearningEngine:
                 logger.warning("Arquivo sinais_detalhados.csv está vazio. Não é possível treinar o modelo.")
                 return
 
-            # Extrair parâmetros
-            df_params = df['parametros'].apply(lambda x: json.loads(x) if pd.notna(x) else {})
+            # --- INTEGRAÇÃO COM GROK INSIGHTS ---
+            # Tenta encontrar o arquivo de insights
+            insights_path = None
+            for path in ["data/grok_insights.csv", "grok_insights.csv"]:
+                if os.path.exists(path):
+                    insights_path = path
+                    break
+            if insights_path:
+                df_insights = pd.read_csv(insights_path)
+                # Normaliza timestamp para merge (usa apenas data/hora, ignora milissegundos)
+                df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+                df_insights['timestamp'] = pd.to_datetime(df_insights['timestamp'], errors='coerce')
+                # Faz merge por par e timestamp mais próximo (tolerância de 5 minutos)
+                df = df.sort_values('timestamp')
+                df_insights = df_insights.sort_values('timestamp')
+                df_merged = pd.merge_asof(
+                    df,
+                    df_insights,
+                    by='par',
+                    left_on='timestamp',
+                    right_on='timestamp',
+                    direction='nearest',
+                    tolerance=pd.Timedelta('5min'),
+                    suffixes=('', '_grok')
+                )
+            else:
+                df_merged = df.copy()
+
+            # Extrai features do Grok (trend, signal, confidence, reason, etc.)
+            def extract_grok_features(row):
+                try:
+                    insight = row['insights'] if isinstance(row['insights'], dict) else json.loads(str(row['insights']))
+                except Exception:
+                    return pd.Series({'grok_trend': None, 'grok_signal': None, 'grok_confidence': None, 'grok_reason': None})
+                return pd.Series({
+                    'grok_trend': insight.get('trend'),
+                    'grok_signal': insight.get('signal'),
+                    'grok_confidence': insight.get('confidence'),
+                    'grok_reason': insight.get('reason')
+                })
+            if 'insights' in df_merged.columns:
+                grok_features = df_merged.apply(extract_grok_features, axis=1)
+                df_merged = pd.concat([df_merged, grok_features], axis=1)
+
+            # Codifica features categóricas do Grok
+            for col in ['grok_trend', 'grok_signal']:
+                if col in df_merged.columns:
+                    df_merged[col] = df_merged[col].astype('category').cat.codes.replace(-1, 0)
+            if 'grok_confidence' in df_merged.columns:
+                df_merged['grok_confidence'] = pd.to_numeric(df_merged['grok_confidence'], errors='coerce').fillna(0)
+
+            # Monta features finais
             df_features = pd.DataFrame()
             for feature in self.features:
-                df_features[feature] = df[feature] if feature in df.columns else 0.0
+                df_features[feature] = df_merged[feature] if feature in df_merged.columns else 0.0
+            # Adiciona features do Grok
+            for grok_feat in ['grok_trend', 'grok_signal', 'grok_confidence']:
+                if grok_feat in df_merged.columns:
+                    df_features[grok_feat] = df_merged[grok_feat]
+                else:
+                    df_features[grok_feat] = 0.0
             X = df_features.fillna(0)
-            y = df['resultado'].apply(lambda x: 1 if x == 'TP' else 0)
+            y = df_merged['resultado'].apply(lambda x: 1 if x == 'TP' else 0)
 
             if len(X) < 2:
                 logger.warning("Dados insuficientes para treinamento (menos de 2 amostras).")
@@ -68,7 +124,7 @@ class LearningEngine:
             if hasattr(self.model, 'coef_'):
                 self.feature_importances_ = np.abs(self.model.coef_[0])
             else:
-                self.feature_importances_ = np.zeros(len(self.features))
+                self.feature_importances_ = np.zeros(len(self.features) + 3)
             self.classification_report_ = classification_report(y, y_pred)
 
             with open(self.model_path, 'wb') as f:

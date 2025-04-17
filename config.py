@@ -23,7 +23,7 @@ CONFIG = {
     'risk_per_trade': 1.0,
     'dry_run': DRY_RUN,
     'mercado': 'futures',
-    'timeout_ordem': 999999,
+    'timeout_ordem': 999999999999999999999999,
     'max_trades_simultaneos': 100,  # Aumentado para permitir mais ordens
     'price_cache_duration': 5,
     'backtest_funding_rate': 0.0001,
@@ -45,7 +45,7 @@ CONFIG = {
         '4h': {'realtime_enabled': True, 'weight': 1.0},
         '1d': {'realtime_enabled': True, 'weight': 1.0}
     },
-    'quantity_in_usdt': 10.0,  # Adicionado para corrigir o erro de quantidade
+    'quantity_in_usdt': 6.0,  # Adicionado para corrigir o erro de quantidade
     'indicators': {
         'rsi': {'ativo': True, 'periodo': 14, 'sobrecomprado': 60, 'sobrevendido': 30, 'score': 20, 'tp_percent': 1.8, 'sl_percent': 0.9},  # Ajustado sobrecomprado para 60
         'vwap': {'ativo': True},

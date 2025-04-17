@@ -65,14 +65,14 @@
     },
     {
         "id": 3,
-        "timestamp": "2025-04-16T16:58:35.447170",
-        "expiry": "2025-04-23T16:58:35.447170",
+        "timestamp": "2025-04-17T00:59:13.926685",
+        "expiry": "2025-04-24T00:59:13.926685",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: bolinguer + vol max",
         "message": "Rob\u00f4 'bolinguer + vol max' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 422
+        "count": 479
     },
     {
         "id": 4,
@@ -257,14 +257,14 @@
     },
     {
         "id": 18,
-        "timestamp": "2025-04-16T15:52:28.002184",
-        "expiry": "2025-04-23T15:52:28.002184",
+        "timestamp": "2025-04-17T00:46:33.176404",
+        "expiry": "2025-04-24T00:46:33.176404",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: Composite Trend",
         "message": "Rob\u00f4 'Composite Trend' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 117
+        "count": 128
     },
     {
         "id": 19,
@@ -708,14 +708,14 @@
     },
     {
         "id": 59,
-        "timestamp": "2025-04-16T15:52:27.989219",
-        "expiry": "2025-04-23T15:52:27.989219",
+        "timestamp": "2025-04-17T16:37:13.954168",
+        "expiry": "2025-04-24T16:37:13.954168",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: Momentum Fast",
         "message": "Rob\u00f4 'Momentum Fast' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 105
+        "count": 136
     },
     {
         "id": 60,
@@ -1324,14 +1324,14 @@
     },
     {
         "id": 115,
-        "timestamp": "2025-04-16T15:52:27.984231",
-        "expiry": "2025-04-23T15:52:27.984231",
+        "timestamp": "2025-04-17T00:42:55.854013",
+        "expiry": "2025-04-24T00:42:55.854013",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: GPT 00",
         "message": "Rob\u00f4 'GPT 00' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 101
+        "count": 108
     },
     {
         "id": 116,
@@ -1544,135 +1544,135 @@
     },
     {
         "id": 135,
-        "timestamp": "2025-04-16T14:19:28.184127",
-        "expiry": "2025-04-23T14:19:28.184127",
+        "timestamp": "2025-04-17T00:38:38.374773",
+        "expiry": "2025-04-24T00:38:38.374773",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: ROBOT PADRAO 1",
         "message": "Rob\u00f4 'ROBOT PADRAO 1' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 61
+        "count": 64
     },
     {
         "id": 136,
-        "timestamp": "2025-04-16T15:51:46.364464",
-        "expiry": "2025-04-23T15:51:46.364464",
+        "timestamp": "2025-04-17T00:38:38.377765",
+        "expiry": "2025-04-24T00:38:38.377765",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: hard",
         "message": "Rob\u00f4 'hard' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 62
+        "count": 65
     },
     {
         "id": 137,
-        "timestamp": "2025-04-16T15:51:46.369452",
-        "expiry": "2025-04-23T15:51:46.369452",
+        "timestamp": "2025-04-17T00:38:38.381754",
+        "expiry": "2025-04-24T00:38:38.381754",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: only1",
         "message": "Rob\u00f4 'only1' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 62
+        "count": 65
     },
     {
         "id": 138,
-        "timestamp": "2025-04-16T15:51:46.374437",
-        "expiry": "2025-04-23T15:51:46.374437",
+        "timestamp": "2025-04-17T00:38:38.386741",
+        "expiry": "2025-04-24T00:38:38.386741",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: frouxo",
         "message": "Rob\u00f4 'frouxo' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 62
+        "count": 65
     },
     {
         "id": 139,
-        "timestamp": "2025-04-16T15:52:27.970270",
-        "expiry": "2025-04-23T15:52:27.970270",
+        "timestamp": "2025-04-17T16:37:13.949182",
+        "expiry": "2025-04-24T16:37:13.949182",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: ema max",
         "message": "Rob\u00f4 'ema max' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 93
+        "count": 116
     },
     {
         "id": 140,
-        "timestamp": "2025-04-16T16:58:35.443179",
-        "expiry": "2025-04-23T16:58:35.443179",
+        "timestamp": "2025-04-17T00:59:13.922694",
+        "expiry": "2025-04-24T00:59:13.922694",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: sma max",
         "message": "Rob\u00f4 'sma max' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 400
+        "count": 457
     },
     {
         "id": 141,
-        "timestamp": "2025-04-16T14:19:28.220148",
-        "expiry": "2025-04-23T14:19:28.220148",
+        "timestamp": "2025-04-17T00:38:38.415667",
+        "expiry": "2025-04-24T00:38:38.415667",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: Robo 00",
         "message": "Rob\u00f4 'Robo 00' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 26
+        "count": 29
     },
     {
         "id": 142,
-        "timestamp": "2025-04-16T15:52:27.994206",
-        "expiry": "2025-04-23T15:52:27.994206",
+        "timestamp": "2025-04-17T00:46:33.168425",
+        "expiry": "2025-04-24T00:46:33.168425",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: Swing Alpha",
         "message": "Rob\u00f4 'Swing Alpha' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 101
+        "count": 111
     },
     {
         "id": 143,
-        "timestamp": "2025-04-16T16:58:35.452156",
-        "expiry": "2025-04-23T16:58:35.452156",
+        "timestamp": "2025-04-17T00:59:13.931672",
+        "expiry": "2025-04-24T00:59:13.931672",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: Sentiment Guard",
         "message": "Rob\u00f4 'Sentiment Guard' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 397
+        "count": 454
     },
     {
         "id": 144,
-        "timestamp": "2025-04-16T15:52:27.960294",
-        "expiry": "2025-04-23T15:52:27.960294",
+        "timestamp": "2025-04-17T00:38:54.020456",
+        "expiry": "2025-04-24T00:38:54.020456",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: robo do um porcento ",
         "message": "Rob\u00f4 'robo do um porcento ' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 20
+        "count": 24
     },
     {
         "id": 145,
-        "timestamp": "2025-04-16T15:52:27.965282",
-        "expiry": "2025-04-23T15:52:27.965282",
+        "timestamp": "2025-04-17T00:38:54.024445",
+        "expiry": "2025-04-24T00:38:54.024445",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: ultima 10",
         "message": "Rob\u00f4 'ultima 10' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 20
+        "count": 24
     },
     {
         "id": 146,
-        "timestamp": "2025-04-16T14:19:28.179876",
-        "expiry": "2025-04-23T14:19:28.179876",
+        "timestamp": "2025-04-17T00:38:38.369786",
+        "expiry": "2025-04-24T00:38:38.369786",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: ROBOT 1 LEO",
         "message": "Rob\u00f4 'ROBOT 1 LEO' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 14
+        "count": 17
     },
     {
         "id": 147,

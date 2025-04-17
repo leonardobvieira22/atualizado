@@ -143,5 +143,10 @@
         "Swing Trade Composite": 0.5
     },
     "realtime_signals_enabled": true,
-    "max_trades_simultaneos_global": 540
+    "max_trades_simultaneos_global": 540,
+    "pausar_sinais": true,
+    "pausar_ordens": false,
+    "pausar_grok": false,
+    "modo_ao_contrario": true,
+    "enviar_ordem_real": false
 }

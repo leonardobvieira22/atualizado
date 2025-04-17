@@ -7,6 +7,7 @@ import os
 import random
 import ta
 import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from binance.client import Client
 from binance.exceptions import BinanceAPIException
@@ -29,6 +30,21 @@ CONFIG_FILE = "config.json"
 STRATEGIES_FILE = "strategies.json"
 ROBOT_STATUS_FILE = "robot_status.json"
 MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
+
+SINALS_HEADER = [
+    'signal_id','par','direcao','preco_entrada','preco_saida','quantity','lucro_percentual','pnl_realizado','resultado','timestamp','timestamp_saida','estado','strategy_name','contributing_indicators','localizadores','motivos','timeframe','aceito','parametros','quality_score','modo_contrario','visual_tag'
+]
+
+def ensure_sinals_file():
+    if not os.path.exists(SINALS_FILE) or os.stat(SINALS_FILE).st_size == 0:
+        df = pd.DataFrame(columns=SINALS_HEADER)
+        df.to_csv(SINALS_FILE, index=False)
+
+# Removed invalid CSS-like block causing syntax errors
+# ...existing code...
+
+# Garante que o arquivo sinais_detalhados.csv sempre exista e com cabeçalho correto
+ensure_sinals_file()
 
 # Após as funções globais existentes (como generate_orders, check_alerts, etc.)
 
@@ -778,6 +794,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+* {
+    cursor: auto !important;
+    pointer-events: auto !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 # Adicione este CSS para padronizar todos os botões do dashboard
 st.markdown("""
 <style>
@@ -839,10 +865,11 @@ st.markdown('''
     padding: 36px 32px 36px 32px !important;
 }
 
-/* Notificações: texto branco, negrito, emojis por tipo */
+/* Notificações: texto branco, negrito, itálico, emojis por tipo */
 .alert {
     color: #fff !important;
     font-weight: bold !important;
+    font-style: italic !important;
     border-radius: 8px !important;
     padding: 16px 24px !important;
     margin: 12px 0 !important;
@@ -855,25 +882,46 @@ st.markdown('''
 .alert-danger  { background: #E02424 !important; }
 .alert-info    { background: #1998CF !important; }
 
-/* Tabela de ordens: fundo escuro, texto branco negrito, bordas claras */
-.order-table, .order-table th, .order-table td {
-    background: #23262F !important;
+/* Painel de notificações azul: texto branco, negrito, itálico */
+.notification, .notification-info, .notification-success, .notification-error, .notification-warning {
     color: #fff !important;
     font-weight: bold !important;
-    border: 2px solid #E6EDF0 !important;
+    font-style: italic !important;
 }
-.order-table th {
+
+/* Insights do Grok: texto preto, negrito, itálico dentro do box */
+.grok-insight-box {
+    color: #111 !important;
+    font-weight: bold !important;
+    font-style: italic !important;
+    background: #f7f7f7 !important;
+    border-radius: 8px !important;
+    padding: 16px 20px !important;
+    margin-bottom: 12px !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
+/* Botões de navegação b1 a b8: padding maior */
+.stTabs [data-baseweb="tab"] {
+    padding: 12px 32px !important;
+    font-size: 1.1em !important;
+}
+
+/* Tabela de sinais: fundo branco, visual simples igual à tabela de métricas avançadas */
+.sinais-table, .sinais-table th, .sinais-table td {
+    background: #fff !important;
+    color: #222 !important;
+    font-weight: 500 !important;
+    border: 1px solid #e0e0e0 !important;
+}
+.sinais-table th {
     background: #1998CF !important;
     color: #fff !important;
     font-weight: bold !important;
-    border-bottom: 3px solid #E6EDF0 !important;
+    border-bottom: 2px solid #e0e0e0 !important;
 }
-.order-table tr:nth-child(even) { background: #181A20 !important; }
-.order-table tr:hover { background: #262930 !important; }
-
-/* PNL positivo/negativo */
-.pnl-pos { color: #1DB954 !important; font-weight: bold !important; }
-.pnl-neg { color: #E02424 !important; font-weight: bold !important; }
+.sinais-table tr:nth-child(even) { background: #f5f8fa !important; }
+.sinais-table tr:hover { background: #e6f0fa !important; }
 </style>
 ''', unsafe_allow_html=True)
 
@@ -899,7 +947,8 @@ def load_config():
             "Sentimento": 0.5,
             "Swing Trade Composite": 0.5
         },
-        "timeframes": ["1m", "5m", "15m", "1h", "4h", "1d"]
+        "timeframes": ["1m", "5m", "15m", "1h", "4h", "1d"],
+        "modo_ao_contrario": False
     }
 
 def save_config(config):
@@ -1041,6 +1090,12 @@ def calculate_indicators(df, active_indicators):
     return indicators
 
 def generate_orders(robot_name, strategy_config):
+    # Checagem de pausa de sinais/ordens
+    config = load_config()
+    if config.get('pausar_sinais', False):
+        logger.warning(f"Criação de sinais/ordens está pausada. Nenhuma ordem será criada para {robot_name}.")
+        return None
+
     if not isinstance(robot_name, str) or not robot_name:
         logger.error(f"Nome de robô inválido: {robot_name}")
         return None
@@ -1048,12 +1103,8 @@ def generate_orders(robot_name, strategy_config):
     if os.path.exists(SINALS_FILE):
         df = pd.read_csv(SINALS_FILE)
     else:
-        df = pd.DataFrame(columns=[
-            'signal_id', 'par', 'direcao', 'preco_entrada', 'preco_saida', 'quantity',
-            'lucro_percentual', 'pnl_realizado', 'resultado', 'timestamp', 'timestamp_saida',
-            'estado', 'strategy_name', 'contributing_indicators', 'localizadores',
-            'motivos', 'timeframe', 'aceito', 'parametros', 'quality_score'
-        ])
+        ensure_sinals_file()
+        df = pd.read_csv(SINALS_FILE)
 
     params = {
         "tp_percent": strategy_config['tp_percent'],
@@ -1108,6 +1159,13 @@ def generate_orders(robot_name, strategy_config):
             logger.info(f"Nenhuma condição atendida para {robot_name} no par {selected_pair}.")
             continue
         direction = "LONG" if indicators.get("EMA12>EMA50", False) or indicators.get("MACD Cruzamento Alta", False) or indicators.get("Swing_Trade_Composite_LONG", False) else "SHORT"
+        # INVERTE DIREÇÃO SE MODO AO CONTRÁRIO ATIVADO
+        modo_ao_contrario = load_config().get('modo_ao_contrario', False)
+        if modo_ao_contrario:
+            if direction == "LONG":
+                direction = "SHORT"
+            elif direction == "SHORT":
+                direction = "LONG"
         # Só pode haver 1 ordem aberta por robô/par/timeframe/direção
         already_open = [t for t in robot_open_orders if t['par'] == selected_pair and t['timeframe'] == timeframe and t['direcao'] == direction]
         if already_open:
@@ -1252,7 +1310,8 @@ def get_tp_sl(row, key, default=0.0):
 def validate_robot_status_and_stats():
     robot_status = load_robot_status()
     if os.path.exists(SINALS_FILE):
-        df = pd.read_csv(SINALS_FILE)
+        with open(SINALS_FILE, 'r') as f:
+            df = pd.read_csv(f)
         # Verificação de existência da coluna antes de acessar
         if 'strategy_name' not in df.columns or df.empty:
             logger.warning("Arquivo sinais_detalhados.csv está vazio ou sem a coluna 'strategy_name'.")
@@ -1293,13 +1352,8 @@ if os.path.exists(SINALS_FILE):
     df = pd.read_csv(SINALS_FILE)
     df['timestamp'] = pd.to_datetime(df['timestamp'])
 else:
-    df = pd.DataFrame(columns=[
-        'signal_id', 'par', 'direcao', 'preco_entrada', 'preco_saida', 'quantity',
-        'lucro_percentual', 'pnl_realizado', 'resultado', 'timestamp', 'timestamp_saida',
-        'estado', 'strategy_name', 'contributing_indicators', 'localizadores',
-        'motivos', 'timeframe', 'aceito', 'parametros', 'quality_score'
-    ])
-    df.to_csv(SINALS_FILE, index=False)
+    ensure_sinals_file()
+    df = pd.read_csv(SINALS_FILE)
 
 if os.path.exists(MISSED_OPPORTUNITIES_FILE):
     df_missed = pd.read_csv(MISSED_OPPORTUNITIES_FILE)
@@ -1312,8 +1366,18 @@ else:
     ])
     df_missed.to_csv(MISSED_OPPORTUNITIES_FILE, index=False)
 
-df_open = df[df['estado'] == 'aberto']
-df_closed = df[df['estado'] == 'fechado']
+df_open = df[df['estado'] == 'aberto'].copy()
+df_closed = df[df['estado'] == 'fechado'].copy()
+
+# Após carregar df_open e df_closed, adicionar coluna visual para modo ao contrario
+if 'modo_contrario' in df_open.columns:
+    df_open.loc[:, 'modo_contrario_emoji'] = df_open['modo_contrario'].apply(lambda x: '🔵 [modo ao contrario]' if x else '')
+else:
+    df_open.loc[:, 'modo_contrario_emoji'] = ''
+if 'modo_contrario' in df_closed.columns:
+    df_closed.loc[:, 'modo_contrario_emoji'] = df_closed['modo_contrario'].apply(lambda x: '🔵 [modo ao contrario]' if x else '')
+else:
+    df_closed.loc[:, 'modo_contrario_emoji'] = ''
 
 if 'known_open_orders' not in st.session_state:
     st.session_state['known_open_orders'] = set()
@@ -1356,8 +1420,8 @@ with col_notifications:
     render_notifications_panel()
 
 # Adiciona a nova aba "Meus Robôs 🤖" e "ML Machine" ao lado de "Ordens Binance"
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-    "Visão Geral", "Ordens", "Configurações de Estratégia", "Oportunidades Perdidas", "Ordens Binance", "Meus Robôs 🤖", "ML Machine"
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+    "Visão Geral", "Ordens", "Configurações de Estratégia", "Oportunidades Perdidas", "Ordens Binance", "Meus Robôs 🤖", "ML Machine", "Insights do Grok"
 ])
 
 with tab1:
@@ -1461,22 +1525,14 @@ with tab1:
             "Sinais Rejeitados": signals_rejected,
             "Ordens Abertas": open_orders,
             "Score Médio de Qualidade": f"{avg_quality_score:.2f}",
-            "PNL Total": f"{total_pnl:.2f}% {alert}",
+            "PNL Total": f"{total_pnl:.2f}%",
             "Taxa de Vitória": f"{win_rate:.2f}%"
         })
-
+    # Após o loop, criar o DataFrame e ordenar
     status_df = pd.DataFrame(status_data)
-    sort_by = st.selectbox("Ordenar por", ["Robô", "Tempo Online", "Sinais Gerados", "Sinais Aceitos", "Sinais Rejeitados", "Ordens Abertas", "Score Médio de Qualidade", "PNL Total", "Taxa de Vitória"], key="sort_robots")
-    if sort_by == "Robô":
-        status_df = status_df.sort_values("Robô")
-    elif sort_by == "Tempo Online":
-        status_df['Tempo Online Sort'] = status_df['Tempo Online'].apply(lambda x: sum(int(part) * (60 if 'h' in part else 1) for part in x.split() if part.isdigit()) if x != "Desativado" else -1)
-        status_df = status_df.sort_values("Tempo Online Sort", ascending=False).drop("Tempo Online Sort", axis=1)
-    elif sort_by == "Sinais Gerados":
-        status_df = status_df.sort_values("Sinais Gerados", ascending=False)
-    elif sort_by == "Sinais Aceitos":
-        status_df = status_df.sort_values("Sinais Aceitos", ascending=False)
-    elif sort_by == "Sinais Rejeitados":
+    # Ordenação padrão por "Robô" (pode ser alterada conforme necessidade)
+    sort_by = st.selectbox("Ordenar por", ["Robô", "Sinais Rejeitados", "Ordens Abertas", "Score Médio de Qualidade", "PNL Total", "Taxa de Vitória"], key="status_sort")
+    if sort_by == "Sinais Rejeitados":
         status_df = status_df.sort_values("Sinais Rejeitados", ascending=False)
     elif sort_by == "Ordens Abertas":
         status_df = status_df.sort_values("Ordens Abertas", ascending=False)
@@ -1484,17 +1540,13 @@ with tab1:
         status_df['Score Sort'] = status_df['Score Médio de Qualidade'].astype(float)
         status_df = status_df.sort_values("Score Sort", ascending=False).drop("Score Sort", axis=1)
     elif sort_by == "PNL Total":
-        status_df['PNL Sort'] = status_df['PNL Total'].str.extract(r'([-+]?\d*\.?\d+)%')[0].astype(float)
+        status_df['PNL Sort'] = status_df['PNL Total'].str.replace('%','').astype(float)
         status_df = status_df.sort_values("PNL Sort", ascending=False).drop("PNL Sort", axis=1)
     elif sort_by == "Taxa de Vitória":
-        status_df['Win Rate Sort'] = status_df['Taxa de Vitória'].str.replace('%', '').astype(float)
+        status_df['Win Rate Sort'] = status_df['Taxa de Vitória'].str.replace('%','').astype(float)
         status_df = status_df.sort_values("Win Rate Sort", ascending=False).drop("Win Rate Sort", axis=1)
-
+    # Exibir tabela
     st.markdown(status_df.to_html(index=False, classes="status-table"), unsafe_allow_html=True)
-
-    
-
-    
 
     st.subheader("Distribuição de Ordens por Resultado (Geral)")
     if not df_closed.empty:
@@ -1556,6 +1608,477 @@ with tab1:
 
     # Filtros para ativar/desativar cada robô
     #removido ativar desativar robos
+
+# Seção própria para controles de segurança global
+# Seção própria para controles de segurança global
+with st.sidebar:
+    st.header('Controles Globais de Segurança')
+    config_atual = load_config()
+    pausar_sinais = config_atual.get('pausar_sinais', False)
+    pausar_ordens = config_atual.get('pausar_ordens', False)
+    pausar_grok = config_atual.get('pausar_grok', False)
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button('⏸️ Sinais' if not pausar_sinais else '▶️ Sinais', key='pause_signals_sidebar'):
+            config_atual['pausar_sinais'] = not pausar_sinais
+            save_config(config_atual)
+            st.experimental_rerun()
+        st.write('Sinais: ' + ('Ativo' if not pausar_sinais else 'Pausado'))
+    with col2:
+        if st.button('⏸️ Ordens' if not pausar_ordens else '▶️ Ordens', key='pause_orders_sidebar'):
+            config_atual['pausar_ordens'] = not pausar_ordens
+            save_config(config_atual)
+            st.experimental_rerun()
+        st.write('Ordens: ' + ('Ativo' if not pausar_ordens else 'Pausado'))
+    if st.button('⏸️ Grok' if not pausar_grok else '▶️ Grok', key='pause_grok_sidebar'):
+        config_atual['pausar_grok'] = not pausar_grok
+        save_config(config_atual)
+        st.experimental_rerun()
+    st.write('Grok: ' + ('Ativo' if not pausar_grok else 'Pausado'))
+
+    # Toggle modo ao contrário
+    if st.checkbox('↔️ Modo Invertido', value=config_atual.get('modo_ao_contrario', False), help='Inverte LONG/SHORT em todas as ordens.'):
+        if not config_atual.get('modo_ao_contrario', False):
+            config_atual['modo_ao_contrario'] = True
+            save_config(config_atual)
+            st.experimental_rerun()
+    else:
+        if config_atual.get('modo_ao_contrario', False):
+            config_atual['modo_ao_contrario'] = False
+            save_config(config_atual)
+            st.experimental_rerun()
+
+    # Call the trading card inside the sidebar
+  
+
+def trading_card_isolated():
+    import streamlit as st
+    import time
+    from binance.client import Client
+    from config import DRY_RUN, REAL_API_KEY, REAL_API_SECRET, DRY_RUN_API_KEY, DRY_RUN_API_SECRET
+
+    # --- Estilo customizado (inspirado na Binance) ---
+    st.markdown('''
+    <style>
+    .trade-card-container {
+        background: #1A2326;
+        border-radius: 8px;
+        padding: 15px;
+        color: #D1D4DC;
+        font-family: Arial, sans-serif;
+        width: 100%;
+        max-width: 280px; /* Adjusted to fit sidebar width */
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+    .trade-pill {
+        display: inline-block;
+        background: #2A3439;
+        color: #F0B90B;
+        border-radius: 16px;
+        padding: 2px 12px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-right: 8px;
+    }
+    .trade-pill-leverage {
+        background: #2A3439;
+        color: #00eaff;
+        cursor: pointer;
+    }
+    .trade-menu {
+        float: right;
+        color: #B0B0B0;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    .trade-pair-selector {
+        display: flex;
+        gap: 10px;
+        margin: 12px 0 8px 0;
+    }
+    .trade-pair-btn {
+        background: #2A3439;
+        color: #D1D4DC;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        flex: 1;
+    }
+    .trade-pair-btn:hover {
+        background: #F0B90B;
+        color: #000;
+    }
+    .trade-type-selector {
+        display: flex;
+        background: #2A3439;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+    .trade-type-btn {
+        flex: 1;
+        background: #2A3439;
+        color: #D1D4DC;
+        border: none;
+        padding: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .trade-type-btn.active {
+        background: #F0B90B;
+        color: #000;
+    }
+    .trade-balance {
+        font-size: 12px;
+        margin-bottom: 15px;
+    }
+    .trade-label {
+        font-size: 12px;
+        margin-bottom: 2px;
+    }
+    .trade-input {
+        width: 100%;
+        background: #2A3439;
+        color: #D1D4DC;
+        border: none;
+        border-radius: 4px;
+        padding: 8px;
+        font-size: 12px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+    .trade-separator {
+        border-top: 1px dashed #444;
+        margin: 10px 0 10px 0;
+    }
+    .trade-tpsl-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .trade-tpsl-label {
+        font-size: 12px;
+    }
+    .trade-tpsl-mark {
+        background: #2A3439;
+        color: #F0B90B;
+        border: none;
+        border-radius: 4px;
+        padding: 3px 10px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .trade-btn-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .trade-btn-long {
+        background: #00C087;
+        color: #fff;
+        font-weight: bold;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        flex: 1;
+        padding: 10px 0;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .trade-btn-long:hover {
+        background: #33ff33;
+    }
+    .trade-btn-short {
+        background: #F6465D;
+        color: #fff;
+        font-weight: bold;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        flex: 1;
+        padding: 10px 0;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .trade-btn-short:hover {
+        background: #ff3333;
+    }
+    .trade-cost {
+        font-size: 12px;
+        margin-top: 2px;
+    }
+    /* Override Streamlit's default button styles within the card */
+    .trade-card-container .stButton > button {
+        width: 100%;
+        box-sizing: border-box;
+        background: none !important;
+        color: inherit !important;
+        font-size: inherit !important;
+        padding: inherit !important;
+        border-radius: inherit !important;
+        box-shadow: none !important;
+    }
+    .trade-card-container .stTextInput > div > input {
+        background: #2A3439 !important;
+        color: #D1D4DC !important;
+        border: none !important;
+        border-radius: 4px !important;
+        padding: 8px !important;
+        font-size: 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .trade-card-container .stCheckbox {
+        margin-bottom: 10px;
+    }
+    </style>
+    ''', unsafe_allow_html=True)
+
+    # --- Estado do Card ---
+    # Initialize session state variables if they don't exist
+    if 'trade_pair' not in st.session_state:
+        st.session_state['trade_pair'] = 'DOGEUSDT'
+    if 'trade_leverage' not in st.session_state:
+        st.session_state['trade_leverage'] = 30
+    if 'trade_type' not in st.session_state:
+        st.session_state['trade_type'] = 'Market'
+    if 'trade_size' not in st.session_state:
+        st.session_state['trade_size'] = ''
+    if 'trade_tp' not in st.session_state:
+        st.session_state['trade_tp'] = ''
+    if 'trade_sl' not in st.session_state:
+        st.session_state['trade_sl'] = ''
+
+    # Initialize trade_tpsl_enabled before creating the checkbox widget
+    if 'trade_tpsl_enabled' not in st.session_state:
+        st.session_state['trade_tpsl_enabled'] = True
+
+    # --- Binance Client ---
+    if DRY_RUN:
+        binance_client = Client(DRY_RUN_API_KEY, DRY_RUN_API_SECRET)
+    else:
+        binance_client = Client(REAL_API_KEY, REAL_API_SECRET)
+
+    # --- Função para saldo ---
+    def get_futures_balance():
+        try:
+            balances = binance_client.futures_account_balance()
+            usdt = next((float(b['balance']) for b in balances if b['asset'] == 'USDT'), 0.0)
+            return usdt
+        except Exception:
+            return 0.0
+
+    # --- Função para preço de mercado ---
+    def get_mark_price(symbol):
+        try:
+            return float(binance_client.futures_mark_price(symbol=symbol)['markPrice'])
+        except Exception:
+            return 0.0
+
+    # --- Função para troca de par ---
+    def change_pair(pair):
+        st.session_state['trade_pair'] = pair
+
+    # --- Layout do Card ---
+    with st.container():
+        st.markdown('<div class="trade-card-container">', unsafe_allow_html=True)
+        # Header
+        st.markdown(f'<span class="trade-pill">Isolated</span>'
+                    f'<span class="trade-pill trade-pill-leverage">{st.session_state["trade_leverage"]}x</span>'
+                    f'<span class="trade-menu">⋮</span>', unsafe_allow_html=True)
+
+        # Par selector
+        st.markdown('<div class="trade-pair-selector">', unsafe_allow_html=True)
+        pairs = ['DOGEUSDT', 'XRPUSDT', 'TRXUSDT']
+        colp1, colp2, colp3 = st.columns(3)
+        for i, p in enumerate(pairs):
+            with [colp1, colp2, colp3][i]:
+                st.markdown(
+                    f'<button class="trade-pair-btn" onclick="st.session_state.trade_pair=\'{p}\'">{p}</button>',
+                    unsafe_allow_html=True
+                )
+                # Use a button click to trigger the pair change
+                if st.button(p, key=f'trade_pair_{p}', use_container_width=True):
+                    change_pair(p)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Tipo de ordem
+        st.markdown('<div class="trade-type-selector">', unsafe_allow_html=True)
+        st.markdown(f'<button class="trade-type-btn active">Market</button>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Saldo
+        balance = get_futures_balance()
+        st.markdown(f'<div class="trade-balance">Balance: {balance:.2f} USDT</div>', unsafe_allow_html=True)
+
+        # Preço do par
+        mark_price = get_mark_price(st.session_state['trade_pair'])
+        st.markdown(f'<div class="trade-label">Price (USDT): <span style="color:#F0B90B">{mark_price:.6f}</span></div>', unsafe_allow_html=True)
+
+        # Tamanho
+        st.markdown('<div class="trade-label">Size</div>', unsafe_allow_html=True)
+        trade_size = st.text_input('', value=st.session_state['trade_size'], key='trade_size_input', placeholder='Enter size', label_visibility="collapsed")
+        st.session_state['trade_size'] = trade_size
+
+        # Separador
+        st.markdown('<div class="trade-separator"></div>', unsafe_allow_html=True)
+
+        # TP/SL
+        # Use the initialized session state value for the checkbox
+        tpsl_enabled = st.checkbox('TP/SL', value=st.session_state['trade_tpsl_enabled'], key='trade_tpsl_enabled_checkbox')
+        # Remove the line that modifies st.session_state['trade_tpsl_enabled'] after the widget
+        # st.session_state['trade_tpsl_enabled'] = tpsl_enabled  # This line caused the error
+
+        if tpsl_enabled:
+            coltp, colsl = st.columns(2)
+            with coltp:
+                st.markdown('<div class="trade-label">Take Profit (%)</div>', unsafe_allow_html=True)
+                tp = st.text_input('', value=st.session_state['trade_tp'], key='trade_tp_input', placeholder='Enter TP in %', label_visibility="collapsed")
+                st.session_state['trade_tp'] = tp
+                if st.button('Mark', key='mark_tp', use_container_width=True):
+                    st.session_state['trade_tp'] = "1"
+            with colsl:
+                st.markdown('<div class="trade-label">Stop Loss (%)</div>', unsafe_allow_html=True)
+                sl = st.text_input('', value=st.session_state['trade_sl'], key='trade_sl_input', placeholder='Enter SL in %', label_visibility="collapsed")
+                st.session_state['trade_sl'] = sl
+                if st.button('Mark', key='mark_sl', use_container_width=True):
+                    st.session_state['trade_sl'] = "1"
+
+        # Botões de ação
+        st.markdown('<div class="trade-btn-row">', unsafe_allow_html=True)
+        colb1, colb2 = st.columns(2)
+        with colb1:
+            if st.button('Buy/Long', key='trade_buy_long', use_container_width=True):
+                try:
+                    qty = float(trade_size) / mark_price if mark_price > 0 else 0
+                    if qty <= 0 or float(trade_size) > balance:
+                        st.warning('Tamanho inválido ou saldo insuficiente.')
+                    else:
+                        # Ajustar alavancagem
+                        binance_client.futures_change_leverage(symbol=st.session_state['trade_pair'], leverage=st.session_state['trade_leverage'])
+                        params = {
+                            'symbol': st.session_state['trade_pair'],
+                            'side': 'BUY',
+                            'type': 'MARKET',
+                            'quantity': round(qty, 3),
+                            'leverage': st.session_state['trade_leverage']
+                        }
+                        if tpsl_enabled and st.session_state['trade_tp'] and st.session_state['trade_sl']:
+                            tp_value = float(st.session_state['trade_tp']) if st.session_state['trade_tp'] else 0
+                            sl_value = float(st.session_state['trade_sl']) if st.session_state['trade_sl'] else 0
+                            if tp_value > 0 and sl_value > 0:
+                                tp_price = mark_price * (1 + tp_value / 100)
+                                sl_price = mark_price * (1 - sl_value / 100)
+                                # Enviar ordem principal
+                                result = binance_client.futures_create_order(
+                                    symbol=params['symbol'],
+                                    side=params['side'],
+                                    type=params['type'],
+                                    quantity=params['quantity'],
+                                    reduceOnly=False
+                                )
+                                # Enviar ordens de TP/SL
+                                binance_client.futures_create_order(
+                                    symbol=params['symbol'],
+                                    side='SELL',
+                                    type='TAKE_PROFIT_MARKET',
+                                    stopPrice=round(tp_price, 6),
+                                    closePosition=True,
+                                    quantity=params['quantity']
+                                )
+                                binance_client.futures_create_order(
+                                    symbol=params['symbol'],
+                                    side='SELL',
+                                    type='STOP_MARKET',
+                                    stopPrice=round(sl_price, 6),
+                                    closePosition=True,
+                                    quantity=params['quantity']
+                                )
+                                st.success(f'Ordem Buy/Long enviada! ID: {result["orderId"]}')
+                            else:
+                                st.warning('Valores de TP/SL inválidos.')
+                        else:
+                            # Enviar ordem sem TP/SL
+                            result = binance_client.futures_create_order(
+                                symbol=params['symbol'],
+                                side=params['side'],
+                                type=params['type'],
+                                quantity=params['quantity'],
+                                reduceOnly=False
+                            )
+                            st.success(f'Ordem Buy/Long enviada! ID: {result["orderId"]}')
+                except Exception as e:
+                    st.error(f'Erro ao enviar ordem: {e}')
+            st.markdown(f'<div class="trade-cost">Order Value: {trade_size or 0} USDT</div>', unsafe_allow_html=True)
+        with colb2:
+            if st.button('Sell/Short', key='trade_sell_short', use_container_width=True):
+                try:
+                    qty = float(trade_size) / mark_price if mark_price > 0 else 0
+                    if qty <= 0 or float(trade_size) > balance:
+                        st.warning('Tamanho inválido ou saldo insuficiente.')
+                    else:
+                        # Ajustar alavancagem
+                        binance_client.futures_change_leverage(symbol=st.session_state['trade_pair'], leverage=st.session_state['trade_leverage'])
+                        params = {
+                            'symbol': st.session_state['trade_pair'],
+                            'side': 'SELL',
+                            'type': 'MARKET',
+                            'quantity': round(qty, 3),
+                            'leverage': st.session_state['trade_leverage']
+                        }
+                        if tpsl_enabled and st.session_state['trade_tp'] and st.session_state['trade_sl']:
+                            tp_value = float(st.session_state['trade_tp']) if st.session_state['trade_tp'] else 0
+                            sl_value = float(st.session_state['trade_sl']) if st.session_state['trade_sl'] else 0
+                            if tp_value > 0 and sl_value > 0:
+                                tp_price = mark_price * (1 - tp_value / 100)  # Para short, TP é abaixo do preço
+                                sl_price = mark_price * (1 + sl_value / 100)  # Para short, SL é acima do preço
+                                # Enviar ordem principal
+                                result = binance_client.futures_create_order(
+                                    symbol=params['symbol'],
+                                    side=params['side'],
+                                    type=params['type'],
+                                    quantity=params['quantity'],
+                                    reduceOnly=False
+                                )
+                                # Enviar ordens de TP/SL
+                                binance_client.futures_create_order(
+                                    symbol=params['symbol'],
+                                    side='BUY',
+                                    type='TAKE_PROFIT_MARKET',
+                                    stopPrice=round(tp_price, 6),
+                                    closePosition=True,
+                                    quantity=params['quantity']
+                                )
+                                binance_client.futures_create_order(
+                                    symbol=params['symbol'],
+                                    side='BUY',
+                                    type='STOP_MARKET',
+                                    stopPrice=round(sl_price, 6),
+                                    closePosition=True,
+                                    quantity=params['quantity']
+                                )
+                                st.success(f'Ordem Sell/Short enviada! ID: {result["orderId"]}')
+                            else:
+                                st.warning('Valores de TP/SL inválidos.')
+                        else:
+                            # Enviar ordem sem TP/SL
+                            result = binance_client.futures_create_order(
+                                symbol=params['symbol'],
+                                side=params['side'],
+                                type=params['type'],
+                                quantity=params['quantity'],
+                                reduceOnly=False
+                            )
+                            st.success(f'Ordem Sell/Short enviada! ID: {result["orderId"]}')
+                except Exception as e:
+                    st.error(f'Erro ao enviar ordem: {e}')
+            st.markdown(f'<div class="trade-cost">Order Value: {trade_size or 0} USDT</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with tab2:
     st.header("Ordens")
@@ -1660,6 +2183,19 @@ with tab2:
     filtered_open = filtered_df[filtered_df['estado'] == 'aberto'].sort_values(by='timestamp', ascending=False)
     logger.info(f"Ordens abertas após filtros: {len(filtered_open)}")
 
+    # Garante que a coluna 'modo_contrario_emoji' existe em todos os DataFrames usados
+    if 'modo_contrario_emoji' not in filtered_open.columns:
+        filtered_open['modo_contrario_emoji'] = ''
+    # Adiciona badge azul se visual_tag == '🟦'
+    if 'visual_tag' in filtered_open.columns:
+        filtered_open['visual_tag_emoji'] = filtered_open['visual_tag'].apply(lambda x: '🟦' if str(x) == '🟦' else '')
+    else:
+        filtered_open['visual_tag_emoji'] = ''
+    # Adiciona coluna de direção original se existir
+    if 'direcao_original' in filtered_open.columns:
+        filtered_open['direcao_original'] = filtered_open['direcao_original']
+    else:
+        filtered_open['direcao_original'] = filtered_open['direcao']
     if not filtered_open.empty:
         display_data = []
         for _, row in filtered_open.iterrows():
@@ -1692,7 +2228,8 @@ with tab2:
             display_data.append({
                 "Status": status_emoji,
                 "Par": row['par'],
-                "Direction": row['direcao'],
+                "Direction": (row['direcao'] + ' ' + row.get('modo_contrario_emoji', '') + ' ' + row.get('visual_tag_emoji', '')),
+                "Direção Original": row.get('direcao_original', row['direcao']),
                 "Entry Price": f"{entry_price:.4f}",
                 "Mark Price": f"{mark_price:.4f}",
                 "Liq. Price": f"{liq_price:.4f}",
@@ -1718,7 +2255,7 @@ with tab2:
 
         if display_data:
             display_df = pd.DataFrame(display_data)
-            display_df = display_df[["Status", "Par", "Direction", "Entry Price", "Mark Price", "Liq. Price", "Distance to TP (%)", "Distance to SL (%)", "PNL (%)", "Time (min)", "Strategy", "Signal ID", "Motivos", "Resumo", "Timeframe", "Quantity", "Historical Win Rate (%)", "Avg PNL (%)", "Total Signals", "Aceito", "TP Percent", "SL Percent", "Quality Score", "Contributing Indicators"]]
+            display_df = display_df[["Status", "Par", "Direction", "Direção Original", "Entry Price", "Mark Price", "Liq. Price", "Distance to TP (%)", "Distance to SL (%)", "PNL (%)", "Time (min)", "Strategy", "Signal ID", "Motivos", "Resumo", "Timeframe", "Quantity", "Historical Win Rate (%)", "Avg PNL (%)", "Total Signals", "Aceito", "TP Percent", "SL Percent", "Quality Score", "Contributing Indicators"]]
 
             # Inicializar estados para paginação e expansão
             if 'open_orders_page' not in st.session_state:
@@ -1765,13 +2302,14 @@ with tab2:
                 if is_expanded:
                     st.markdown(f"""
 <div class="strategy-header">
-🟦 [ULTRABOT] SINAL GERADO - {row['Par']} ({row['Timeframe']}) - {row['Direction']} 🟦
+{row.get('visual_tag_emoji','')} [ULTRABOT] SINAL GERADO - {row['Par']} ({row['Timeframe']}) - {row['Direction']} {row.get('visual_tag_emoji','')}
 </div>
 <div class="strategy-section">
 <p><strong>Id da ordem:</strong> {row['Signal ID']}</p>
 <p>💰 <strong>Preço de Entrada:</strong> {row['Entry Price']} | <strong>Quantidade:</strong> {row['Quantity']}</p>
 <p>🎯 <strong>TP:</strong> <span style="color: green;">+{row['TP Percent']}%</span> | <strong>SL:</strong> <span style="color: red;">-{row['SL Percent']}%</span></p>
 <p>🧠 <strong>Estratégia:</strong> {row['Strategy']}</p>
+<p>↔️ <strong>Direção Original:</strong> {row['Direção Original']}</p>
 <p>📌 <strong>Motivos do Sinal:</strong> {row['Resumo']}</p>
 <p>📊 <strong>Indicadores Utilizados:</strong></p>
 <p>- {row['Contributing Indicators']}</p>
@@ -1806,9 +2344,19 @@ with tab2:
 
     # Seção: Histórico de Ordens Fechadas
     st.subheader("Histórico de Ordens Fechadas")
-    filtered_closed = filtered_df[filtered_df['estado'] == 'fechado'].sort_values(by='timestamp_saida', ascending=False)
+    filtered_closed = filtered_df[filtered_df['estado'] == 'fechado'].sort_values(by='timestamp', ascending=False)
+    # Adiciona coluna de direção original se existir
+    if 'direcao_original' in filtered_closed.columns:
+        filtered_closed['direcao_original'] = filtered_closed['direcao_original']
+    else:
+        filtered_closed['direcao_original'] = filtered_closed['direcao']
     if not filtered_closed.empty:
         closed_display = []
+        # Adiciona badge azul se visual_tag == '🟦'
+        if 'visual_tag' in filtered_closed.columns:
+            filtered_closed['visual_tag_emoji'] = filtered_closed['visual_tag'].apply(lambda x: '🟦' if str(x) == '🟦' else '')
+        else:
+            filtered_closed['visual_tag_emoji'] = ''
         for _, row in filtered_closed.iterrows():
             status_emoji = "🟠🟢" if row['pnl_realizado'] >= 0 else "🟠🔴"
             valores_indicadores = json.loads(row['localizadores'])
@@ -1821,7 +2369,8 @@ with tab2:
             closed_display.append({
                 "Status": status_emoji,
                 "Par": row['par'],
-                "Direction": row['direcao'],
+                "Direction": (row['direcao'] + ' ' + row.get('modo_contrario_emoji', '') + ' ' + row.get('visual_tag_emoji', '')),
+                "Direção Original": row.get('direcao_original', row['direcao']),
                 "Entry Price": f"{float(row['preco_entrada']):.4f}",
                 "Exit Price": f"{float(row['preco_saida']):.4f}",
                 "PNL (%)": f"{float(row['pnl_realizado']):.2f}%",
@@ -1846,7 +2395,7 @@ with tab2:
 
         if closed_display:
             closed_df = pd.DataFrame(closed_display)
-            closed_df = closed_df[["Status", "Par", "Direction", "Entry Price", "Exit Price", "PNL (%)", "Resultado", "Strategy", "Open Time", "Close Time", "Motivos", "Resumo", "Timeframe", "Quantity", "Historical Win Rate (%)", "Avg PNL (%)", "Total Signals", "Aceito", "TP Percent", "SL Percent", "Quality Score", "Contributing Indicators", "Signal ID"]]
+            closed_df = closed_df[["Status", "Par", "Direction", "Direção Original", "Entry Price", "Exit Price", "PNL (%)", "Resultado", "Strategy", "Open Time", "Close Time", "Motivos", "Resumo", "Timeframe", "Quantity", "Historical Win Rate (%)", "Avg PNL (%)", "Total Signals", "Aceito", "TP Percent", "SL Percent", "Quality Score", "Contributing Indicators", "Signal ID"]]
 
             # Inicializar estados para paginação e expansão
             if 'closed_orders_page' not in st.session_state:
@@ -1889,13 +2438,14 @@ with tab2:
                 if is_expanded:
                     st.markdown(f"""
 <div class="strategy-header">
-🟦 [ULTRABOT] SINAL GERADO - {row['Par']} ({row['Timeframe']}) - {row['Direction']} 🟦
+{row.get('visual_tag_emoji','')} [ULTRABOT] SINAL GERADO - {row['Par']} ({row['Timeframe']}) - {row['Direction']} {row.get('visual_tag_emoji','')}
 </div>
 <div class="strategy-section">
 <p><strong>Id da ordem:</strong> {row['Signal ID']}</p>
 <p>💰 <strong>Preço de Entrada:</strong> {row['Entry Price']} | <strong>Quantidade:</strong> {row['Quantity']}</p>
 <p>🎯 <strong>TP:</strong> <span style="color: green;">+{row['TP Percent']}%</span> | <strong>SL:</strong> <span style="color: red;">-{row['SL Percent']}%</span></p>
 <p>🧠 <strong>Estratégia:</strong> {row['Strategy']}</p>
+<p>↔️ <strong>Direção Original:</strong> {row['Direção Original']}</p>
 <p>📌 <strong>Motivos do Sinal:</strong> {row['Resumo']}</p>
 <p>📊 <strong>Indicadores Utilizados:</strong></p>
 <p>- {row['Contributing Indicators']}</p>
@@ -1930,13 +2480,16 @@ with tab2:
 
     # Seção: Sinais Gerados
     st.subheader("Sinais Gerados")
+    # Garante que a coluna 'modo_contrario_emoji' existe
+    if 'modo_contrario_emoji' not in filtered_df.columns:
+        filtered_df['modo_contrario_emoji'] = ''
     if not filtered_df.empty:
         signals_display = []
         for _, row in filtered_df.iterrows():
             signals_display.append({
                 "Timestamp": row['timestamp'],
                 "Par": row['par'],
-                "Direção": row['direcao'],
+                "Direção": (row['direcao'] + ' ' + row.get('modo_contrario_emoji', '') + ' ' + row.get('visual_tag_emoji', '')),
                 "Estratégia": row['strategy_name'],
                 "Timeframe": row['timeframe'],
                 "Aceito": "Sim" if row['aceito'] else "Não",
@@ -1956,7 +2509,7 @@ with tab2:
         total_pages = (len(signals_df) + page_size - 1) // page_size
 
         st.markdown('<div class="table-container">', unsafe_allow_html=True)
-        st.table(signals_df.iloc[start_idx:end_idx])
+        st.markdown(signals_df.iloc[start_idx:end_idx].to_html(index=False, classes="sinais-table"), unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Controles de navegação para paginação
@@ -2283,14 +2836,6 @@ with tab5:
             return closed_orders
         except Exception as e:
             st.error(f"Erro ao buscar ordens fechadas da Binance: {e}")
-            return []
-
-    # --- Open Orders (reais) ---
-    if st.session_state['binance_nav_selected'] == "Open Orders":
-        st.markdown('<div class="binance-delay">Atualização automática a cada 1-2 minutos. <b>Delay esperado!</b></div>', unsafe_allow_html=True)
-        # Remover botões duplicados de refresh/closeall se existirem acima do menu
-        # st.button("Refresh", key="refresh_open_orders", help="Atualizar ordens", use_container_width=True)
-        # st.button("Close All Positions", key="close_all_binance", help="Fechar todas as posições", use_container_width=True, type="primary")
         open_orders = get_open_binance_orders()
         total_pnl = sum([o['pnl'] for o in open_orders])
         pnl_class_total = 'binance-pnl-pos' if total_pnl >= 0 else 'binance-pnl-neg'
@@ -2574,9 +3119,6 @@ with tab6:
     else:
         st.info("Nenhuma negociação fechada encontrada.")
 
-# Seção de Robôs Ativos
-#removido by leleo
-
 # Verificar mudanças no status dos robôs e gerar ordens
 previous_active_strategies = st.session_state.get('previous_active_strategies', {})
 for strategy_name, strategy_config in strategies.items():
@@ -2633,3 +3175,141 @@ with tab7:
         st.write(f"Proporção positiva: {sentiment_counts / len(df):.2%}" if len(df) > 0 else "Sem dados suficientes.")
     else:
         st.info("Ainda não há dados de sentimento do X nos insights.")
+
+with tab8:
+    st.markdown("### Insights do Grok")
+    insights_path = "data/grok_insights.csv" if os.path.exists("data/grok_insights.csv") else "grok_insights.csv"
+    if os.path.exists(insights_path):
+        try:
+            insights_df = pd.read_csv(insights_path)
+            if not insights_df.empty:
+                for pair in ["TRXUSDT", "DOGEUSDT", "XRPUSDT"]:
+                    pair_insights = insights_df[insights_df["pair"] == pair].tail(6)
+                    if pair_insights.empty:
+                        continue
+                    st.markdown(f"#### {pair}")
+                    for idx, row in pair_insights.iterrows():
+                        try:
+                            insight = json.loads(row["insights"])
+                        except Exception:
+                            insight = row["insights"]
+                        with st.expander(f"{row['timestamp']} - {insight.get('trend', 'N/A').capitalize() if isinstance(insight, dict) else ''}", expanded=True):
+                            signal_class = f"signal-{insight['signal'].lower()}" if isinstance(insight, dict) and 'signal' in insight else ''
+                            st.markdown(
+                                f"""
+                                <div class='insight-card'>
+                                    <p><strong>Tendência:</strong> {insight.get('trend', 'N/A').capitalize() if isinstance(insight, dict) else ''}</p>
+                                    <p><strong>Sinal:</strong> <span class='{signal_class}'>{insight.get('signal', 'N/A').capitalize() if isinstance(insight, dict) else ''}</span></p>
+                                    <p><strong>Confiança:</strong> {insight.get('confidence', 0.0):.2% if isinstance(insight, dict) and 'confidence' in insight else ''}</p>
+                                    <p><strong>Take-Profit:</strong> {insight.get('tp', 'N/A') if isinstance(insight, dict) else ''}</p>
+                                    <p><strong>Stop-Loss:</strong> {insight.get('sl', 'N/A') if isinstance(insight, dict) else ''}</p>
+                                    <p><strong>Leverage:</strong> {insight.get('leverage', 'N/A') if isinstance(insight, dict) else ''}</p>
+                                    <p><strong>Motivo:</strong> {insight.get('reason', 'N/A') if isinstance(insight, dict) else insight}</p>
+                                    <p><strong>Ajustes por Robô:</strong> <pre>{json.dumps(insight.get('robot_adjustments', {}), indent=2, ensure_ascii=False) if isinstance(insight, dict) and 'robot_adjustments' in insight else ''}</pre></p>
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
+            else:
+                st.markdown('<div class="notification notification-info">ℹ️ Nenhum insight do Grok disponível.</div>', unsafe_allow_html=True)
+        except Exception as e:
+            st.markdown(f'<div class="notification notification-error">🚨 Erro ao carregar insights: {e}</div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="notification notification-info">ℹ️ O arquivo grok_insights.csv não foi encontrado.</div>', unsafe_allow_html=True)
+
+def render_grok_insights():
+    st.markdown("### Insights do Grok")
+    st.markdown(
+        """
+        <style>
+        .insight-card {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .signal-buy { color: #00ff00; font-weight: bold; }
+        .signal-sell { color: #ff0000; font-weight: bold; }
+        .signal-hold { color: #ffff00; font-weight: bold; }
+        .action-button {
+            background-color: #f5c518;
+            color: #000000;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        .action-button:hover {
+            background-color: #e0b015;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    try:
+        insights_df = pd.read_csv("data/grok_insights.csv")
+        if not insights_df.empty:
+            for pair in ["TRXUSDT", "DOGEUSDT", "XRPUSDT"]:
+                pair_insights = insights_df[
+                    (insights_df["pair"] == pair) &
+                    (pd.to_datetime(insights_df["timestamp"]) > pd.Timestamp.now() - pd.Timedelta(hours=2))
+                ].tail(6)
+                if pair_insights.empty:
+                    continue
+                st.markdown(f"#### {pair}")
+                for idx, row in pair_insights.iterrows():
+                    insight = json.loads(row["insights"])
+                    with st.expander(f"{row['timestamp']} - {insight['trend'].capitalize()}", expanded=True):
+                        signal_class = f"signal-{insight['signal'].lower()}"
+                        st.markdown(
+                            f"""
+                            <div class='insight-card'>
+                                <p><strong>Tendência:</strong> {insight['trend'].capitalize()}</p>
+                                <p><strong>Sinal:</strong> <span class='{signal_class}'>{insight['signal'].capitalize()}</span></p>
+                                <p><strong>Confiança:</strong> {insight['confidence']:.2%}</p>
+                                <p><strong>Take-Profit:</strong> {insight['tp']:.4f}</p>
+                                <p><strong>Stop-Loss:</strong> {insight['sl']:.4f}</p>
+                                <p><strong>Leverage:</strong> {insight['leverage']}x</p>
+                                <p><strong>Motivo:</strong> {insight['reason']}</p>
+                                <p><strong>Ajustes por Robô:</strong> <pre>{json.dumps(insight['robot_adjustments'], indent=2)}</pre></p>
+                                <a href='#' class='action-button'>Aplicar Ajustes</a>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                # Gráfico de confiança
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(
+                    x=pair_insights["timestamp"],
+                    y=[json.loads(x)["confidence"] for x in pair_insights["insights"]],
+                    mode="lines+markers",
+                    name="Confiança",
+                    line=dict(color="#f5c518")
+                ))
+                fig.update_layout(
+                    title=f"Confiança dos Insights - {pair}",
+                    xaxis_title="Data/Hora",
+                    yaxis_title="Confiança (%)",
+                    template="plotly_dark",
+                    height=300,
+                    margin=dict(l=20, r=20, t=40, b=20)
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.markdown(
+                '<div class="notification notification-info">ℹ️ Nenhum insight disponível.</div>',
+                unsafe_allow_html=True
+            )
+    except Exception as e:
+        st.markdown(
+            f'<div class="notification notification-error">🚨 Erro ao carregar insights: {e}</div>',
+            unsafe_allow_html=True
+        )
+
+if 'tab8' in locals() or 'tab8' in globals():
+    with tab8:
+        render_grok_insights()
