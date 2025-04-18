@@ -708,14 +708,14 @@
     },
     {
         "id": 59,
-        "timestamp": "2025-04-17T16:37:13.954168",
-        "expiry": "2025-04-24T16:37:13.954168",
+        "timestamp": "2025-04-17T22:55:48.108641",
+        "expiry": "2025-04-24T22:55:48.108641",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: Momentum Fast",
         "message": "Rob\u00f4 'Momentum Fast' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 136
+        "count": 173
     },
     {
         "id": 60,
@@ -1588,14 +1588,14 @@
     },
     {
         "id": 139,
-        "timestamp": "2025-04-17T16:37:13.949182",
-        "expiry": "2025-04-24T16:37:13.949182",
+        "timestamp": "2025-04-17T20:39:07.929401",
+        "expiry": "2025-04-24T20:39:07.929401",
         "type": "WARNING",
         "source": "Valida\u00e7\u00e3o: ema max",
         "message": "Rob\u00f4 'ema max' est\u00e1 ativo, mas n\u00e3o possui ordens abertas.",
         "details": null,
         "read": false,
-        "count": 116
+        "count": 139
     },
     {
         "id": 140,

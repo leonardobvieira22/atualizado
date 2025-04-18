@@ -8,6 +8,9 @@ from config import CONFIG, SYMBOLS, TIMEFRAMES
 from utils import logger
 from trade_manager import check_timeframe_direction_limit, check_active_trades, check_global_and_robot_limit
 from data_manager import get_quantity
+from order_executor import OrderExecutor
+from binance.client import Client
+from config import REAL_API_KEY, REAL_API_SECRET
 
 def load_data(file_path="sinais_detalhados.csv", columns=None):
     """
@@ -86,7 +89,7 @@ def calculate_performance(df):
         return {"total_signals": 0, "win_rate": 0.0, "avg_pnl": 0.0}
 
 def generate_orders(strategy_name, strategy_config):
-    """Gera ordens simuladas para exibição no dashboard, respeitando limites de ordens abertas e valor fixo de 10 USD por ordem."""
+    logger.info(f"[DEBUG] modo_real lido do config.json: {CONFIG.get('modes', {}).get('real', False)}")
     try:
         tp_percent = strategy_config.get('tp_percent', CONFIG.get('tp_percent', 0.5))
         sl_percent = strategy_config.get('sl_percent', CONFIG.get('sl_percent', 0.3))
@@ -97,10 +100,7 @@ def generate_orders(strategy_name, strategy_config):
         config = CONFIG
         config['quantity_in_usdt'] = 10.0  # Garante valor fixo de 10 USD por ordem
         modo_ao_contrario = config.get('modo_ao_contrario', False)
-        # Checagem de limite global e por robô
-        if not check_global_and_robot_limit(strategy_name, active_trades):
-            logger.warning(f"Limite global (540) ou por robô (36) atingido para {strategy_name}. Nenhuma ordem será gerada no dashboard.")
-            return []
+        modo_real = config.get('modes', {}).get('real', False)
         for pair in SYMBOLS:
             for tf in TIMEFRAMES:
                 for direction in ['LONG', 'SHORT']:
@@ -151,6 +151,27 @@ def generate_orders(strategy_name, strategy_config):
                         "estado": "aberto",
                         "aceito": True
                     }
+                    # Se modo real, envia ordem real para Binance
+                    if modo_real:
+                        try:
+                            logger.info(f"[DASHBOARD-REAL-ORDER-TRY] Enviando ordem REAL para Binance: {pair} {direcao_final} (Estratégia: {strategy_name})")
+                            client = Client(REAL_API_KEY, REAL_API_SECRET)
+                            order_executor = OrderExecutor(client, config)
+                            result = order_executor.executar_ordem(
+                                par=pair,
+                                direcao=direcao_final,
+                                capital=quantity * entry_price,
+                                stop_loss=sl_percent,
+                                take_profit=tp_percent,
+                                mercado='futures',
+                                dry_run=False,
+                                dry_run_id=order["signal_id"]
+                            )
+                            logger.info(f"[DASHBOARD-REAL-ORDER-SUCCESS] Ordem REAL enviada para Binance: {pair} {direcao_final} | Resultado: {result}")
+                            order['binance_result'] = result
+                        except Exception as e:
+                            logger.error(f"[DASHBOARD-REAL-ORDER-ERROR] Erro ao enviar ordem real para Binance: {e}", exc_info=True)
+                            order['binance_result'] = str(e)
                     orders.append(order)
                     # Atualiza lista local para impedir múltiplas simulações do mesmo tipo
                     active_trades.append({

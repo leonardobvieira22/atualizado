@@ -31,6 +31,8 @@ from binance.client import Client
 import logging
 from signal_generator import SignalGenerator
 from grok_periodic_check import GrokPeriodicCheck
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 logger.info("Carregando variáveis de ambiente...")
 load_dotenv()
@@ -494,6 +496,7 @@ try:
                         print(f"- {error['description']} / {error['timestamp']} / {error['reason']}")
                 print("└───────────────────────────────┘")
 
+                log_status_extra()
                 time.sleep(30)
             except Exception as e:
                 logger.error(f"Erro ao gerar resumo periódico: {e}")
@@ -621,6 +624,22 @@ try:
                     logger.info(f"Limite de ordens atingido para {direction} em {pair}/{tf} com estratégia {strategy_name}")
 
         return signals
+
+    class ConfigReloadHandler(FileSystemEventHandler):
+        def __init__(self, config, config_path, logger):
+            super().__init__()
+            self.config = config
+            self.config_path = config_path
+            self.logger = logger
+        def on_modified(self, event):
+            if event.src_path.endswith('config.json'):
+                try:
+                    with open(self.config_path, 'r', encoding='utf-8') as f:
+                        self.config.clear()
+                        self.config.update(json.load(f))
+                    self.logger.info('Configuração recarregada instantaneamente via file watcher: %s', self.config)
+                except Exception as e:
+                    self.logger.error(f'Erro ao recarregar config.json via file watcher: {e}')
 
     def main():
         logger.info("Inicializando arquivos CSV...")
@@ -848,65 +867,154 @@ try:
             pd.DataFrame(columns=["pair", "timeframe", "insights", "timestamp"]).to_csv("grok_insights.csv", index=False)
             logger.info("Arquivo grok_insights.csv criado.")
 
-        while True:
-            iteration_count += 1
-            logger.info(f"--- Início da iteração {iteration_count} do loop principal ---")
-            try:
-                # Atualizar o estado das estratégias no início de cada iteração
-                active_strategies = {
-                    name: config for name, config in strategies.items()
-                    if robot_status.get(name, False)
-                }
-                logger.info(f"Estratégias ativas atualizadas: {list(active_strategies.keys())}")
+        # --- INÍCIO: Monitoramento de alterações no config.json ---
+        config_path = os.path.join(os.path.dirname(__file__), "config.json")
+        last_config_mtime = os.path.getmtime(config_path) if os.path.exists(config_path) else None
 
-                if config.get('learning_enabled', False) and time.time() - last_learning_update > config.get('learning_update_interval', 3600):
-                    logger.info("Atualizando modelo de aprendizado...")
-                    learning_engine.train()
-                    last_learning_update = time.time()
-                    bot_status["last_learning_update"] = last_learning_update
-                    bot_status["model_accuracy"] = learning_engine.accuracy
-                    strategy_performance = calculate_strategy_performance()
-                    for strategy_name, perf in strategy_performance.items():
-                        learning_engine.adjust_strategy_parameters(strategy_name, perf)
-                    logger.info("Modelo de aprendizado atualizado com sucesso.")
-                else:
-                    logger.debug("Atualização do modelo de aprendizado não necessária nesta iteração.")
+        # --- INÍCIO: Watchdog para reload instantâneo do config.json ---
+        event_handler = ConfigReloadHandler(config, config_path, logger)
+        observer = Observer()
+        observer.schedule(event_handler, os.path.dirname(config_path), recursive=False)
+        observer.start()
+        logger.info("File watcher (watchdog) iniciado para config.json.")
+        # --- FIM: Watchdog ---
 
-                current_time = datetime.now()
-                signals_in_iteration = 0
-                # Priorizar pares de forma balanceada
-                for pair in PAIRS:
-                    logger.info(f"Processando par: {pair}")
-                    # Salva o preço atual no precos_log.csv, mesmo em modo simulado
-                    try:
-                        price = get_current_price(client, pair, config)
-                        logger.info(f"[DEBUG] Preço salvo em precos_log.csv para {pair}: {price}")
-                    except Exception as e:
-                        logger.error(f"[ERRO] Falha ao salvar preço em precos_log.csv para {pair}: {e}")
-                    signals_by_tf = {}
+        try:
+            while True:
+                # --- INÍCIO: Reload automático do config.json ---
+                try:
+                    current_mtime = os.path.getmtime(config_path) if os.path.exists(config_path) else None
+                    if current_mtime and current_mtime != last_config_mtime:
+                        logger.info("Alteração detectada em config.json. Recarregando configurações...")
+                        with open(config_path, 'r', encoding='utf-8') as f:
+                            config.clear()
+                            config.update(json.load(f))
+                        last_config_mtime = current_mtime
+                        logger.info(f"Configuração recarregada: {config}")
+                except Exception as e:
+                    logger.error(f"Erro ao tentar recarregar config.json: {e}")
+                # --- FIM: Reload automático do config.json ---
+                iteration_count += 1
+                logger.info(f"--- Início da iteração {iteration_count} do loop principal ---")
+                try:
+                    # Atualizar o estado das estratégias no início de cada iteração
+                    active_strategies = {
+                        name: config for name, config in strategies.items()
+                        if robot_status.get(name, False)
+                    }
+                    logger.info(f"Estratégias ativas atualizadas: {list(active_strategies.keys())}")
 
-                    # Carregar insights recentes do Grok para o par
-                    grok_insights = {}
-                    try:
-                        insights_df = pd.read_csv("grok_insights.csv")
-                        recent_insights = insights_df[insights_df["pair"] == pair].tail(1)
-                        if not recent_insights.empty:
-                            grok_insights = json.loads(recent_insights.iloc[0]["insights"])
-                    except Exception as e:
-                        logger.warning(f"Erro ao carregar insights do Grok para {pair}: {e}")
+                    if config.get('learning_enabled', False) and time.time() - last_learning_update > config.get('learning_update_interval', 3600):
+                        logger.info("Atualizando modelo de aprendizado...")
+                        learning_engine.train()
+                        last_learning_update = time.time()
+                        bot_status["last_learning_update"] = last_learning_update
+                        bot_status["model_accuracy"] = learning_engine.accuracy
+                        strategy_performance = calculate_strategy_performance()
+                        for strategy_name, perf in strategy_performance.items():
+                            learning_engine.adjust_strategy_parameters(strategy_name, perf)
+                        logger.info("Modelo de aprendizado atualizado com sucesso.")
+                    else:
+                        logger.debug("Atualização do modelo de aprendizado não necessária nesta iteração.")
 
-                    # Gerar sinais em tempo real (se habilitado)
-                    for strategy_name, strategy_config in active_strategies.items():
-                        for tf in strategy_config.get("timeframes", TIMEFRAMES):
-                            direction, score, details, contributing_indicators, strategy_name = generate_realtime_signal(
-                                client, pair, tf, strategy_config, config, learning_engine, binance_utils
-                            )
-                            # Ajustar score com base no Grok se houver insight
-                            if grok_insights:
-                                score = score * 0.7 + grok_insights.get("confidence", 0.0) * 0.3
-                                if "reasons" in details:
-                                    details["reasons"].append(f"Grok: {grok_insights.get('reason', 'Sem motivo')}")
-                            if direction and score >= MIN_SCORE_THRESHOLD:
+                    current_time = datetime.now()
+                    signals_in_iteration = 0
+                    # Priorizar pares de forma balanceada
+                    for pair in PAIRS:
+                        logger.info(f"Processando par: {pair}")
+                        # Salva o preço atual no precos_log.csv, mesmo em modo simulado
+                        try:
+                            price = get_current_price(client, pair, config)
+                            logger.info(f"[DEBUG] Preço salvo em precos_log.csv para {pair}: {price}")
+                        except Exception as e:
+                            logger.error(f"[ERRO] Falha ao salvar preço em precos_log.csv para {pair}: {e}")
+                        signals_by_tf = {}
+
+                        # Carregar insights recentes do Grok para o par
+                        grok_insights = {}
+                        try:
+                            insights_df = pd.read_csv("grok_insights.csv")
+                            recent_insights = insights_df[insights_df["pair"] == pair].tail(1)
+                            if not recent_insights.empty:
+                                grok_insights = json.loads(recent_insights.iloc[0]["insights"])
+                        except Exception as e:
+                            logger.warning(f"Erro ao carregar insights do Grok para {pair}: {e}")
+
+                        # Gerar sinais em tempo real (se habilitado)
+                        for strategy_name, strategy_config in active_strategies.items():
+                            for tf in strategy_config.get("timeframes", TIMEFRAMES):
+                                direction, score, details, contributing_indicators, strategy_name = generate_realtime_signal(
+                                    client, pair, tf, strategy_config, config, learning_engine, binance_utils
+                                )
+                                # Ajustar score com base no Grok se houver insight
+                                if grok_insights:
+                                    score = score * 0.7 + grok_insights.get("confidence", 0.0) * 0.3
+                                    if "reasons" in details:
+                                        details["reasons"].append(f"Grok: {grok_insights.get('reason', 'Sem motivo')}")
+                                if direction and score >= MIN_SCORE_THRESHOLD:
+                                    signals_by_tf[tf] = {
+                                        "direction": direction,
+                                        "score": score,
+                                        "details": details,
+                                        "contributing_indicators": contributing_indicators,
+                                        "strategy_name": strategy_name
+                                    }
+                                    signals_in_iteration += 1
+                                    bot_status["signals_generated"] += 1
+                                    logger.info(f"Sinal em tempo real gerado para {pair} ({tf}): {direction} (score={score})")
+                                elif direction:
+                                    logger.info(f"Sinal rejeitado para {pair} ({tf}): score {score} abaixo do limite {MIN_SCORE_THRESHOLD}")
+
+                        # Salvar insights do Grok para o par
+                        if grok_insights:
+                            pd.DataFrame({
+                                "pair": [pair],
+                                "timeframe": [tf],
+                                "insights": [json.dumps(grok_insights)],
+                                "timestamp": [datetime.now().isoformat()]
+                            }).to_csv("grok_insights.csv", mode="a", index=False, header=False)
+
+                        # Gerar sinais baseados em velas fechadas
+                        for tf in TIMEFRAMES:
+                            if current_time < candle_schedule[pair][tf]:
+                                logger.debug(f"Vela para {pair} ({tf}) ainda não fechou. Próxima verificação em {candle_schedule[pair][tf]}.")
+                                continue
+
+                            candle_schedule[pair][tf] = get_next_candle_close_time(tf, current_time)
+                            is_closed, close_time = is_candle_closed(client, pair, tf)
+                            if not is_closed:
+                                logger.debug(f"Candle para {pair} ({tf}) ainda não fechou. Pulando...")
+                                continue
+
+                            if last_candle_close[pair][tf] == close_time:
+                                logger.debug(f"Candle para {pair} ({tf}) já processado. Pulando...")
+                                continue
+                            last_candle_close[pair][tf] = close_time
+
+                            logger.info(f"Candle para {pair} ({tf}) fechada em {close_time}. Processando...")
+                            # Aumentar o número de candles para timeframes maiores
+                            limit = 200 if tf in ["1h", "4h", "1d"] else 100
+                            historical_data = get_historical_data(client, pair, tf, limit=limit)
+                            if historical_data.empty:
+                                logger.warning(f"Sem dados históricos para {pair} ({tf}). Pulando...")
+                                continue
+                            logger.info(f"Dados históricos obtidos: {len(historical_data)} candles.")
+
+                            historical_data = calculate_indicators(historical_data, binance_utils)
+                            for strategy_name, strategy_config in active_strategies.items():
+                                if tf not in strategy_config.get("timeframes", TIMEFRAMES):
+                                    continue
+                                logger.info(f"Gerando sinais para {pair} ({tf}) com estratégia {strategy_name}...")
+                                direction, score, details, contributing_indicators, _ = generate_signal(
+                                    historical_data, tf, strategy_config, config, learning_engine, binance_utils
+                                )
+                                if not direction:
+                                    logger.debug(f"Nenhum sinal gerado para {pair} ({tf}) com estratégia {strategy_name}.")
+                                    continue
+                                if score < MIN_SCORE_THRESHOLD:
+                                    logger.info(f"Sinal rejeitado para {pair} ({tf}) com estratégia {strategy_name}: score {score} abaixo do limite {MIN_SCORE_THRESHOLD}")
+                                    continue
+
                                 signals_by_tf[tf] = {
                                     "direction": direction,
                                     "score": score,
@@ -916,159 +1024,158 @@ try:
                                 }
                                 signals_in_iteration += 1
                                 bot_status["signals_generated"] += 1
-                                logger.info(f"Sinal em tempo real gerado para {pair} ({tf}): {direction} (score={score})")
-                            elif direction:
-                                logger.info(f"Sinal rejeitado para {pair} ({tf}): score {score} abaixo do limite {MIN_SCORE_THRESHOLD}")
+                                logger.info(f"Sinal gerado para {pair} ({tf}) com estratégia {strategy_name}: {direction} (score={score})")
 
-                    # Salvar insights do Grok para o par
-                    if grok_insights:
-                        pd.DataFrame({
-                            "pair": [pair],
-                            "timeframe": [tf],
-                            "insights": [json.dumps(grok_insights)],
-                            "timestamp": [datetime.now().isoformat()]
-                        }).to_csv("grok_insights.csv", mode="a", index=False, header=False)
-
-                    # Gerar sinais baseados em velas fechadas
-                    for tf in TIMEFRAMES:
-                        if current_time < candle_schedule[pair][tf]:
-                            logger.debug(f"Vela para {pair} ({tf}) ainda não fechou. Próxima verificação em {candle_schedule[pair][tf]}.")
+                        if not signals_by_tf:
                             continue
 
-                        candle_schedule[pair][tf] = get_next_candle_close_time(tf, current_time)
-                        is_closed, close_time = is_candle_closed(client, pair, tf)
-                        if not is_closed:
-                            logger.debug(f"Candle para {pair} ({tf}) ainda não fechou. Pulando...")
+                        final_direction, final_score, multi_tf_details = generate_multi_timeframe_signal(
+                            signals_by_tf, learning_engine, signals_by_tf[list(signals_by_tf.keys())[0]]['contributing_indicators']
+                        )
+                        if not final_direction:
+                            logger.debug(f"Nenhum sinal multi-timeframe gerado para {pair}.")
+                            continue
+                        logger.info(f"Sinal multi-timeframe gerado para {pair}: {final_direction} (score={final_score})")
+
+                        signal_id = str(uuid.uuid4())
+                        current_price = get_current_price(client, pair, config)
+                        if current_price is None:
+                            logger.warning(f"Não foi possível obter preço para {pair}. Pulando sinal...")
+                            continue
+                        quantity = get_quantity(config, pair, current_price)
+                        if quantity is None:
+                            logger.error(f"Não foi possível calcular quantidade para {pair}. Pulando sinal...")
+                            continue
+                        funding_rate = get_funding_rate(client, pair, config, mode="dry_run")
+                        strategy_name = signals_by_tf[list(signals_by_tf.keys())[0]]['strategy_name']
+                        strategy_config = active_strategies[strategy_name]
+                        combo_key = generate_combination_key(pair, final_direction, strategy_name, signals_by_tf[list(signals_by_tf.keys())[0]]['contributing_indicators'], tf)
+                        signal_data = {
+                            "signal_id": signal_id,
+                            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "par": pair,
+                            "timeframe": tf,
+                            "direcao": final_direction,
+                            "preco_entrada": current_price,
+                            "quantity": quantity,
+                            "score_tecnico": final_score,
+                            "motivos": json.dumps(details["reasons"] + [f"Multi-TF: {multi_tf_details.get('multi_tf_confidence', 0.0):.2f}"]),
+                            "funding_rate": funding_rate,
+                            "localizadores": json.dumps(details["locators"]),
+                            "parametros": json.dumps({
+                                "tp_percent": strategy_config.get("tp_percent", config["stop_padrao"]["tp_percent"]),
+                                "sl_percent": strategy_config.get("sl_percent", config["stop_padrao"]["sl_percent"]),
+                                "leverage": strategy_config.get("leverage", config["leverage"])
+                            }),
+                            "timeframes_analisados": json.dumps(list(signals_by_tf.keys())),
+                            "contributing_indicators": signals_by_tf[list(signals_by_tf.keys())[0]]['contributing_indicators'],
+                            "strategy_name": strategy_name,
+                            "combination_key": combo_key,
+                            "historical_win_rate": details.get("historical_win_rate", 0.0),
+                            "avg_pnl": details.get("avg_pnl", 0.0),
+                            "estado": "aberto",
+                            "side_performance": json.dumps({"LONG": 0.0, "SHORT": 0.0}),
+                            "timeframe_weight": 1.0 / (TIMEFRAMES.index(tf) + 1)
+                        }
+                        signal_data['quality_score'] = calculate_signal_quality(historical_data, signal_data, binance_utils)
+                        signal_queue.put((-signal_data['quality_score'], signal_data))
+                        signals_in_iteration += 1
+                        bot_status["signals_generated"] += 1
+
+                    from trade_manager import check_global_and_robot_limit
+                    # Remover limitação global: processar todos os sinais da fila
+                    while not signal_queue.empty():
+                        _, signal_data = signal_queue.get()
+                        strategy_name = signal_data['strategy_name']
+                        strategy_config = active_strategies[strategy_name]
+                        strategy_active_trades = [trade for trade in active_trades_dry_run if trade['strategy_name'] == strategy_name]
+                        combo_key = signal_data['combination_key']
+                        # Checagem de limite global e por robô
+                        if not check_global_and_robot_limit(strategy_name, active_trades_dry_run):
+                            logger.warning(f"Limite global (540) ou por robô (36) atingido para {strategy_name}. Sinal {signal_data['signal_id']} rejeitado.")
+                            save_signal(signal_data, accepted=False, mode="dry_run")
+                            save_signal_log(signal_data, accepted=False, mode="dry_run")
+                            rejected_signals.put((-signal_data['quality_score'], signal_data))
+                            continue
+                        strategy_max_trades = strategy_config.get("max_trades_simultaneos", 1)
+                        if len(strategy_active_trades) >= strategy_max_trades:
+                            logger.warning(f"Limite de trades simultâneos atingido para {strategy_name} ({len(strategy_active_trades)}/{strategy_max_trades}). Sinal {signal_data['signal_id']} rejeitado.")
+                            save_signal(signal_data, accepted=False, mode="dry_run")
+                            save_signal_log(signal_data, accepted=False, mode="dry_run")
+                            rejected_signals.put((-signal_data['quality_score'], signal_data))
                             continue
 
-                        if last_candle_close[pair][tf] == close_time:
-                            logger.debug(f"Candle para {pair} ({tf}) já processado. Pulando...")
+                        if combo_key in active_combinations and config["modes"]["dry_run"]:
+                            logger.info(f"Combinação já ativa: {combo_key}")
                             continue
-                        last_candle_close[pair][tf] = close_time
 
-                        logger.info(f"Candle para {pair} ({tf}) fechada em {close_time}. Processando...")
-                        # Aumentar o número de candles para timeframes maiores
-                        limit = 200 if tf in ["1h", "4h", "1d"] else 100
-                        historical_data = get_historical_data(client, pair, tf, limit=limit)
-                        if historical_data.empty:
-                            logger.warning(f"Sem dados históricos para {pair} ({tf}). Pulando...")
+                        logger.info(f"Novo sinal aceito: {signal_data['par']} - {signal_data['direcao']} (ID: {signal_data['signal_id']}, Score: {signal_data['quality_score']:.2f})")
+                        # Sempre salva o sinal no CSV (dry_run)
+                        save_signal(signal_data, accepted=True, mode="dry_run")
+                        save_signal_log(signal_data, accepted=True, mode="dry_run")
+
+                        # Executa dry_run se ativo
+                        if config["modes"].get("dry_run", False):
+                            active_combinations[combo_key] = signal_data['signal_id']
+                            active_trades_dry_run.append(signal_data)
+                            bot_status["orders_opened"] += 1
+                            robot_name = signal_data['strategy_name']
+                            if robot_name not in robots_status:
+                                robots_status[robot_name] = {
+                                    "last_order": signal_data,
+                                    "total_pnl": 0.0
+                                }
+                            else:
+                                robots_status[robot_name]["last_order"] = signal_data
+                            threading.Thread(
+                                target=simulate_trade,
+                                args=(client, signal_data, config, active_trades_dry_run, binance_utils, order_executor, active_combinations, get_current_price, get_funding_rate),
+                                daemon=True
+                            ).start()
+                            logger.info(f"Thread de simulação iniciada para sinal {signal_id}.")
+
+                        # Executa ordem real se ativo (independente do dry_run)
+                        if config["modes"].get("real", False):
+                            logger.info(f"[DEBUG-REAL] combo_key={combo_key}, active_combinations={active_combinations}")
+                            logger.info(f"[DEBUG-REAL] Sinal: {signal_data}")
+                            logger.info(f"[DEBUG-REAL] Limites: pausar_sinais={config.get('pausar_sinais')}, pausar_ordens={config.get('pausar_ordens')}")
+                            logger.info(f"[DEBUG] config['modes']: {config.get('modes')}")
+                            logger.info(f"[REAL-ORDER-TRY] Tentando enviar ordem REAL para Binance: {signal_data['par']} {signal_data['direcao']} (ID: {signal_data['signal_id']})")
+                            try:
+                                result = order_executor.executar_ordem(
+                                    par=signal_data['par'],
+                                    direcao=signal_data['direcao'],
+                                    capital=signal_data['quantity'] * signal_data['preco_entrada'],
+                                    stop_loss=json.loads(signal_data['parametros']).get('sl_percent', 1.0),
+                                    take_profit=json.loads(signal_data['parametros']).get('tp_percent', 2.0),
+                                    mercado='futures',
+                                    dry_run=False,
+                                    dry_run_id=signal_data['signal_id']
+                                )
+                                logger.info(f"[REAL-ORDER-SUCCESS] Ordem REAL enviada para Binance: {signal_data['par']} {signal_data['direcao']} (ID: {signal_data['signal_id']}) | Resultado: {result}")
+                            except Exception as e:
+                                logger.error(f"[REAL-ORDER-ERROR] Erro ao enviar ordem real para Binance: {e}", exc_info=True)
+
+                    # Reavaliar sinais rejeitados, também sem limitação global
+                    while not rejected_signals.empty():
+                        _, signal_data = rejected_signals.get()
+                        strategy_name = signal_data['strategy_name']
+                        strategy_config = active_strategies[strategy_name]
+                        strategy_active_trades = [trade for trade in active_trades_dry_run if trade['strategy_name'] == strategy_name]
+                        combo_key = signal_data['combination_key']
+                        # Checagem de limite global e por robô
+                        if not check_global_and_robot_limit(strategy_name, active_trades_dry_run):
                             continue
-                        logger.info(f"Dados históricos obtidos: {len(historical_data)} candles.")
+                        strategy_max_trades = strategy_config.get("max_trades_simultaneos", 1)
+                        if len(strategy_active_trades) >= strategy_max_trades:
+                            rejected_signals.put((-signal_data['quality_score'], signal_data))
+                            break
+                        if combo_key in active_combinations:
+                            continue
 
-                        historical_data = calculate_indicators(historical_data, binance_utils)
-                        for strategy_name, strategy_config in active_strategies.items():
-                            if tf not in strategy_config.get("timeframes", TIMEFRAMES):
-                                continue
-                            logger.info(f"Gerando sinais para {pair} ({tf}) com estratégia {strategy_name}...")
-                            direction, score, details, contributing_indicators, _ = generate_signal(
-                                historical_data, tf, strategy_config, config, learning_engine, binance_utils
-                            )
-                            if not direction:
-                                logger.debug(f"Nenhum sinal gerado para {pair} ({tf}) com estratégia {strategy_name}.")
-                                continue
-                            if score < MIN_SCORE_THRESHOLD:
-                                logger.info(f"Sinal rejeitado para {pair} ({tf}) com estratégia {strategy_name}: score {score} abaixo do limite {MIN_SCORE_THRESHOLD}")
-                                continue
-
-                            signals_by_tf[tf] = {
-                                "direction": direction,
-                                "score": score,
-                                "details": details,
-                                "contributing_indicators": contributing_indicators,
-                                "strategy_name": strategy_name
-                            }
-                            signals_in_iteration += 1
-                            bot_status["signals_generated"] += 1
-                            logger.info(f"Sinal gerado para {pair} ({tf}) com estratégia {strategy_name}: {direction} (score={score})")
-
-                    if not signals_by_tf:
-                        continue
-
-                    final_direction, final_score, multi_tf_details = generate_multi_timeframe_signal(
-                        signals_by_tf, learning_engine, signals_by_tf[list(signals_by_tf.keys())[0]]['contributing_indicators']
-                    )
-                    if not final_direction:
-                        logger.debug(f"Nenhum sinal multi-timeframe gerado para {pair}.")
-                        continue
-                    logger.info(f"Sinal multi-timeframe gerado para {pair}: {final_direction} (score={final_score})")
-
-                    signal_id = str(uuid.uuid4())
-                    current_price = get_current_price(client, pair, config)
-                    if current_price is None:
-                        logger.warning(f"Não foi possível obter preço para {pair}. Pulando sinal...")
-                        continue
-                    quantity = get_quantity(config, pair, current_price)
-                    if quantity is None:
-                        logger.error(f"Não foi possível calcular quantidade para {pair}. Pulando sinal...")
-                        continue
-                    funding_rate = get_funding_rate(client, pair, config, mode="dry_run")
-                    strategy_name = signals_by_tf[list(signals_by_tf.keys())[0]]['strategy_name']
-                    strategy_config = active_strategies[strategy_name]
-                    combo_key = generate_combination_key(pair, final_direction, strategy_name, signals_by_tf[list(signals_by_tf.keys())[0]]['contributing_indicators'], tf)
-                    signal_data = {
-                        "signal_id": signal_id,
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "par": pair,
-                        "timeframe": tf,
-                        "direcao": final_direction,
-                        "preco_entrada": current_price,
-                        "quantity": quantity,
-                        "score_tecnico": final_score,
-                        "motivos": json.dumps(details["reasons"] + [f"Multi-TF: {multi_tf_details.get('multi_tf_confidence', 0.0):.2f}"]),
-                        "funding_rate": funding_rate,
-                        "localizadores": json.dumps(details["locators"]),
-                        "parametros": json.dumps({
-                            "tp_percent": strategy_config.get("tp_percent", config["stop_padrao"]["tp_percent"]),
-                            "sl_percent": strategy_config.get("sl_percent", config["stop_padrao"]["sl_percent"]),
-                            "leverage": strategy_config.get("leverage", config["leverage"])
-                        }),
-                        "timeframes_analisados": json.dumps(list(signals_by_tf.keys())),
-                        "contributing_indicators": signals_by_tf[list(signals_by_tf.keys())[0]]['contributing_indicators'],
-                        "strategy_name": strategy_name,
-                        "combination_key": combo_key,
-                        "historical_win_rate": details.get("historical_win_rate", 0.0),
-                        "avg_pnl": details.get("avg_pnl", 0.0),
-                        "estado": "aberto",
-                        "side_performance": json.dumps({"LONG": 0.0, "SHORT": 0.0}),
-                        "timeframe_weight": 1.0 / (TIMEFRAMES.index(tf) + 1)
-                    }
-                    signal_data['quality_score'] = calculate_signal_quality(historical_data, signal_data, binance_utils)
-                    signal_queue.put((-signal_data['quality_score'], signal_data))
-                    signals_in_iteration += 1
-                    bot_status["signals_generated"] += 1
-
-                from trade_manager import check_global_and_robot_limit
-                # Remover limitação global: processar todos os sinais da fila
-                while not signal_queue.empty():
-                    _, signal_data = signal_queue.get()
-                    strategy_name = signal_data['strategy_name']
-                    strategy_config = active_strategies[strategy_name]
-                    strategy_active_trades = [trade for trade in active_trades_dry_run if trade['strategy_name'] == strategy_name]
-                    combo_key = signal_data['combination_key']
-                    # Checagem de limite global e por robô
-                    if not check_global_and_robot_limit(strategy_name, active_trades_dry_run):
-                        logger.warning(f"Limite global (540) ou por robô (36) atingido para {strategy_name}. Sinal {signal_data['signal_id']} rejeitado.")
-                        save_signal(signal_data, accepted=False, mode="dry_run")
-                        save_signal_log(signal_data, accepted=False, mode="dry_run")
-                        rejected_signals.put((-signal_data['quality_score'], signal_data))
-                        continue
-                    strategy_max_trades = strategy_config.get("max_trades_simultaneos", 1)
-                    if len(strategy_active_trades) >= strategy_max_trades:
-                        logger.warning(f"Limite de trades simultâneos atingido para {strategy_name} ({len(strategy_active_trades)}/{strategy_max_trades}). Sinal {signal_data['signal_id']} rejeitado.")
-                        save_signal(signal_data, accepted=False, mode="dry_run")
-                        save_signal_log(signal_data, accepted=False, mode="dry_run")
-                        rejected_signals.put((-signal_data['quality_score'], signal_data))
-                        continue
-
-                    if combo_key in active_combinations and config["modes"]["dry_run"]:
-                        logger.info(f"Combinação já ativa: {combo_key}")
-                        continue
-
-                    logger.info(f"Novo sinal aceito: {signal_data['par']} - {signal_data['direcao']} (ID: {signal_data['signal_id']}, Score: {signal_data['quality_score']:.2f})")
-                    save_signal(signal_data, accepted=True, mode="dry_run")
-                    save_signal_log(signal_data, accepted=True, mode="dry_run")
-
-                    if config["modes"]["dry_run"]:
+                        logger.info(f"Reavaliando sinal rejeitado: {signal_data['par']} - {signal_data['direcao']} (ID: {signal_data['signal_id']})")
+                        save_signal(signal_data, accepted=True, mode="dry_run")
+                        save_signal_log(signal_data, accepted=True, mode="dry_run")
                         active_combinations[combo_key] = signal_data['signal_id']
                         active_trades_dry_run.append(signal_data)
                         bot_status["orders_opened"] += 1
@@ -1087,106 +1194,158 @@ try:
                             args=(client, signal_data, config, active_trades_dry_run, binance_utils, order_executor, active_combinations, get_current_price, get_funding_rate),
                             daemon=True
                         ).start()
-                        logger.info(f"Thread de simulação iniciada para sinal {signal_id}.")
 
-                # Reavaliar sinais rejeitados, também sem limitação global
-                while not rejected_signals.empty():
-                    _, signal_data = rejected_signals.get()
-                    strategy_name = signal_data['strategy_name']
-                    strategy_config = active_strategies[strategy_name]
-                    strategy_active_trades = [trade for trade in active_trades_dry_run if trade['strategy_name'] == strategy_name]
-                    combo_key = signal_data['combination_key']
-                    # Checagem de limite global e por robô
-                    if not check_global_and_robot_limit(strategy_name, active_trades_dry_run):
-                        continue
-                    strategy_max_trades = strategy_config.get("max_trades_simultaneos", 1)
-                    if len(strategy_active_trades) >= strategy_max_trades:
-                        rejected_signals.put((-signal_data['quality_score'], signal_data))
-                        break
-                    if combo_key in active_combinations:
-                        continue
+                    # Adicionar lógica para reiniciar partes do sistema afetadas por erros
+                    if system_errors:
+                        last_error = system_errors[-1]
+                        logger.warning(f"Último erro registrado: {last_error['description']} em {last_error['timestamp']} - Motivo: {last_error['reason']}")
+                        if "loop principal" in last_error['description']:
+                            logger.info("Tentando reiniciar partes afetadas do sistema...")
+                            try:
+                                # Recarregar estratégias e estado do robô
+                                strategies = load_strategies()
+                                robot_status = load_robot_status()
+                                logger.info("Estratégias e estado do robô recarregados com sucesso.")
+                            except Exception as e:
+                                logger.error(f"Erro ao reiniciar partes do sistema: {e}")
 
-                    logger.info(f"Reavaliando sinal rejeitado: {signal_data['par']} - {signal_data['direcao']} (ID: {signal_data['signal_id']})")
-                    save_signal(signal_data, accepted=True, mode="dry_run")
-                    save_signal_log(signal_data, accepted=True, mode="dry_run")
-                    active_combinations[combo_key] = signal_data['signal_id']
-                    active_trades_dry_run.append(signal_data)
-                    bot_status["orders_opened"] += 1
+                    # Garantir que o estado atualizado seja salvo periodicamente
+                    save_robot_status(robot_status)
+                    logger.info("Estado do robô salvo periodicamente.")
 
-                    robot_name = signal_data['strategy_name']
-                    if robot_name not in robots_status:
-                        robots_status[robot_name] = {
-                            "last_order": signal_data,
-                            "total_pnl": 0.0
-                        }
-                    else:
-                        robots_status[robot_name]["last_order"] = signal_data
-
-                    threading.Thread(
-                        target=simulate_trade,
-                        args=(client, signal_data, config, active_trades_dry_run, binance_utils, order_executor, active_combinations, get_current_price, get_funding_rate),
-                        daemon=True
-                    ).start()
-
-                # Adicionar lógica para reiniciar partes do sistema afetadas por erros
-                if system_errors:
-                    last_error = system_errors[-1]
-                    logger.warning(f"Último erro registrado: {last_error['description']} em {last_error['timestamp']} - Motivo: {last_error['reason']}")
-                    if "loop principal" in last_error['description']:
-                        logger.info("Tentando reiniciar partes afetadas do sistema...")
+                    # Adicionar uma função para validar a consistência entre sinais, ordens abertas e fechadas
+                    def validate_bot_status():
+                        """Valida a consistência entre sinais gerados, ordens abertas e fechadas."""
                         try:
-                            # Recarregar estratégias e estado do robô
-                            strategies = load_strategies()
-                            robot_status = load_robot_status()
-                            logger.info("Estratégias e estado do robô recarregados com sucesso.")
+                            df = pd.read_csv(SINALS_FILE)
+                            total_signals = len(df)
+                            closed_orders = len(df[df['estado'] == 'fechado'])
+                            open_orders = len(df[df['estado'] == 'aberto'])
+
+                            # Atualizar bot_status com base nos dados reais
+                            bot_status["signals_generated"] = total_signals
+                            bot_status["orders_closed"] = closed_orders
+                            bot_status["orders_opened"] = open_orders
+
+                            logger.info(f"Validação do status do bot: {total_signals} sinais gerados, {open_orders} ordens abertas, {closed_orders} ordens fechadas.")
                         except Exception as e:
-                            logger.error(f"Erro ao reiniciar partes do sistema: {e}")
+                            logger.error(f"Erro ao validar o status do bot: {e}")
 
-                # Garantir que o estado atualizado seja salvo periodicamente
-                save_robot_status(robot_status)
-                logger.info("Estado do robô salvo periodicamente.")
+                    # Chamar a função de validação no final de cada iteração do loop principal
+                    validate_bot_status()
 
-                # Adicionar uma função para validar a consistência entre sinais, ordens abertas e fechadas
-                def validate_bot_status():
-                    """Valida a consistência entre sinais gerados, ordens abertas e fechadas."""
-                    try:
-                        df = pd.read_csv(SINALS_FILE)
-                        total_signals = len(df)
-                        closed_orders = len(df[df['estado'] == 'fechado'])
-                        open_orders = len(df[df['estado'] == 'aberto'])
+                    # Chamar a função de atualização no final de cada iteração do loop principal
+                    update_orders_status()
+                    close_invalid_open_orders(client)
+                    update_bot_summary()
 
-                        # Atualizar bot_status com base nos dados reais
-                        bot_status["signals_generated"] = total_signals
-                        bot_status["orders_closed"] = closed_orders
-                        bot_status["orders_opened"] = open_orders
+                    logger.info(f"--- Fim da iteração {iteration_count} do loop principal ---")
+                    time.sleep(1)  # Reduzido para 1 segundo, já que o agendamento cuida da frequência
 
-                        logger.info(f"Validação do status do bot: {total_signals} sinais gerados, {open_orders} ordens abertas, {closed_orders} ordens fechadas.")
-                    except Exception as e:
-                        logger.error(f"Erro ao validar o status do bot: {e}")
+                except KeyboardInterrupt:
+                    logger.info("Interrupção manual detectada. Encerrando o bot...")
+                    break
+                except Exception as e:
+                    error_entry = {
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "description": "Erro no loop principal",
+                        "reason": str(e)
+                    }
+                    system_errors.append(error_entry)
+                    logger.error(f"Erro no loop principal: {e}")
+                    time.sleep(5)
+        finally:
+            observer.stop()
+            observer.join()
 
-                # Chamar a função de validação no final de cada iteração do loop principal
-                validate_bot_status()
+    def log_status_extra():
+        import os, json
+        from datetime import datetime
+        import pandas as pd
+        # Status das chaves API
+        try:
+            from config import REAL_API_KEY, REAL_API_SECRET
+            from initialization import check_api_status
+            real_status = check_api_status(REAL_API_KEY, REAL_API_SECRET)
+            binance_status = 'Válida' if real_status.get('connected') else f"Erro: {real_status.get('error', 'desconhecido')}"
+            binance_perms = real_status.get('permissions', {})
+        except Exception as e:
+            binance_status = f'Erro: {e}'
+            binance_perms = {}
+        # Grok API
+        try:
+            from config_grok import GROK_API_KEY
+            grok_status = 'Válida' if GROK_API_KEY else 'Não configurada'
+        except Exception as e:
+            grok_status = f'Erro: {e}'
+        # Ordens/trades
+        try:
+            df = pd.read_csv('sinais_detalhados.csv')
+            open_orders = len(df[df['estado'] == 'aberto']),
+            closed_orders = len(df[df['estado'] == 'fechado'])
+        except Exception:
+            open_orders = closed_orders = 'erro'
+        try:
+            if os.path.exists('trades_dry_run.json'):
+                with open('trades_dry_run.json') as f:
+                    trades = json.load(f)
+                active_trades = len(trades)
+            else:
+                active_trades = 0
+        except Exception:
+            active_trades = 'erro'
+        # LearningEngine
+        try:
+            from learning_engine import LearningEngine
+            le = LearningEngine()
+            le_status = f"carregado, acurácia: {le.accuracy:.2f}" if hasattr(le, 'accuracy') else 'carregado'
+        except Exception as e:
+            le_status = f'erro: {e}'
+        # Sinais file
+        try:
+            size = os.path.getsize('sinais_detalhados.csv') if os.path.exists('sinais_detalhados.csv') else 0
+            sinais_file_status = f'ok, {size} bytes' if size else 'vazio'
+        except Exception as e:
+            sinais_file_status = f'erro: {e}'
+        # Históricos
+        try:
+            arquivos = [f for f in os.listdir('.') if f.startswith('historical_data_') and f.endswith('.csv')]
+            hist_status = f"{len(arquivos)} arquivos"
+        except Exception:
+            hist_status = 'erro'
+        # Últimos erros/warnings
+        try:
+            if os.path.exists('bot.log'):
+                with open('bot.log', encoding='utf-8', errors='ignore') as f:
+                    lines = f.readlines()
+                errors = [l.strip() for l in lines if 'ERROR' in l or 'CRITICAL' in l or 'WARNING' in l]
+                last_errors = errors[-5:]
+            else:
+                last_errors = []
+        except Exception:
+            last_errors = []
+        # Notificações
+        try:
+            from notification_manager import get_last_notifications
+            last_notification = get_last_notifications(1)[0]
+        except Exception:
+            last_notification = 'sem notificações'
+        # Imprime tudo
+        print("\n--- STATUS EXTRA DO SISTEMA (a cada 30s) ---")
+        print(f"Data/hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"Binance API: {binance_status} | Permissões: {binance_perms}")
+        print(f"Grok API: {grok_status}")
+        print(f"Ordens abertas: {open_orders} | Ordens fechadas: {closed_orders}")
+        print(f"Trades ativos: {active_trades}")
+        print(f"LearningEngine: {le_status}")
+        print(f"Arquivo de sinais: {sinais_file_status}")
+        print(f"Sync dados históricos: {hist_status}")
+        print(f"Última notificação: {last_notification}")
+        print("Últimos erros/warnings:")
+        for err in last_errors:
+            print(f"  {err}")
+        print("-------------------------------------------\n")
 
-                # Chamar a função de atualização no final de cada iteração do loop principal
-                update_orders_status()
-                close_invalid_open_orders(client)
-                update_bot_summary()
-
-                logger.info(f"--- Fim da iteração {iteration_count} do loop principal ---")
-                time.sleep(1)  # Reduzido para 1 segundo, já que o agendamento cuida da frequência
-
-            except KeyboardInterrupt:
-                logger.info("Interrupção manual detectada. Encerrando o bot...")
-                break
-            except Exception as e:
-                error_entry = {
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "description": "Erro no loop principal",
-                    "reason": str(e)
-                }
-                system_errors.append(error_entry)
-                logger.error(f"Erro no loop principal: {e}")
-                time.sleep(5)
     try:
         if __name__ == "__main__":
             logger.info("Iniciando execução do script main.py...")

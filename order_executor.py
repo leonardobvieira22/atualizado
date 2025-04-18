@@ -39,6 +39,7 @@ class OrderExecutor:
             raise
 
     def executar_ordem(self, par, direcao, capital, stop_loss, take_profit, mercado='futures', dry_run=False, dry_run_id=None):
+        logger.info(f"[DEBUG-ORDER_EXECUTOR] Parâmetros: par={par}, direcao={direcao}, capital={capital}, stop_loss={stop_loss}, take_profit={take_profit}, dry_run={dry_run}, config={self.config}")
         """
         Executa uma ordem de mercado ou simula em dry run.
         Agora faz log detalhado e vincula o signal_id local ao id da Binance e ao id da ordem dry run.
@@ -60,6 +61,7 @@ class OrderExecutor:
         active_trades = check_active_trades()
         # Checagem de limite global e por robô
         if not check_global_and_robot_limit(self.config['strategy_name'], active_trades):
+            logger.info(f"[DEBUG-ORDER_EXECUTOR] Motivo do bloqueio: Limite global (540) ou por robô (36) atingido para {self.config['strategy_name']}")
             logger.warning(f"Limite global (540) ou por robô (36) atingido para {self.config['strategy_name']}. Ordem não será criada.")
             with open("oportunidades_perdidas.csv", "a") as f:
                 f.write(f"{pd.Timestamp.now()},{self.config['strategy_name']},{par},{self.config['timeframe']},{direcao},N/A,N/A,Limite global ou por robô atingido\n")
@@ -73,6 +75,7 @@ class OrderExecutor:
             self.config
         )
         if not can_open:
+            logger.info(f"[DEBUG-ORDER_EXECUTOR] Motivo do bloqueio: Limite de trades simultâneos atingido para {self.config['strategy_name']} em {par}/{self.config['timeframe']}/{direcao}")
             logger.warning(f"Limite de trades simultâneos atingido para {self.config['strategy_name']} em {par}/{self.config['timeframe']}/{direcao}. Ordem não será criada.")
             with open("oportunidades_perdidas.csv", "a") as f:
                 f.write(f"{pd.Timestamp.now()},{self.config['strategy_name']},{par},{self.config['timeframe']},{direcao},N/A,N/A,Limite de trades simultâneos atingido\n")
@@ -85,6 +88,7 @@ class OrderExecutor:
                             (df['direcao'] == direcao) &
                             (df['timeframe'] == self.config['timeframe'])]
         if not ordens_abertas.empty:
+            logger.info(f"[DEBUG-ORDER_EXECUTOR] Motivo do bloqueio: Já existe uma ordem aberta para a estratégia {self.config['strategy_name']} na direção {direcao} e timeframe {self.config['timeframe']}")
             logger.warning(f"Já existe uma ordem aberta para a estratégia {self.config['strategy_name']} na direção {direcao} e timeframe {self.config['timeframe']}. Ordem não será criada.")
             # Registrar no log de oportunidades perdidas
             with open("oportunidades_perdidas.csv", "a") as f:

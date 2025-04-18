@@ -80,7 +80,7 @@ def initialize_csv_files():
         'signal_id', 'par', 'direcao', 'preco_entrada', 'preco_saida', 'quantity',
         'lucro_percentual', 'pnl_realizado', 'resultado', 'timestamp', 'timestamp_saida',
         'estado', 'strategy_name', 'contributing_indicators', 'localizadores',
-        'motivos', 'timeframe', 'aceito', 'parametros'
+        'motivos', 'timeframe', 'aceito', 'parametros', 'quality_score', 'modo_contrario', 'visual_tag', 'mode', 'binance_order_id'
     ]
     missed_columns = [
         'timestamp', 'robot_name', 'par', 'timeframe', 'direcao', 'score_tecnico',

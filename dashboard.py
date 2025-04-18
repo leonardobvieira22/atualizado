@@ -32,7 +32,7 @@ ROBOT_STATUS_FILE = "robot_status.json"
 MISSED_OPPORTUNITIES_FILE = "oportunidades_perdidas.csv"
 
 SINALS_HEADER = [
-    'signal_id','par','direcao','preco_entrada','preco_saida','quantity','lucro_percentual','pnl_realizado','resultado','timestamp','timestamp_saida','estado','strategy_name','contributing_indicators','localizadores','motivos','timeframe','aceito','parametros','quality_score','modo_contrario','visual_tag'
+    'signal_id','par','direcao','preco_entrada','preco_saida','quantity','lucro_percentual','pnl_realizado','resultado','timestamp','timestamp_saida','estado','strategy_name','contributing_indicators','localizadores','motivos','timeframe','aceito','parametros','quality_score','modo_contrario','visual_tag','mode','binance_order_id'
 ]
 
 def ensure_sinals_file():
@@ -1591,7 +1591,7 @@ with tab1:
                 'sharpe': '{:.2f}',
                 'max_drawdown': '{:.2f}'
             }
-            format_dict = {k: v for k, v in format_dict.items() if k in metrics_df.columns}
+            format_dict = {k: format_dict[k] for k in format_dict if k in metrics_df.columns}
             # Garante que só formata colunas numéricas
             for k in list(format_dict.keys()):
                 if not pd.api.types.is_numeric_dtype(metrics_df[k]):
@@ -1617,6 +1617,8 @@ with st.sidebar:
     pausar_sinais = config_atual.get('pausar_sinais', False)
     pausar_ordens = config_atual.get('pausar_ordens', False)
     pausar_grok = config_atual.get('pausar_grok', False)
+    # --- NOVO: Controles de modo Dry Run e Real ---
+    modes = config_atual.get('modes', {'dry_run': True, 'real': False})
     col1, col2 = st.columns(2)
     with col1:
         if st.button('⏸️ Sinais' if not pausar_sinais else '▶️ Sinais', key='pause_signals_sidebar'):
@@ -1635,6 +1637,38 @@ with st.sidebar:
         save_config(config_atual)
         st.experimental_rerun()
     st.write('Grok: ' + ('Ativo' if not pausar_grok else 'Pausado'))
+    # --- Botões de modo Dry Run e Real ---
+    col3, col4 = st.columns(2)
+    with col3:
+        if st.button('Dry Run: ' + ('Ativo' if modes.get('dry_run', True) else 'Pausado'), key='toggle_dry_run'):
+            modes['dry_run'] = not modes.get('dry_run', True)
+            config_atual['modes'] = modes
+            save_config(config_atual)
+            st.experimental_rerun()
+    with col4:
+        if st.button('Real: ' + ('Ativo' if modes.get('real', False) else 'Pausado'), key='toggle_real'):
+            modo_real_antes = modes.get('real', False)
+            modes['real'] = not modo_real_antes
+            config_atual['modes'] = modes
+            save_config(config_atual)
+
+            # Se acabou de ativar o modo real, gerar ordens para estratégias ativas
+            if not modo_real_antes and modes['real']:
+                from strategy_manager import load_strategies
+                from dashboard_utils import generate_orders, load_robot_status
+                strategies = load_strategies()
+                robot_status = load_robot_status()
+                for strategy_name, is_active in robot_status.items():
+                    if is_active:
+                        strategy_config = strategies.get(strategy_name)
+                        if strategy_config:
+                            import logging
+                            logging.info(f"[DASHBOARD] Gerando ordem real para {strategy_name} ao ativar modo real.")
+                            generate_orders(strategy_name, strategy_config)
+
+            st.experimental_rerun()
+    st.write('Modo Dry Run: ' + ('Ativo' if modes.get('dry_run', True) else 'Pausado'))
+    st.write('Modo Real: ' + ('Ativo' if modes.get('real', False) else 'Pausado'))
 
     # Toggle modo ao contrário
     if st.checkbox('↔️ Modo Invertido', value=config_atual.get('modo_ao_contrario', False), help='Inverte LONG/SHORT em todas as ordens.'):
@@ -2083,6 +2117,27 @@ def trading_card_isolated():
 with tab2:
     st.header("Ordens")
     st.info("Visualize e filtre ordens simuladas (dry run), ordens fechadas e sinais gerados.")
+
+    # ==== NOVO: Cards de valor total em ordens reais e dry-run ====
+    # Considera que o DataFrame df já está carregado
+    valor_total_reais = 0.0
+    valor_total_dryrun = 0.0
+    if not df.empty:
+        # Valor total em ordens reais: mode contém 'real' e binance_order_id não nulo
+        if 'mode' in df.columns and 'binance_order_id' in df.columns:
+            reais = df[df['mode'].astype(str).str.lower().str.contains('real') & (df['binance_order_id'].notnull())]
+            valor_total_reais = (reais['preco_entrada'] * reais['quantity']).sum()
+        # Valor total em ordens dry-run: mode contém 'dry'
+        if 'mode' in df.columns:
+            dryrun = df[df['mode'].astype(str).str.lower().str.contains('dry')]
+            valor_total_dryrun = (dryrun['preco_entrada'] * dryrun['quantity']).sum()
+    # Exibe os cards
+    colX, colY = st.columns(2)
+    with colX:
+        st.markdown(f"<div class='metric'><div class='metric-label'>Valor Total em Ordens Reais (USDT)</div><div class='metric-value'>{valor_total_reais:.2f}</div></div>", unsafe_allow_html=True)
+    with colY:
+        st.markdown(f"<div class='metric'><div class='metric-label'>Valor Total em Ordens Dry-Run (USDT)</div><div class='metric-value'>{valor_total_dryrun:.2f}</div></div>", unsafe_allow_html=True)
+    # ==== FIM NOVO ====
 
     # Card global de resumo acima dos filtros
     st.subheader("Resumo Geral de Ordens")
@@ -2956,19 +3011,6 @@ with tab6:
     }
     .toggle-switch {
         position: relative;
-        width: 40px;
-        height: 20px;
-        background-color: #ccc; /* Cinza quando desligado */
-        border-radius: 20px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        margin: 0 5px;
-    }
-    .toggle-switch.active {
-        background-color: #28a745; /* Verde quando ligado */
-    }
-    .toggle-switch .toggle-circle {
-        position: absolute;
         top: 2px;
         left: 2px;
         width: 16px;
@@ -3023,8 +3065,6 @@ with tab6:
             indicadores_frequentes=('contributing_indicators', lambda x: get_frequent_indicators(x)),
             timeframe_mais_usado=('timeframe', lambda x: x.mode().iloc[0] if not x.mode().empty else 'N/A')
         ).reset_index()
-
-        # Ajustar métricas
         summary['taxa_vitoria'] = (summary['negociacoes_positivas'] / summary['num_negociacoes'] * 100).round(2)
         summary['media_pnl'] = (summary['pnl_total'] / summary['num_negociacoes']).round(4)
         summary['lucro_percentual_medio'] = summary['lucro_percentual_medio'].round(2)

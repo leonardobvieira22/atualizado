@@ -14,7 +14,7 @@
     },
     "quantity_in_usdt": false,
     "modes": {
-        "real": false,
+        "real": true,
         "dry_run": true,
         "backtest": false
     },
@@ -146,7 +146,6 @@
     "max_trades_simultaneos_global": 540,
     "pausar_sinais": true,
     "pausar_ordens": false,
-    "pausar_grok": false,
-    "modo_ao_contrario": true,
-    "enviar_ordem_real": false
+    "pausar_grok": true,
+    "modo_ao_contrario": true
 }

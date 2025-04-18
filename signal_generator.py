@@ -74,10 +74,18 @@ class SignalGenerator:
         }
 
     def save_signal(self, pair, signal):
-        """Salva o sinal gerado em sinais_detalhados.csv."""
+        """Salva o sinal gerado em sinais_detalhados.csv com cabeçalho completo."""
         if not signal or not signal.get('direcao'):
             return
-        df = pd.DataFrame([signal])
+        # Cabeçalho completo esperado
+        full_header = [
+            'signal_id','par','direcao','preco_entrada','preco_saida','quantity','lucro_percentual','pnl_realizado','resultado','timestamp','timestamp_saida','estado','strategy_name','contributing_indicators','localizadores','motivos','timeframe','aceito','parametros','quality_score','modo_contrario','visual_tag','mode','binance_order_id'
+        ]
+        # Preencher campos ausentes com vazio ou valor padrão
+        for col in full_header:
+            if col not in signal:
+                signal[col] = ''
+        df = pd.DataFrame([{k: signal[k] for k in full_header}])
         file = 'sinais_detalhados.csv'
         header = not pd.io.common.file_exists(file)
         df.to_csv(file, mode='a', index=False, header=header)
